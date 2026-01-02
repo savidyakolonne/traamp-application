@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_setup.dart';
+import 'signup.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -37,14 +38,15 @@ class LoginScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+
+                  // ✅ FIX HERE
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginSetup(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const LoginSetup()),
                     );
                   },
+
                   child: const Text("LOGIN", style: TextStyle(fontSize: 16)),
                 ),
               ),
@@ -58,7 +60,10 @@ class LoginScreen extends StatelessWidget {
                   const Text("Don’t have an account? "),
                   GestureDetector(
                     onTap: () {
-                      // Navigate to Register
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SignUp()),
+                      );
                     },
                     child: const Text(
                       "Sign Up",

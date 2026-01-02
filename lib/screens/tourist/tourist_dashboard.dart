@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 
-class GuideDashboard extends StatelessWidget {
-  const GuideDashboard({super.key});
+class TouristDashboard extends StatelessWidget {
+  const TouristDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Guide Dashboard'),
+        title: const Text('Tourist Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -20,7 +20,7 @@ class GuideDashboard extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(child: Text('Guide Dashboard (Phase 1)')),
+      body: const Center(child: Text('Tourist dashboard (phase 1)')),
     );
   }
 }
