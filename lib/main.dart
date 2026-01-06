@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-
+import 'package:device_preview/device_preview.dart';
 import 'screens/auth/login_screen.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const TraampApp());
-}
+void main() => runApp(
+  DevicePreview(
+    builder: (context) => TraampApp(), // Wrap your app
+  ),
+);
 
 class TraampApp extends StatelessWidget {
   const TraampApp({super.key});
@@ -17,8 +15,12 @@ class TraampApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
       title: 'Traamp',
-      home: const LoginScreen(),
+      home: LoginScreen(),
     );
   }
 }
