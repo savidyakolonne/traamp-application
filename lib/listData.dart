@@ -1,4 +1,5 @@
-class Countries {
+class ListData {
+  // Countries
   static List<String> countryNames = [
     "Afghanistan",
     "Albania",
@@ -196,4 +197,10 @@ class Countries {
     "Zambia",
     "Zimbabwe",
   ];
+
+  //Gender
+  static List<String> gender = ["Male", "Female"];
+
+  //Guide certificate types
+  static List<String> guideCertificates = [];
 }

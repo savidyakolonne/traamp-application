@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
-import 'countryNames.dart';
+import '../../listData.dart';
 
 class TouristSignupForm extends StatefulWidget {
   const TouristSignupForm({super.key});
-
   @override
   State<TouristSignupForm> createState() => _TouristSignupFormState();
 }
 
 class _TouristSignupFormState extends State<TouristSignupForm> {
+  // global key object for Form
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  // DOB text editing controller
   final TextEditingController _dobController = TextEditingController();
 
-  final _countries = Countries.countryNames;
-  final List<String> _genders = ["Male", "Female"];
+  // array for country names
+  final _countries = ListData.countryNames;
+  final List<String> _genders = ListData.gender; // for gender dropdown menu
 
+  // global variables to store data coming from form
   String? firstName;
   String? lastName;
   String? gender;
@@ -23,13 +26,15 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   String? cPassword;
   String? selectedCountry;
   String? dob;
+  String? type = "tourist"; // identify as a tourist
 
+  // first name
   Widget firstNameFormField() {
     return TextFormField(
       decoration: InputDecoration(hintText: "First Name"),
       //validation
       validator: (text) {
-        if (text!.isEmpty) {
+        if (text == null || text == "") {
           return "Name cannot be empty";
         }
         if (text.length <= 2) {
@@ -44,12 +49,13 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
+  // last name
   Widget lastNameFormField() {
     return TextFormField(
       decoration: InputDecoration(hintText: "Last Name"),
       //validation
       validator: (text) {
-        if (text!.isEmpty) {
+        if (text == null || text == "") {
           return "Name cannot be empty";
         }
         if (text.length <= 2) {
@@ -64,11 +70,20 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
+  // email
   Widget emailFormField() {
     return TextFormField(
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(hintText: "Email Address"),
       validator: (mail) {
+        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+        if (mail == null || mail == "") {
+          return "Email cannot be empty";
+        } else {
+          if (!emailRegex.hasMatch(mail)) {
+            return 'Enter a valid email address';
+          }
+        }
         return null;
       },
       onSaved: (mail) {
@@ -77,11 +92,33 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
+  // passowrd
   Widget passwordFormField() {
     return TextFormField(
       obscureText: true,
       decoration: InputDecoration(hintText: "Password"),
       validator: (pass) {
+        if (pass != null && pass != "") {
+          if (pass.length >= 8 && pass.length <= 16) {
+            if (RegExp(r'[A-Z]').hasMatch(pass)) {
+              if (RegExp(r'[a-z]').hasMatch(pass)) {
+                if (RegExp(r'[^A-Za-z0-9]').hasMatch(pass)) {
+                  password = pass;
+                } else {
+                  return 'Password must contain at least one symbol';
+                }
+              } else {
+                return 'Password must contain at least one lowercase letter';
+              }
+            } else {
+              return 'Password must contain at least one uppercase letter';
+            }
+          } else {
+            return "Password must have 8 - 16 characters";
+          }
+        } else {
+          return "Enter a password";
+        }
         return null;
       },
       onSaved: (pass) {
@@ -90,11 +127,21 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
+  // confirm password
   Widget confirmPasswordFormField() {
     return TextFormField(
       obscureText: true,
       decoration: InputDecoration(hintText: "Confirm Password"),
       validator: (cPass) {
+        if (cPass != null && cPass != "") {
+          if (password != cPass) {
+            print(password);
+            return "Incorrect Password.";
+          }
+        } else {
+          return "Please confirm your password";
+        }
+
         return null;
       },
       onSaved: (cPass) {
@@ -103,6 +150,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
+  // gender dropdown
   Widget genderFormField() {
     return DropdownButtonFormField<String>(
       decoration: const InputDecoration(
@@ -118,7 +166,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
         });
       },
       validator: (value) {
-        if (value == null) {
+        if (value == null || value == "") {
           return "Please select your gender";
         }
         return null;
@@ -126,6 +174,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
+  // country dropdown
   Widget selectCountryFormField() {
     return DropdownButtonFormField<String>(
       decoration: const InputDecoration(
@@ -141,7 +190,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
         });
       },
       validator: (value) {
-        if (value == null) {
+        if (value == null || value == "") {
           return "Please select a country";
         }
         return null;
@@ -149,6 +198,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
+  // calender for DOB
   Widget dobFormField() {
     return TextFormField(
       controller: _dobController,
@@ -174,7 +224,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
         }
       },
       validator: (value) {
-        if (value == "") {
+        if (value == null || value == "") {
           return "Please select your DOB";
         }
         return null;
@@ -185,6 +235,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
+  // build method
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -193,6 +244,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
           'Welcome to Traamp',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),
         ),
+        backgroundColor: Colors.green,
       ),
       body: Padding(
         padding: EdgeInsets.all(25.0),
@@ -217,7 +269,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                         emailFormField(),
                         passwordFormField(),
                         confirmPasswordFormField(),
-                        SizedBox(height: 15.0),
+                        SizedBox(height: 15.0), // to reserve some space
                         selectCountryFormField(),
                         SizedBox(height: 15.0),
                         genderFormField(),
@@ -229,16 +281,20 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                   SizedBox(height: 30.0),
                   OutlinedButton(
                     onPressed: () {
+                      // if validated save to global variables
                       if (_formKey.currentState!.validate()) {
+                        password = null;
                         _formKey.currentState?.save();
                         print(firstName);
                         print(lastName);
                         print(email);
-                        print(password);
                         print(cPassword);
                         print(selectedCountry);
                         print(gender);
                         print(dob);
+                        print(password);
+
+                        // save to database after validation
                       }
                     },
                     child: Text(
