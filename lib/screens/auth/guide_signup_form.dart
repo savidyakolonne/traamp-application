@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../listData.dart';
+import '../../encryption.dart';
 
 class GuideSignupForm extends StatefulWidget {
   const GuideSignupForm({super.key});
@@ -10,16 +12,22 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   final GlobalKey<FormState> _formKeyGuide = GlobalKey<FormState>();
   final TextEditingController _dobController = TextEditingController();
 
-  final List<String> _genders = ["Male", "Female"];
+  final List<String> _genders = ListData.gender;
+  final List<String> _certificateType = ListData.guideCertificates;
+  final List<String> _districts = ListData.districts;
 
   String? firstName;
   String? lastName;
   String? email;
   String? password;
-  String? cPassword;
   String? gender;
   String? dob;
   String? phoneNumber;
+  String? guideCertifateType;
+  String? certificateNumber;
+  String? nic;
+  String? location;
+  String? address;
 
   // first name
   Widget firstNameFormField() {
@@ -39,6 +47,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       onSaved: (text) {
         firstName = text?.toLowerCase();
       },
+      showCursor: true,
     );
   }
 
@@ -115,7 +124,8 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
         return null;
       },
       onSaved: (pass) {
-        password = pass;
+        String hashed = Encryption.generateSha256(pass!);
+        password = hashed;
       },
     );
   }
@@ -128,18 +138,14 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       validator: (cPass) {
         if (cPass != null && cPass != "") {
           if (password != cPass) {
-            print(password);
             return "Incorrect Password.";
           }
         } else {
           return "Please confirm your password";
         }
-
         return null;
       },
-      onSaved: (cPass) {
-        cPassword = cPass;
-      },
+      onSaved: (cPass) {},
     );
   }
 
@@ -207,7 +213,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   // phone number
   Widget phoneNumberFormField() {
     return TextFormField(
-      decoration: InputDecoration(hintText: "Phone Number : +94771234567"),
+      decoration: InputDecoration(hintText: "Phone Number (ex: +94771234567)"),
       //validation
       validator: (number) {
         if (number == null || number.isEmpty) {
@@ -236,6 +242,118 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
     );
   }
 
+  //certificate type
+  Widget certificateTypeFormField() {
+    return DropdownButtonFormField<String>(
+      decoration: const InputDecoration(
+        labelText: "Select Certificate Type",
+        border: OutlineInputBorder(),
+      ),
+      items: _certificateType.map((certificateType) {
+        return DropdownMenuItem(
+          value: certificateType,
+          child: Text(certificateType),
+        );
+      }).toList(),
+      onChanged: (certificate) {
+        setState(() {
+          guideCertifateType = certificate;
+        });
+      },
+      validator: (certificate) {
+        return null;
+      },
+    );
+  }
+
+  //NIC
+  Widget NICFormField() {
+    return TextFormField(
+      decoration: InputDecoration(
+        hintText: "NIC Number (123214255v/123456789123)",
+      ),
+      //validation
+      validator: (number) {
+        if (number == null || number.isEmpty) {
+          return 'NIC number is required';
+        }
+        if (number.length != 12 && number.length != 10) {
+          return 'NIC must be 123456789v or 123456789123';
+        }
+        return null;
+      },
+      //save global variable
+      onSaved: (number) {
+        nic = number?.toLowerCase();
+      },
+    );
+  }
+
+  // certificate number
+  Widget certificateNumberField() {
+    return TextFormField(
+      decoration: InputDecoration(hintText: "Certificate Number"),
+      //validation
+      validator: (number) {
+        return null;
+      },
+      //save global variable
+      onSaved: (number) {
+        if (number == "") {
+          certificateNumber = null;
+        } else {
+          certificateNumber = number;
+        }
+      },
+    );
+  }
+
+  // Location
+  Widget locationFormField() {
+    return DropdownButtonFormField<String>(
+      decoration: const InputDecoration(
+        labelText: "Select Location",
+        border: OutlineInputBorder(),
+      ),
+      items: _districts.map((district) {
+        return DropdownMenuItem(value: district, child: Text(district));
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          location = value;
+        });
+      },
+      validator: (value) {
+        if (value == null || value == "") {
+          return "Please select your location";
+        }
+        return null;
+      },
+    );
+  }
+
+  //Address
+  Widget addressFormField() {
+    return TextFormField(
+      decoration: InputDecoration(hintText: "Address"),
+      //validation
+      validator: (text) {
+        if (text == null || text == "") {
+          return "Address cannot be empty";
+        }
+        if (text.length <= 5) {
+          return "Must be more than 5 charactors";
+        }
+        return null;
+      },
+      //save global variable
+      onSaved: (text) {
+        address = text;
+      },
+      maxLines: 4,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -251,7 +369,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
         child: SingleChildScrollView(
           child: Form(
             key: _formKeyGuide,
-            child: Container(
+            child: SizedBox(
               width: double.infinity,
               child: Column(
                 children: [
@@ -277,6 +395,14 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                         dobFormField(),
                         SizedBox(height: 15.0),
                         phoneNumberFormField(),
+                        NICFormField(),
+                        SizedBox(height: 15.0),
+                        certificateTypeFormField(),
+                        SizedBox(height: 15.0),
+                        certificateNumberField(),
+                        addressFormField(),
+                        SizedBox(height: 15.0),
+                        locationFormField(),
                       ],
                     ),
                   ),
@@ -284,8 +410,23 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                   OutlinedButton(
                     onPressed: () {
                       // if validated save to global variables
-
-                      // save to database after validation
+                      if (_formKeyGuide.currentState!.validate()) {
+                        password = null;
+                        _formKeyGuide.currentState?.save();
+                        print(firstName);
+                        print(lastName);
+                        print(email);
+                        print(gender);
+                        print(dob);
+                        print(phoneNumber);
+                        print(nic);
+                        print(guideCertifateType);
+                        print(location);
+                        print(certificateNumber);
+                        print(password);
+                        print(address);
+                        // save to database after validation
+                      }
                     },
                     child: Text(
                       "Register",

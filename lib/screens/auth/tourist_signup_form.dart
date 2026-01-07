@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../encryption.dart';
 import '../../listData.dart';
 
 class TouristSignupForm extends StatefulWidget {
@@ -14,7 +15,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   final TextEditingController _dobController = TextEditingController();
 
   // array for country names
-  final _countries = ListData.countryNames;
+  final List<String> _countries = ListData.countryNames;
   final List<String> _genders = ListData.gender; // for gender dropdown menu
 
   // global variables to store data coming from form
@@ -23,7 +24,6 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   String? gender;
   String? email;
   String? password;
-  String? cPassword;
   String? selectedCountry;
   String? dob;
   String? type = "tourist"; // identify as a tourist
@@ -46,6 +46,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
       onSaved: (text) {
         firstName = text?.toLowerCase();
       },
+      showCursor: true,
     );
   }
 
@@ -122,7 +123,8 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
         return null;
       },
       onSaved: (pass) {
-        password = pass;
+        String hashed = Encryption.generateSha256(pass!);
+        password = hashed;
       },
     );
   }
@@ -135,7 +137,6 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
       validator: (cPass) {
         if (cPass != null && cPass != "") {
           if (password != cPass) {
-            print(password);
             return "Incorrect Password.";
           }
         } else {
@@ -144,9 +145,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
 
         return null;
       },
-      onSaved: (cPass) {
-        cPassword = cPass;
-      },
+      onSaved: (cPass) {},
     );
   }
 
@@ -288,7 +287,6 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                         print(firstName);
                         print(lastName);
                         print(email);
-                        print(cPassword);
                         print(selectedCountry);
                         print(gender);
                         print(dob);

@@ -202,5 +202,40 @@ class ListData {
   static List<String> gender = ["Male", "Female"];
 
   //Guide certificate types
-  static List<String> guideCertificates = [];
+  static List<String> guideCertificates = [
+    "National Guide Certificate",
+    "Chauffer Guide Certificate",
+    "Area Guide Certificate",
+    "Site Guide Certificate",
+    "Tourist Driver",
+  ];
+
+  //Districts
+  static List<String> districts = [
+    "Ampara",
+    "Anuradhapura",
+    "Badulla",
+    "Batticaloa",
+    "Colombo",
+    "Galle",
+    "Gampaha",
+    "Hambantota",
+    "Jaffna",
+    "Kalutara",
+    "Kandy",
+    "Kegalle",
+    "Kilinochchi",
+    "Kurunegala",
+    "Mannar",
+    "Matale",
+    "Matara",
+    "Monaragala",
+    "Mullaitivu",
+    "Nuwara Eliya",
+    "Polonnaruwa",
+    "Puttalam",
+    "Ratnapura",
+    "Trincomalee",
+    "Vavuniya",
+  ];
 }
