@@ -1,6 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:traamp_frontend/services/tourist.dart';
 import '../../encryption.dart';
 import '../../listData.dart';
+import 'login_setup.dart';
 
 class TouristSignupForm extends StatefulWidget {
   const TouristSignupForm({super.key});
@@ -9,6 +13,8 @@ class TouristSignupForm extends StatefulWidget {
 }
 
 class _TouristSignupFormState extends State<TouristSignupForm> {
+  // instance of firebase - firestore
+  final db = FirebaseFirestore.instance;
   // global key object for Form
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   // DOB text editing controller
@@ -18,15 +24,19 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   final List<String> _countries = ListData.countryNames;
   final List<String> _genders = ListData.gender; // for gender dropdown menu
 
+  // creating object for fireStore users collection
+  late final users = db.collection("users");
+
   // global variables to store data coming from form
-  String? firstName;
-  String? lastName;
-  String? gender;
-  String? email;
-  String? password;
-  String? selectedCountry;
-  String? dob;
-  String? type = "tourist"; // identify as a tourist
+  late String uid = users.doc().id;
+  String firstName = "";
+  String lastName = "";
+  String gender = "";
+  String email = "";
+  String rowPassword = "";
+  String password = "";
+  String selectedCountry = "";
+  String dob = "";
 
   // first name
   Widget firstNameFormField() {
@@ -44,7 +54,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
       },
       //save global variable
       onSaved: (text) {
-        firstName = text?.toLowerCase();
+        firstName = text!.trim();
       },
       showCursor: true,
     );
@@ -66,7 +76,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
       },
       //save global variable
       onSaved: (text) {
-        lastName = text?.toLowerCase();
+        lastName = text!.trim();
       },
     );
   }
@@ -88,7 +98,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
         return null;
       },
       onSaved: (mail) {
-        email = mail?.toLowerCase();
+        email = mail!.toLowerCase().trim();
       },
     );
   }
@@ -104,7 +114,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
             if (RegExp(r'[A-Z]').hasMatch(pass)) {
               if (RegExp(r'[a-z]').hasMatch(pass)) {
                 if (RegExp(r'[^A-Za-z0-9]').hasMatch(pass)) {
-                  password = pass;
+                  rowPassword = pass;
                 } else {
                   return 'Password must contain at least one symbol';
                 }
@@ -123,8 +133,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
         return null;
       },
       onSaved: (pass) {
-        String hashed = Encryption.generateSha256(pass!);
-        password = hashed;
+        password = pass!;
       },
     );
   }
@@ -136,8 +145,8 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
       decoration: InputDecoration(hintText: "Confirm Password"),
       validator: (cPass) {
         if (cPass != null && cPass != "") {
-          if (password != cPass) {
-            return "Incorrect Password.";
+          if (rowPassword != cPass) {
+            return "Password do not match.";
           }
         } else {
           return "Please confirm your password";
@@ -161,7 +170,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
       }).toList(),
       onChanged: (value) {
         setState(() {
-          gender = value;
+          gender = value!;
         });
       },
       validator: (value) {
@@ -185,7 +194,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
       }).toList(),
       onChanged: (value) {
         setState(() {
-          selectedCountry = value;
+          selectedCountry = value!;
         });
       },
       validator: (value) {
@@ -229,7 +238,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
         return null;
       },
       onSaved: (date) {
-        dob = date;
+        dob = date!;
       },
     );
   }
@@ -279,20 +288,62 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                   ),
                   SizedBox(height: 30.0),
                   OutlinedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       // if validated save to global variables
                       if (_formKey.currentState!.validate()) {
-                        password = null;
                         _formKey.currentState?.save();
-                        print(firstName);
-                        print(lastName);
-                        print(email);
-                        print(selectedCountry);
-                        print(gender);
-                        print(dob);
-                        print(password);
 
-                        // save to database after validation
+                        final tourist = Tourist(
+                          firstName: firstName,
+                          lastName: lastName,
+                          email: email,
+                          gender: gender,
+                          dob: dob,
+                          country: selectedCountry,
+                          uid: uid,
+                        );
+
+                        try {
+                          // email and password authentication
+                          final credential = await FirebaseAuth.instance
+                              .createUserWithEmailAndPassword(
+                                email: email,
+                                password: password,
+                              );
+                          // add data to users collection
+                          await users
+                              .doc(credential.user!.uid)
+                              .set(tourist.toMap());
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Successfully Created.'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          // return back to signin page
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return LoginSetup();
+                              },
+                            ),
+                          );
+                        } on FirebaseException catch (e) {
+                          debugPrint(
+                            'Firestore error: ${e.code} - ${e.message}',
+                          );
+                          print(e);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Failed to create user. Please try again. Try to use another email.',
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }
                     },
                     child: Text(

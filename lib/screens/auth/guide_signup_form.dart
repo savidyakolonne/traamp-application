@@ -1,6 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../listData.dart';
 import '../../encryption.dart';
+import '../../services/guide.dart';
+import 'login_setup.dart';
 
 class GuideSignupForm extends StatefulWidget {
   const GuideSignupForm({super.key});
@@ -9,25 +13,35 @@ class GuideSignupForm extends StatefulWidget {
 }
 
 class _GuideSignupFormState extends State<GuideSignupForm> {
+  // instance of firebase - firestore
+  final db = FirebaseFirestore.instance;
+  // global key object for Form
   final GlobalKey<FormState> _formKeyGuide = GlobalKey<FormState>();
+  // DOB text editing controller
   final TextEditingController _dobController = TextEditingController();
+  // creating object for fireStore users collection
+  late final users = db.collection("users");
 
   final List<String> _genders = ListData.gender;
   final List<String> _certificateType = ListData.guideCertificates;
   final List<String> _districts = ListData.districts;
 
-  String? firstName;
-  String? lastName;
-  String? email;
-  String? password;
-  String? gender;
-  String? dob;
-  String? phoneNumber;
+  // global variables to store data coming from form
+  late final userId = users.doc().id;
+  String firstName = "";
+  String lastName = "";
+  String email = "";
+  String rowPassword = "";
+  String password = "";
+  String gender = "";
+  String dob = "";
+  String phoneNumber = "";
   String? guideCertifateType;
   String? certificateNumber;
-  String? nic;
-  String? location;
-  String? address;
+  String nic = "";
+  String location = "";
+  String address = "";
+  String country = "Sri Lanka";
 
   // first name
   Widget firstNameFormField() {
@@ -45,7 +59,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       },
       //save global variable
       onSaved: (text) {
-        firstName = text?.toLowerCase();
+        firstName = text!.trim();
       },
       showCursor: true,
     );
@@ -67,7 +81,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       },
       //save global variable
       onSaved: (text) {
-        lastName = text?.toLowerCase();
+        lastName = text!.trim();
       },
     );
   }
@@ -89,7 +103,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
         return null;
       },
       onSaved: (mail) {
-        email = mail?.toLowerCase();
+        email = mail!.toLowerCase().trim();
       },
     );
   }
@@ -105,7 +119,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
             if (RegExp(r'[A-Z]').hasMatch(pass)) {
               if (RegExp(r'[a-z]').hasMatch(pass)) {
                 if (RegExp(r'[^A-Za-z0-9]').hasMatch(pass)) {
-                  password = pass;
+                  rowPassword = pass;
                 } else {
                   return 'Password must contain at least one symbol';
                 }
@@ -124,8 +138,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
         return null;
       },
       onSaved: (pass) {
-        String hashed = Encryption.generateSha256(pass!);
-        password = hashed;
+        password = pass!;
       },
     );
   }
@@ -137,8 +150,8 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       decoration: InputDecoration(hintText: "Confirm Password"),
       validator: (cPass) {
         if (cPass != null && cPass != "") {
-          if (password != cPass) {
-            return "Incorrect Password.";
+          if (rowPassword != cPass) {
+            return "Passwords do not match.";
           }
         } else {
           return "Please confirm your password";
@@ -161,7 +174,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       }).toList(),
       onChanged: (value) {
         setState(() {
-          gender = value;
+          gender = value!;
         });
       },
       validator: (value) {
@@ -205,7 +218,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
         return null;
       },
       onSaved: (date) {
-        dob = date;
+        dob = date!;
       },
     );
   }
@@ -236,7 +249,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       },
       //save global variable
       onSaved: (number) {
-        phoneNumber = number;
+        phoneNumber = number!.trim();
       },
       keyboardType: TextInputType.number,
     );
@@ -284,7 +297,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       },
       //save global variable
       onSaved: (number) {
-        nic = number?.toLowerCase();
+        nic = number!.toLowerCase().trim();
       },
     );
   }
@@ -320,7 +333,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       }).toList(),
       onChanged: (value) {
         setState(() {
-          location = value;
+          location = value!;
         });
       },
       validator: (value) {
@@ -348,7 +361,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       },
       //save global variable
       onSaved: (text) {
-        address = text;
+        address = text!;
       },
       maxLines: 4,
     );
@@ -408,24 +421,67 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                   ),
                   SizedBox(height: 30.0),
                   OutlinedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       // if validated save to global variables
                       if (_formKeyGuide.currentState!.validate()) {
-                        password = null;
                         _formKeyGuide.currentState?.save();
-                        print(firstName);
-                        print(lastName);
-                        print(email);
-                        print(gender);
-                        print(dob);
-                        print(phoneNumber);
-                        print(nic);
-                        print(guideCertifateType);
-                        print(location);
-                        print(certificateNumber);
-                        print(password);
-                        print(address);
+                        Guide guide = Guide(
+                          uid: userId,
+                          firstName: firstName,
+                          lastName: lastName,
+                          email: email,
+                          gender: gender,
+                          dob: dob,
+                          phoneNumber: phoneNumber,
+                          guideCertifateType: guideCertifateType,
+                          certificateNumber: certificateNumber,
+                          nic: nic,
+                          location: location,
+                          address: address,
+                          country: country,
+                        );
                         // save to database after validation
+                        try {
+                          // email and password authentication
+                          final credential = await FirebaseAuth.instance
+                              .createUserWithEmailAndPassword(
+                                email: email,
+                                password: password,
+                              );
+                          // add data to users collection
+                          await users
+                              .doc(credential.user!.uid)
+                              .set(guide.toMap());
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Successfully Created.'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          // return back to signin page
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return LoginSetup();
+                              },
+                            ),
+                          );
+                        } on FirebaseException catch (e) {
+                          debugPrint(
+                            'Firestore error: ${e.code} - ${e.message}',
+                          );
+                          print(e);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Failed to create user. Please try again. Try to use another email.',
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }
                     },
                     child: Text(

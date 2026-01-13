@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
+  final auth = FirebaseAuth.instance;
+
   static Future<UserCredential> loginEmail({
     required String email,
     required String password,
@@ -32,4 +34,13 @@ class AuthService {
     await GoogleSignIn().signOut();
     await FirebaseAuth.instance.signOut();
   }
+
+  // static Future<void> createUser(email, password) async {
+  //   final auth = FirebaseAuth.instance;
+
+  //   await auth.createUserWithEmailAndPassword(
+  //     email: email!,
+  //     password: password,
+  //   );
+  // }
 }
