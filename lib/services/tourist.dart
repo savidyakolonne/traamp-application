@@ -10,14 +10,12 @@ class Tourist extends AppUser {
     required super.email,
     required super.gender,
     required super.dob,
+    required super.type,
     required this.country,
-  }) : super(type: 'tourist');
+  });
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      ...super.toMap(),
-      'touristData': {'country': country},
-    };
+    return {...super.toMap(), 'country': country};
   }
 }

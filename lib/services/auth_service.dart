@@ -34,13 +34,4 @@ class AuthService {
     await GoogleSignIn().signOut();
     await FirebaseAuth.instance.signOut();
   }
-
-  // static Future<void> createUser(email, password) async {
-  //   final auth = FirebaseAuth.instance;
-
-  //   await auth.createUserWithEmailAndPassword(
-  //     email: email!,
-  //     password: password,
-  //   );
-  // }
 }

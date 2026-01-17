@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class AppUser {
   final String uid;
   final String firstName;
@@ -27,6 +25,7 @@ class AppUser {
       'email': email,
       'gender': gender,
       'dob': dob,
+      'type': type,
       'createdAt': DateTime.now(),
     };
   }

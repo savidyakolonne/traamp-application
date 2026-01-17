@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../listData.dart';
-import '../../encryption.dart';
 import '../../services/guide.dart';
 import 'login_setup.dart';
 
@@ -42,6 +41,8 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   String location = "";
   String address = "";
   String country = "Sri Lanka";
+  String type = "guide";
+  double rating = 0.0;
 
   // first name
   Widget firstNameFormField() {
@@ -439,6 +440,8 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                           location: location,
                           address: address,
                           country: country,
+                          type: type,
+                          rating: rating,
                         );
                         // save to database after validation
                         try {

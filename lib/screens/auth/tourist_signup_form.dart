@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:traamp_frontend/services/tourist.dart';
-import '../../encryption.dart';
 import '../../listData.dart';
 import 'login_setup.dart';
 
@@ -37,6 +36,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   String password = "";
   String selectedCountry = "";
   String dob = "";
+  String type = "tourist";
 
   // first name
   Widget firstNameFormField() {
@@ -301,6 +301,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                           dob: dob,
                           country: selectedCountry,
                           uid: uid,
+                          type: type,
                         );
 
                         try {

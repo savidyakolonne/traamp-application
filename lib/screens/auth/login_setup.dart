@@ -15,13 +15,13 @@ class _LoginSetupState extends State<LoginSetup> {
   final passCtrl = TextEditingController();
   bool loading = false;
 
+  String email = "";
+  String password = "";
+
   Future<void> loginEmail() async {
     try {
       setState(() => loading = true);
-      await AuthService.loginEmail(
-        email: emailCtrl.text,
-        password: passCtrl.text,
-      );
+      await AuthService.loginEmail(email: email, password: password);
       await RoleRouter.goToDashboard(context);
     } catch (e) {
       ScaffoldMessenger.of(
@@ -120,7 +120,10 @@ class _LoginSetupState extends State<LoginSetup> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: loading ? null : loginEmail,
+                  onPressed: () {
+                    email = emailCtrl.text;
+                    password = passCtrl.text;
+                  },
                   child: loading
                       ? const SizedBox(
                           height: 18,
