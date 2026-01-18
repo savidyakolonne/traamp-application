@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../guide/guide_dashboard.dart';
+import '../tourist/tourist_dashboard.dart';
 import 'signup.dart';
 import 'role_router.dart';
 
@@ -15,20 +19,55 @@ class _LoginSetupState extends State<LoginSetup> {
   final passCtrl = TextEditingController();
   bool loading = false;
 
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   String email = "";
   String password = "";
+  String type = "";
+  bool _obsecureState = true;
 
   Future<void> loginEmail() async {
     try {
-      setState(() => loading = true);
-      await AuthService.loginEmail(email: email, password: password);
-      await RoleRouter.goToDashboard(context);
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      if (mounted) setState(() => loading = false);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: emailCtrl.text.trim().toLowerCase(),
+        password: passCtrl.text,
+      );
+
+      final user = userCredential.user;
+      if (user == null) return;
+
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (doc.exists) {
+        type = doc['type'] as String;
+      }
+
+      if (type == "tourist") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => TouristDashboard()),
+        );
+      } else if (type == "guide") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => GuideDashboard()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String message;
+      if (e.code == 'user-not-found') {
+        message = 'No user found for that email.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Wrong password provided.';
+      } else {
+        message = 'Login failed: ${e.message}';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -57,8 +96,8 @@ class _LoginSetupState extends State<LoginSetup> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(top: 100, left: 24, right: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -104,10 +143,21 @@ class _LoginSetupState extends State<LoginSetup> {
 
               TextField(
                 controller: passCtrl,
-                obscureText: true,
+                obscureText: _obsecureState,
                 decoration: InputDecoration(
                   hintText: "Password",
-                  suffixIcon: const Icon(Icons.visibility_off),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        if (_obsecureState == true) {
+                          _obsecureState = false;
+                        } else if (_obsecureState == false) {
+                          _obsecureState = true;
+                        }
+                      });
+                    },
+                    icon: Icon(Icons.visibility_off_outlined),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -121,8 +171,7 @@ class _LoginSetupState extends State<LoginSetup> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    email = emailCtrl.text;
-                    password = passCtrl.text;
+                    loginEmail();
                   },
                   child: loading
                       ? const SizedBox(

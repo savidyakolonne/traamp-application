@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../services/auth_service.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import '../../possition.dart';
 
 class TouristDashboard extends StatefulWidget {
   const TouristDashboard({super.key});
@@ -9,7 +13,62 @@ class TouristDashboard extends StatefulWidget {
 }
 
 class _TouristDashboardState extends State<TouristDashboard> {
-  Widget suggetionScrollableView() {
+  String? name;
+  String currentLocation = "Unknown location";
+
+  @override
+  void initState() {
+    super.initState();
+    getNameFromEmail();
+    getCurrentCity();
+  }
+
+  // get name from db from email
+  Future<void> getNameFromEmail() async {
+    try {
+      //get firstName from firebase
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (doc.exists && doc.data()!.containsKey('firstName')) {
+        setState(() {
+          name = doc['firstName'];
+        });
+      }
+    } catch (e) {
+      setState(() {
+        print('Error fetching name: $e');
+        name = null;
+      });
+    }
+  }
+
+  // get current location via GPS
+  Future<void> getCurrentCity() async {
+    try {
+      // Get current position
+      Position position = await GPSPossition.determinePosition();
+
+      // Convert coordinates to placemarks
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      // Extract city/town name
+      Placemark place = placemarks[0];
+      setState(() {
+        currentLocation = place.locality!;
+      });
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  Widget suggestionScrollableView() {
     return Row(
       children: [
         Column(
@@ -34,6 +93,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -70,7 +130,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
                   ),
                 ),
                 Text(
-                  "Hi Lyod",
+                  "Hi $name",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20.0,
@@ -87,6 +147,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
         ),
         actions: [
           IconButton(
+            padding: EdgeInsets.only(right: 15),
             onPressed: () {},
             icon: Icon(Icons.favorite, size: 35.0, color: Colors.red[700]),
           ),
@@ -96,7 +157,12 @@ class _TouristDashboardState extends State<TouristDashboard> {
         children: [
           Container(
             width: double.infinity,
-            padding: EdgeInsets.only(top: 20.0, left: 18.0, right: 18.0),
+            padding: EdgeInsets.only(
+              top: 20.0,
+              left: 18.0,
+              right: 18.0,
+              bottom: 20,
+            ),
             child: Column(
               children: [
                 Text(
@@ -108,10 +174,12 @@ class _TouristDashboardState extends State<TouristDashboard> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        getCurrentCity();
+                      },
                       icon: Icon(Icons.location_on_outlined),
                     ),
-                    Text("Kurunegala"),
+                    Text(currentLocation),
                   ],
                 ),
 
@@ -347,7 +415,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
                     height: 100,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      children: [suggetionScrollableView()],
+                      children: [suggestionScrollableView()],
                     ),
                   ),
                 ),
