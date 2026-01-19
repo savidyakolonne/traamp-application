@@ -1,6 +1,5 @@
-# traamp_frontend
+# traamp_mobile_application
 
-A new Flutter project.
 
 ## Getting Started
 
