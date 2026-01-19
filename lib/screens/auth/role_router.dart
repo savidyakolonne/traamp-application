@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../services/user_service.dart';
 import '../guide/guide_dashboard.dart';
-import '../tourist/tourist_dashboard.dart';
 
 class RoleRouter {
   static Future<void> goToDashboard(BuildContext context) async {
@@ -20,12 +19,12 @@ class RoleRouter {
         MaterialPageRoute(builder: (_) => const GuideDashboard()),
         (_) => false,
       );
-    } else if (role == 'tourist') {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const TouristDashboard()),
-        (_) => false,
-      );
+      // } else if (role == 'tourist') {
+      //   Navigator.pushAndRemoveUntil(
+      //     context,
+      //     MaterialPageRoute(builder: (_) => const TouristDashboard()),
+      //     (_) => false,
+      //   );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
