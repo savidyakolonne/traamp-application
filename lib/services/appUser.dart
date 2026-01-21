@@ -19,7 +19,7 @@ class AppUser {
 
   Map<String, dynamic> toMap() {
     return {
-      'userId': uid,
+      'uid': uid,
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
