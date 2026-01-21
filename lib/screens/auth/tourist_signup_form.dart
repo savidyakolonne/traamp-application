@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:traamp_frontend/services/tourist.dart';
-import '../../listData.dart';
+import '../../list_data.dart';
 import 'login_setup.dart';
 
 class TouristSignupForm extends StatefulWidget {
