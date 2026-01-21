@@ -1,27 +1,243 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../services/auth_service.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import '../../position.dart';
 
-class GuideDashboard extends StatelessWidget {
+class GuideDashboard extends StatefulWidget {
   const GuideDashboard({super.key});
+
+  @override
+  State<GuideDashboard> createState() => _GuideDashboardState();
+}
+
+class _GuideDashboardState extends State<GuideDashboard> {
+  String currentLocation = "Unknown location";
+  bool availability = false;
+  late String dropdownValue;
+  double rating = 0.0;
+  String name = "";
+
+  String getAvailability(List<String> list) {
+    if (availability == true) {
+      return list[1];
+    } else if (availability == false) {
+      return list[0];
+    } else {
+      return "";
+    }
+  }
+
+  Widget availabilityStatusDropMenu() {
+    List<String> list = ["I'm not available", "I'm currently available"];
+    String dropdownValue = getAvailability(list);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        DropdownButton<String>(
+          value: dropdownValue,
+          borderRadius: BorderRadius.circular(16),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+          elevation: 16,
+          style: TextStyle(color: availability ? Colors.green : Colors.red),
+          onChanged: (String? value) async {
+            setState(() {
+              // update dropdown value
+              dropdownValue = value!;
+              availability = (dropdownValue == list[1]);
+            });
+            // create instance from database
+            final currentUser = FirebaseAuth.instance.currentUser;
+            if (currentUser == null) return;
+            final docRef = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(currentUser.uid);
+
+            // update database
+            if (value == "I'm currently available") {
+              await docRef
+                  .update({'availability': true})
+                  .then((_) {
+                    print("Database successfully updated!");
+                  })
+                  .catchError((error) {
+                    print("Error updating document: $error");
+                  });
+            } else if (value == "I'm not available") {
+              await docRef
+                  .update({'availability': false})
+                  .then((_) {
+                    print("Database successfully updated!");
+                  })
+                  .catchError((error) {
+                    print("Error updating document: $error");
+                  });
+            }
+          },
+          items: list.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(value: value, child: Text(value));
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Future<void> getNameAndAvailabilityFromUID() async {
+    try {
+      //get firstName from firebase
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (doc.exists && doc.data()!.containsKey('firstName')) {
+        setState(() {
+          name = doc['firstName'];
+          if (doc['type'] == "guide") {
+            availability = doc['availability'];
+            rating = doc['rating'];
+          }
+        });
+      }
+    } catch (e) {
+      setState(() {
+        print('Error fetching name: $e');
+        name = "";
+      });
+    }
+  }
+
+  Future<void> getCurrentCity() async {
+    try {
+      // Get current position
+      Position position = await GPSPosition.determinePosition();
+
+      // Convert coordinates to placemark
+      List<Placemark> placemark = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      // Extract city/town name
+      Placemark place = placemark[0];
+      setState(() {
+        currentLocation = place.locality!;
+      });
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getNameAndAvailabilityFromUID();
+    getCurrentCity();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Guide Dashboard'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.white, Colors.green],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.contain,
+              height: 60,
+            ),
+            SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ShaderMask(
+                  shaderCallback: (bounds) => LinearGradient(
+                    colors: [Colors.black, Colors.green],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ).createShader(bounds),
+                  child: Text(
+                    "Traamp",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Text(
+                  "Hi ${name}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
+                    color: Colors.amber[900],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(30.0),
+          child: Container(),
+        ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await AuthService.logout();
-              if (!context.mounted) return;
-              Navigator.popUntil(context, (r) => r.isFirst);
-            },
+          Padding(
+            padding: EdgeInsetsGeometry.only(right: 8),
+            child: Row(
+              children: [
+                Icon(Icons.star, size: 20.0, color: Colors.yellow[700]),
+                Text('${rating}'),
+              ],
+            ),
           ),
         ],
       ),
-      body: const Center(child: Text('Guide Dashboard (Phase 1)')),
+      body: SingleChildScrollView(
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(
+            top: 20.0,
+            left: 18.0,
+            right: 18.0,
+            bottom: 20,
+          ),
+          child: Column(
+            children: [
+              Text(
+                "Welcome to your\nDashboard",
+                style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      getCurrentCity();
+                    },
+                    icon: Icon(Icons.location_on_outlined),
+                  ),
+                  Text(currentLocation),
+                ],
+              ),
+              availabilityStatusDropMenu(),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

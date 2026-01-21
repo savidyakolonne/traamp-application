@@ -1,6 +1,6 @@
 import 'package:geolocator/geolocator.dart';
 
-class GPSPossition {
+class GPSPosition {
   static Future<Position> determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;

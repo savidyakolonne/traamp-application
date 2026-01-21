@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../listData.dart';
+import '../../list-data.dart';
 import '../../services/guide.dart';
 import 'login_setup.dart';
 
@@ -35,7 +35,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   String gender = "";
   String dob = "";
   String phoneNumber = "";
-  String? guideCertifateType;
+  String? guideCertificateType;
   String? certificateNumber;
   String nic = "";
   String location = "";
@@ -43,6 +43,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   String country = "Sri Lanka";
   String type = "guide";
   double rating = 0.0;
+  bool availability = false;
 
   // first name
   Widget firstNameFormField() {
@@ -271,7 +272,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       }).toList(),
       onChanged: (certificate) {
         setState(() {
-          guideCertifateType = certificate;
+          guideCertificateType = certificate;
         });
       },
       validator: (certificate) {
@@ -434,7 +435,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                           gender: gender,
                           dob: dob,
                           phoneNumber: phoneNumber,
-                          guideCertifateType: guideCertifateType,
+                          guideCertificateType: guideCertificateType,
                           certificateNumber: certificateNumber,
                           nic: nic,
                           location: location,
@@ -442,6 +443,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                           country: country,
                           type: type,
                           rating: rating,
+                          availability: availability,
                         );
                         // save to database after validation
                         try {

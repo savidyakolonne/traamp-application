@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../../services/user_service.dart';
 import '../guide/guide_dashboard.dart';
 

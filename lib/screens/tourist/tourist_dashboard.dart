@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../possition.dart';
+import '../../components/bottom-nav.dart';
+import '../../position.dart';
 
 class TouristDashboard extends StatefulWidget {
   const TouristDashboard({super.key});
@@ -50,7 +51,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
   Future<void> getCurrentCity() async {
     try {
       // Get current position
-      Position position = await GPSPossition.determinePosition();
+      Position position = await GPSPosition.determinePosition();
 
       // Convert coordinates to placemarks
       List<Placemark> placemarks = await placemarkFromCoordinates(
@@ -153,279 +154,286 @@ class _TouristDashboardState extends State<TouristDashboard> {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.only(
-              top: 20.0,
-              left: 18.0,
-              right: 18.0,
-              bottom: 20,
-            ),
-            child: Column(
-              children: [
-                Text(
-                  "Welcome to your\nDashboard",
-                  style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        getCurrentCity();
-                      },
-                      icon: Icon(Icons.location_on_outlined),
-                    ),
-                    Text(currentLocation),
-                  ],
-                ),
-
-                // menu icons
-                Column(
-                  spacing: 20.0,
-                  children: [
-                    // first row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // 1st row - 1st icon
-                        Column(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: BoxBorder.all(width: 2.0),
-                                borderRadius: BorderRadiusGeometry.all(
-                                  Radius.circular(16.0),
-                                ),
-                              ),
-
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Image.asset(
-                                  "assets/images/guidesIcon.png",
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 8.0),
-                            Text(
-                              "Guides",
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // 1st row - 2nd icon
-                        Column(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: BoxBorder.all(width: 2.0),
-                                borderRadius: BorderRadiusGeometry.all(
-                                  Radius.circular(16.0),
-                                ),
-                              ),
-
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Image.asset(
-                                  "assets/images/places.png",
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 8.0),
-                            Text(
-                              "Places",
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // 1st row - 3rd icon
-                        Column(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: BoxBorder.all(width: 2.0),
-                                borderRadius: BorderRadiusGeometry.all(
-                                  Radius.circular(16.0),
-                                ),
-                              ),
-
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Image.asset(
-                                  "assets/images/activity.png",
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 8.0),
-                            Text(
-                              "Activities",
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    // 2nd row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 2nd row - first icon
-                        Column(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: BoxBorder.all(width: 2.0),
-                                borderRadius: BorderRadiusGeometry.all(
-                                  Radius.circular(16.0),
-                                ),
-                              ),
-
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Image.asset(
-                                  "assets/images/AImap.png",
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 8.0),
-                            Text(
-                              "AI Map",
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // 2nd row - 2nd icon
-                        Column(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: BoxBorder.all(width: 2.0),
-                                borderRadius: BorderRadiusGeometry.all(
-                                  Radius.circular(16.0),
-                                ),
-                              ),
-
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Image.asset(
-                                  "assets/images/weather.png",
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 8.0),
-                            Text(
-                              "Weather",
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // 2nd row - 3rd icon
-                        Column(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: BoxBorder.all(width: 2.0),
-                                borderRadius: BorderRadiusGeometry.all(
-                                  Radius.circular(16.0),
-                                ),
-                              ),
-
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Image.asset(
-                                  "assets/images/sos.png",
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 8.0),
-                            Text(
-                              "Emergency\nContacts",
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-
-                // suggestion area
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "We suggest you",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: Text(
-                        "See more",
-                        style: TextStyle(
-                          fontSize: 13.0,
-                          color: const Color.fromARGB(255, 8, 5, 172),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: EdgeInsets.all(10.0),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black, width: 2.0),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: SizedBox(
-                    height: 100,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [suggestionScrollableView()],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+      body: SingleChildScrollView(
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(
+            top: 20.0,
+            left: 18.0,
+            right: 18.0,
+            bottom: 20,
           ),
-        ],
+          child: Column(
+            children: [
+              Text(
+                "Welcome to your\nDashboard",
+                style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      getCurrentCity();
+                    },
+                    icon: Icon(Icons.location_on_outlined),
+                  ),
+                  Text(currentLocation),
+                ],
+              ),
+
+              // menu icons
+              Column(
+                spacing: 20.0,
+                children: [
+                  // first row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // 1st row - 1st icon
+                      Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: BoxBorder.all(
+                                width: 1.5,
+                                color: Colors.grey,
+                              ),
+                              borderRadius: BorderRadiusGeometry.all(
+                                Radius.circular(16.0),
+                              ),
+                            ),
+
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: Image.asset(
+                                "assets/images/guidesIcon.png",
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "Guides",
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // 1st row - 2nd icon
+                      Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: BoxBorder.all(
+                                width: 1.5,
+                                color: Colors.grey,
+                              ),
+                              borderRadius: BorderRadiusGeometry.all(
+                                Radius.circular(16.0),
+                              ),
+                            ),
+
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: Image.asset(
+                                "assets/images/places.png",
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "Places",
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // 1st row - 3rd icon
+                      Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: BoxBorder.all(
+                                width: 1.5,
+                                color: Colors.grey,
+                              ),
+                              borderRadius: BorderRadiusGeometry.all(
+                                Radius.circular(16.0),
+                              ),
+                            ),
+
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: Image.asset(
+                                "assets/images/activity.png",
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "Activities",
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  // 2nd row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 2nd row - first icon
+                      Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: BoxBorder.all(
+                                width: 1.5,
+                                color: Colors.grey,
+                              ),
+                              borderRadius: BorderRadiusGeometry.all(
+                                Radius.circular(16.0),
+                              ),
+                            ),
+
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: Image.asset(
+                                "assets/images/AImap.png",
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "AI Map",
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // 2nd row - 2nd icon
+                      Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: BoxBorder.all(
+                                width: 1.5,
+                                color: Colors.grey,
+                              ),
+                              borderRadius: BorderRadiusGeometry.all(
+                                Radius.circular(16.0),
+                              ),
+                            ),
+
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: Image.asset(
+                                "assets/images/weather.png",
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "Weather",
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // 2nd row - 3rd icon
+                      Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: BoxBorder.all(
+                                width: 1.5,
+                                color: Colors.grey,
+                              ),
+                              borderRadius: BorderRadiusGeometry.all(
+                                Radius.circular(16.0),
+                              ),
+                            ),
+
+                            child: IconButton(
+                              onPressed: () {},
+                              icon: Image.asset(
+                                "assets/images/sos.png",
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "Emergency\nContacts",
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              // suggestion area
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "We suggest you",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Text(
+                      "See more",
+                      style: TextStyle(
+                        fontSize: 13.0,
+                        color: const Color.fromARGB(255, 8, 5, 172),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey, width: 1.5),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: SizedBox(
+                  height: 100,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [suggestionScrollableView()],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
       floatingActionButton: Container(
-        color: const Color.fromARGB(131, 122, 9, 144),
+        //color: const Color.fromARGB(131, 122, 9, 144),
         height: 90,
         width: 80,
         child: Column(
@@ -438,45 +446,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        height: 60,
-        shape: CircularNotchedRectangle(),
-        color: Colors.green,
-        child: Container(
-          padding: EdgeInsets.only(bottom: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.center,
-
-            children: [
-              IconButton(
-                icon: Icon(Icons.home_outlined, size: 40, color: Colors.black),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: Icon(Icons.email_outlined, size: 36, color: Colors.black),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.notifications_active_outlined,
-                  size: 36,
-                  color: Colors.black,
-                ),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.account_circle_outlined,
-                  size: 35,
-                  color: Colors.black,
-                ),
-                onPressed: () {},
-              ),
-            ],
-          ),
-        ),
-      ),
+      bottomNavigationBar: BottomNav.bottom_navigation(),
     );
   }
 }

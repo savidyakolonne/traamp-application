@@ -24,7 +24,22 @@ class _LoginSetupState extends State<LoginSetup> {
   String email = "";
   String password = "";
   String type = "";
-  bool _obsecureState = true;
+  bool _obscureState = true;
+
+  Widget showAndHidePasswordIcon() {
+    return IconButton(
+      icon: Icon(
+        _obscureState
+            ? Icons.visibility_off_outlined
+            : Icons.visibility_outlined,
+      ),
+      onPressed: () {
+        setState(() {
+          _obscureState = !_obscureState;
+        });
+      },
+    );
+  }
 
   Future<void> loginEmail() async {
     try {
@@ -143,21 +158,10 @@ class _LoginSetupState extends State<LoginSetup> {
 
               TextField(
                 controller: passCtrl,
-                obscureText: _obsecureState,
+                obscureText: _obscureState,
                 decoration: InputDecoration(
                   hintText: "Password",
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        if (_obsecureState == true) {
-                          _obsecureState = false;
-                        } else if (_obsecureState == false) {
-                          _obsecureState = true;
-                        }
-                      });
-                    },
-                    icon: Icon(Icons.visibility_off_outlined),
-                  ),
+                  suffixIcon: showAndHidePasswordIcon(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
