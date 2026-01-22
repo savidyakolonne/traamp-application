@@ -1,9 +1,14 @@
+import 'package:clickable_widget/clickable_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../components/bottom-nav.dart';
 import '../../position.dart';
+import 'package:text_gradiate/text_gradiate.dart';
+import 'guide_gallery.dart';
+import 'guide_package.dart';
 
 class GuideDashboard extends StatefulWidget {
   const GuideDashboard({super.key});
@@ -80,6 +85,41 @@ class _GuideDashboardState extends State<GuideDashboard> {
           }).toList(),
         ),
       ],
+    );
+  }
+
+  Widget cardElement(String imageURL, String cardTitle, bool toGuidePackage) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: ClickableCard(
+        color: const Color.fromARGB(255, 235, 235, 235),
+        child: Row(
+          children: [
+            Image.asset(imageURL),
+            SizedBox(width: 15.0),
+            TextGradiate(
+              text: Text(
+                cardTitle,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+              ),
+              colors: [
+                const Color.fromARGB(255, 61, 141, 64),
+                const Color.fromARGB(255, 0, 64, 36),
+              ],
+              gradientType: GradientType.linear,
+            ),
+          ],
+        ),
+        // if toGuidePackage = true go to guide package screen else go to gallery screen
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  toGuidePackage ? GuidePackage() : GuideGallery(),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -234,10 +274,71 @@ class _GuideDashboardState extends State<GuideDashboard> {
                 ],
               ),
               availabilityStatusDropMenu(),
+              cardElement("assets/images/jeep.png", "Your Packages", true),
+              SizedBox(height: 8),
+              cardElement("assets/images/wild.png", "Your Gallery", false),
+              SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // #1
+                  Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          border: BoxBorder.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: IconButton(
+                          onPressed: () {},
+                          icon: Image.asset("assets/images/news.png"),
+                        ),
+                      ),
+                      Text("News"),
+                    ],
+                  ),
+
+                  // #2
+                  Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          border: BoxBorder.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: IconButton(
+                          onPressed: () {},
+                          icon: Image.asset("assets/images/weather.png"),
+                        ),
+                      ),
+                      Text("Weather"),
+                    ],
+                  ),
+
+                  // #3
+                  Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          border: BoxBorder.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: IconButton(
+                          onPressed: () {},
+                          icon: Image.asset("assets/images/sos.png"),
+                        ),
+                      ),
+                      Text("Emergency\ncontacts", textAlign: TextAlign.center),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       ),
+      bottomNavigationBar: BottomNav.bottom_navigation(),
     );
   }
 }
