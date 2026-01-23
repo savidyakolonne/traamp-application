@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-
 import '../screens/guide/guide_dashboard.dart';
 import '../screens/guide/guide_msg_screen.dart';
 import '../screens/guide/guide_notification_screen.dart';
-import '../screens/guide/guide_settings_screen.dart';
 import '../screens/tourist/tourist_msg_screen.dart';
 import '../screens/tourist/tourist_notification_screen.dart';
-import '../screens/tourist/tourist_settings_screen.dart';
+import 'settings_screen.dart';
 import '../screens/tourist/tourist_dashboard.dart';
 
 class BottomNav {
@@ -21,6 +19,7 @@ class BottomNav {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // home icon
           IconButton(
             icon: Icon(Icons.home_outlined, size: 40, color: Colors.black),
             onPressed: () {
@@ -34,6 +33,7 @@ class BottomNav {
               );
             },
           ),
+          // message icon
           IconButton(
             icon: Icon(Icons.email_outlined, size: 36, color: Colors.black),
             onPressed: () {
@@ -46,6 +46,7 @@ class BottomNav {
               );
             },
           ),
+          // notification icon
           IconButton(
             icon: Icon(
               Icons.notifications_active_outlined,
@@ -64,13 +65,14 @@ class BottomNav {
               );
             },
           ),
+          // settings icon
           IconButton(
             icon: Icon(Icons.settings_outlined, size: 35, color: Colors.black),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) {
-                    return isTourist ? TouristSettings() : GuideSettings();
+                    return Settings();
                   },
                 ),
               );
