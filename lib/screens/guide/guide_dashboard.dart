@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../components/bottom-nav.dart';
+import '../../components/bottom_nav.dart';
 import '../../position.dart';
 import 'package:text_gradiate/text_gradiate.dart';
 import 'guide_gallery.dart';
@@ -23,6 +23,9 @@ class _GuideDashboardState extends State<GuideDashboard> {
   late String dropdownValue;
   double rating = 0.0;
   String name = "";
+
+  // object for bottom navigation, isTourist = false
+  BottomNav nav = BottomNav(false);
 
   String getAvailability(List<String> list) {
     if (availability == true) {
@@ -92,11 +95,11 @@ class _GuideDashboardState extends State<GuideDashboard> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: ClickableCard(
-        color: const Color.fromARGB(255, 235, 235, 235),
+        color: Colors.white,
         child: Row(
           children: [
             Image.asset(imageURL),
-            SizedBox(width: 15.0),
+            SizedBox(width: 8),
             TextGradiate(
               text: Text(
                 cardTitle,
@@ -108,6 +111,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
               ],
               gradientType: GradientType.linear,
             ),
+            SizedBox(width: 8),
           ],
         ),
         // if toGuidePackage = true go to guide package screen else go to gallery screen
@@ -255,6 +259,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
             bottom: 20,
           ),
           child: Column(
+            spacing: 8,
             children: [
               Text(
                 "Welcome to your\nDashboard",
@@ -274,9 +279,22 @@ class _GuideDashboardState extends State<GuideDashboard> {
                 ],
               ),
               availabilityStatusDropMenu(),
-              cardElement("assets/images/jeep.png", "Your Packages", true),
-              SizedBox(height: 8),
-              cardElement("assets/images/wild.png", "Your Gallery", false),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 8,
+                children: [
+                  cardElement(
+                    "assets/images/jeep.png",
+                    "Your Packages  ",
+                    true,
+                  ),
+                  cardElement(
+                    "assets/images/wild.png",
+                    "Your Gallery       ",
+                    false,
+                  ),
+                ],
+              ),
               SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -338,7 +356,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNav.bottom_navigation(),
+      bottomNavigationBar: nav.bottom_nav(context),
     );
   }
 }

@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../components/bottom-nav.dart';
+import '../../components/bottom_nav.dart';
 import '../../position.dart';
 
 class TouristDashboard extends StatefulWidget {
@@ -16,6 +16,9 @@ class TouristDashboard extends StatefulWidget {
 class _TouristDashboardState extends State<TouristDashboard> {
   String? name;
   String currentLocation = "Unknown location";
+
+  // object for bottom navigation, isTourist = true
+  BottomNav nav = BottomNav(true);
 
   @override
   void initState() {
@@ -150,7 +153,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
           IconButton(
             padding: EdgeInsets.only(right: 15),
             onPressed: () {},
-            icon: Icon(Icons.favorite, size: 35.0, color: Colors.red[700]),
+            icon: Icon(Icons.favorite, size: 25.0, color: Colors.red[700]),
           ),
         ],
       ),
@@ -433,7 +436,6 @@ class _TouristDashboardState extends State<TouristDashboard> {
         ),
       ),
       floatingActionButton: Container(
-        //color: const Color.fromARGB(131, 122, 9, 144),
         height: 90,
         width: 80,
         child: Column(
@@ -446,7 +448,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNav.bottom_navigation(),
+      bottomNavigationBar: nav.bottom_nav(context),
     );
   }
 }
