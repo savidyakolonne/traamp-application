@@ -11,37 +11,34 @@ This repository contains:
 ---
 
 ## 📁 Project Structure
+
+```text
 TRAAMP-MOBILE-FRONTEND/
-│
-├── lib/ # Flutter frontend
-│ ├── screens/ # UI screens (auth, map, dashboards)
-│ │ ├── auth/
-│ │ ├── guide/
-│ │ ├── tourist/
-│ │ └── map/
-│ │ └── map_screen.dart
-│ │
-│ ├── services/
-│ │ └── position.dart # GPS & location permission logic
-│ │
-│ └── main.dart
-│
-├── functions/ # Node.js backend
-│ ├── routes/
-│ │ └── places.routes.js 
-│ ├── firebaseAdmin.js
-│ ├── app.js
-│ ├── index.js
-│ ├── package.json
-│ └── package-lock.json
-│
-├── assets/
-├── web/
-├── android/
-├── ios/
-├── pubspec.yaml
-├── .gitignore
-└── README.md
+├── lib/                      # Flutter frontend source code
+│   ├── screens/              # UI screens and layouts
+│   │   ├── auth/             # Login and Registration screens
+│   │   ├── guide/            # Guide dashboard and specific features
+│   │   ├── tourist/          # Tourist dashboard and specific features
+│   │   └── map/
+│   │       └── map_screen.dart # Google Maps integration and nearby places UI
+│   ├── services/
+│   │   └── position.dart     # GPS logic and location permission handling
+│   └── main.dart             # Application entry point
+├── functions/                # Node.js (Firebase Functions) backend
+│   ├── routes/
+│   │   └── places.routes.js  # Nearby places API endpoints
+│   ├── firebaseAdmin.js      # Firebase Admin SDK initialization
+│   ├── app.js                # Express.js application configuration
+│   ├── index.js              # Backend entry point
+│   ├── package.json          # Node.js dependencies
+│   └── package-lock.json
+├── assets/                   # Images, icons, and static assets
+├── web/                      # Flutter web platform configuration
+├── android/                  # Android native platform files
+├── ios/                      # iOS native platform files
+├── pubspec.yaml              # Flutter dependencies and metadata
+├── .gitignore                # Files excluded from version control
+└── README.md                 # Project documentation
 
 
 ---
