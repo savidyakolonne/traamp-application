@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../possition.dart';
+import '../places/places_list_page.dart';
 
 class TouristDashboard extends StatefulWidget {
   const TouristDashboard({super.key});
@@ -233,7 +234,14 @@ class _TouristDashboardState extends State<TouristDashboard> {
                               ),
 
                               child: IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const PlacesListPage(),
+                                    ),
+                                  );
+                                },
                                 icon: Image.asset(
                                   "assets/images/places.png",
                                   fit: BoxFit.cover,
