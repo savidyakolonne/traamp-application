@@ -1,39 +1,81 @@
-# traamp_mobile_application
+# TRAAMP Mobile Application 🌍
 
-## Getting Started
+TRAAMP is a Flutter-based tourism discovery application designed for Sri Lanka.  
+The platform helps tourists discover **lesser-known and hidden places** using an interactive map and location-based suggestions.
 
-This repository contains the Flutter mobile application for the TRAAMP project.
+This repository contains:
+- **Flutter frontend** (Android, iOS, Web)
+- **Node.js + Express backend** for geo-based place search
+- **Firestore** as the database
 
-This project serves as a starting point for building and running a Flutter application.
+---
 
-### Prerequisites
+## 📁 Project Structure
+TRAAMP-MOBILE-FRONTEND/
+│
+├── lib/ # Flutter frontend
+│ ├── screens/ # UI screens (auth, map, dashboards)
+│ │ ├── auth/
+│ │ ├── guide/
+│ │ ├── tourist/
+│ │ └── map/
+│ │ └── map_screen.dart
+│ │
+│ ├── services/
+│ │ └── position.dart # GPS & location permission logic
+│ │
+│ └── main.dart
+│
+├── functions/ # Node.js backend
+│ ├── routes/
+│ │ └── places.routes.js 
+│ ├── firebaseAdmin.js
+│ ├── app.js
+│ ├── index.js
+│ ├── package.json
+│ └── package-lock.json
+│
+├── assets/
+├── web/
+├── android/
+├── ios/
+├── pubspec.yaml
+├── .gitignore
+└── README.md
 
-Before getting started, make sure you have  
-- Flutter SDK installed  
-- Android Studio or VS Code  
-- An Android emulator, iOS simulator, or physical device  
 
-Check your Flutter setup by running 
+---
 
-### Running the Project
+## 🚀 Features
 
-Clone the repository and navigate into the project directory  
+- Tourist & Guide authentication
+- Role-based dashboards
+- Google Maps integration
+- Current location detection
+- Nearby hidden places (5km / 10km radius)
+- Backend-powered geo queries (Firestore + Geohash)
+- Works on **Android, iOS, and Web (Chrome)**
 
+---
+
+## 🧰 Prerequisites
+
+### Frontend
+- Flutter SDK (latest stable)
+- Android Studio or VS Code
+- Chrome browser (for Flutter Web)
+- Android Emulator / iOS Simulator (optional)
+
+Check Flutter setup:
+```bash
 flutter doctor
-flutter pub get
-flutter run
 
-### Flutter Resources
 
-If this is your first Flutter project, these resources will help you get started  
+▶️ Running Order (IMPORTANT)
 
-- Lab: Write your first Flutter app  
-  https://docs.flutter.dev/get-started/codelab  
+Start Backend - 
+cd functions
+node index.js
 
-- Cookbook: Useful Flutter samples  
-  https://docs.flutter.dev/cookbook  
-
-For more details, check out the Flutter documentation  
-https://docs.flutter.dev  
-
-The documentation provides tutorials, samples, guidance on mobile development, and a full API reference.
+Start Flutter App - 
+flutter run 
