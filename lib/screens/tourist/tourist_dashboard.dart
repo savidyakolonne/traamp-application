@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../possition.dart';
+import 'package:traamp_frontend/screens/map/map_screen.dart';
 
 class TouristDashboard extends StatefulWidget {
   const TouristDashboard({super.key});
@@ -299,7 +300,14 @@ class _TouristDashboardState extends State<TouristDashboard> {
                               ),
 
                               child: IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const MapScreen(),
+                                    ),
+                                  );
+                                },
                                 icon: Image.asset(
                                   "assets/images/AImap.png",
                                   fit: BoxFit.cover,

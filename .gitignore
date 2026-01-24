@@ -43,3 +43,15 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+
+# ======================
+# Backend (Node / Firebase)
+# ======================
+functions/node_modules/
+functions/serviceAccountKey.json
+functions/.env
+
+# Safety net (any nested node project)
+**/node_modules/
