@@ -2,8 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
-import '../../possition.dart';
+import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 
 class TouristDashboard extends StatefulWidget {
@@ -50,22 +49,25 @@ class _TouristDashboardState extends State<TouristDashboard> {
   // get current location via GPS
   Future<void> getCurrentCity() async {
     try {
-      // Get current position
-      Position position = await GPSPossition.determinePosition();
+      final position = await LocationService.getCurrentPosition();
 
-      // Convert coordinates to placemarks
-      List<Placemark> placemarks = await placemarkFromCoordinates(
+      final placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
       );
 
-      // Extract city/town name
-      Placemark place = placemarks[0];
+      final place = placemarks.isNotEmpty ? placemarks.first : null;
+
       setState(() {
-        currentLocation = place.locality!;
+        currentLocation = (place?.locality?.isNotEmpty == true
+            ? place!.locality!
+            : "Unknown");
       });
     } catch (e) {
       print("Error: $e");
+      setState(() {
+        currentLocation = "Location unavailable";
+      });
     }
   }
 
