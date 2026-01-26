@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../components/bottom_nav.dart';
-import '../../position.dart';
 import 'package:text_gradiate/text_gradiate.dart';
+import '../../services/location_service.dart';
 import 'guide_gallery.dart';
 import 'guide_package.dart';
 
@@ -156,7 +156,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
   Future<void> getCurrentCity() async {
     try {
       // Get current position
-      Position position = await GPSPosition.determinePosition();
+      Position position = await LocationService.getCurrentPosition();
 
       // Convert coordinates to placemark
       List<Placemark> placemark = await placemarkFromCoordinates(

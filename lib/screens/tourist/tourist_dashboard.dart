@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import '../../components/bottom_nav.dart';
-import '../../position.dart';
+import 'package:traamp_frontend/services/location_service.dart';
+import 'package:traamp_frontend/screens/map/map_screen.dart';
 
 class TouristDashboard extends StatefulWidget {
   const TouristDashboard({super.key});
@@ -54,21 +54,25 @@ class _TouristDashboardState extends State<TouristDashboard> {
   Future<void> getCurrentCity() async {
     try {
       // Get current position
-      Position position = await GPSPosition.determinePosition();
+      final position = await LocationService.getCurrentPosition();
 
-      // Convert coordinates to placemarks
-      List<Placemark> placemarks = await placemarkFromCoordinates(
+      final placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
       );
 
-      // Extract city/town name
-      Placemark place = placemarks[0];
+      final place = placemarks.isNotEmpty ? placemarks.first : null;
+
       setState(() {
-        currentLocation = place.locality!;
+        currentLocation = (place?.locality?.isNotEmpty == true
+            ? place!.locality!
+            : "Unknown");
       });
     } catch (e) {
       print("Error: $e");
+      setState(() {
+        currentLocation = "Location unavailable";
+      });
     }
   }
 
@@ -311,17 +315,25 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             ),
 
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const MapScreen(),
+                                  ),
+                                );
+                              },
                               icon: Image.asset(
                                 "assets/images/AImap.png",
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
+                          SizedBox(height: 8.0),
                           Text(
                             "AI Map",
                             style: TextStyle(
-                              fontSize: 15.0,
+                              fontSize: 18.0,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
