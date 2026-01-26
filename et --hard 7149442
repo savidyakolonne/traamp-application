@@ -1,0 +1,11 @@
+[33m0802b80[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mlimasha-branch[m[33m, [m[1;31morigin/limasha-branch[m[33m)[m HEAD@{0}: reset: moving to HEAD
+[33m0802b80[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mlimasha-branch[m[33m, [m[1;31morigin/limasha-branch[m[33m)[m HEAD@{1}: checkout: moving from limasha-branch to limasha-branch
+[33m0802b80[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mlimasha-branch[m[33m, [m[1;31morigin/limasha-branch[m[33m)[m HEAD@{2}: checkout: moving from main to limasha-branch
+[33m7149442[m[33m ([m[1;32mmain[m[33m)[m HEAD@{3}: commit: Save my work before pushing to my branch
+[33m9d760da[m HEAD@{4}: pull origin main: Fast-forward
+[33m298d427[m HEAD@{5}: checkout: moving from limasha-branch to main
+[33m0802b80[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mlimasha-branch[m[33m, [m[1;31morigin/limasha-branch[m[33m)[m HEAD@{6}: commit: Save current work before syncing backend
+[33m45809a8[m HEAD@{7}: commit: Implement places list and place details pages
+[33mb97dd5d[m HEAD@{8}: commit: create folders and dart files for places
+[33m298d427[m HEAD@{9}: checkout: moving from main to limasha-branch
+[33m298d427[m HEAD@{10}: clone: from https://github.com/savidyakolonne/traamp-mobile-frontend.git

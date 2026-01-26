@@ -3,6 +3,7 @@ import 'package:device_preview/device_preview.dart';
 import 'screens/auth/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'screens/map/map_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +27,9 @@ class TraampApp extends StatelessWidget {
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       title: 'Traamp',
+
+      routes: {'/map': (context) => const MapScreen()},
+
       home: LoginScreen(),
     );
   }
