@@ -4,12 +4,6 @@ import { geohashQueryBounds, distanceBetween } from "geofire-common";
 
 const router = express.Router();
 
-/**
- * ---------------------------------------------------------
- * FRIEND'S ROUTE (DO NOT MODIFY)
- * GET /api/places/nearby?lat=..&lng=..&radius=5000
- * ---------------------------------------------------------
- */
 router.get("/nearby", async (req, res) => {
   try {
     const lat = Number(req.query.lat);
@@ -79,11 +73,7 @@ router.get("/nearby", async (req, res) => {
 });
 
 /**
- * ---------------------------------------------------------
- * YOUR ROUTE
- * GET /api/places
- * Used for Places List UI
- * ---------------------------------------------------------
+places part
  */
 router.get("/", async (req, res) => {
   try {
@@ -109,10 +99,7 @@ router.get("/", async (req, res) => {
 
 /**
  * ---------------------------------------------------------
- * YOUR ROUTE
- * GET /api/places/:id
- * Used for Place Profile UI
- * ---------------------------------------------------------
+ places part
  */
 router.get("/:id", async (req, res) => {
   try {
