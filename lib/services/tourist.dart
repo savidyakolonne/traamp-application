@@ -8,6 +8,7 @@ class Tourist extends AppUser {
     required super.firstName,
     required super.lastName,
     required super.email,
+    required super.password,
     required super.gender,
     required super.dob,
     required super.type,

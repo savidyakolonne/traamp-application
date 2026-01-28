@@ -1,8 +1,8 @@
-import express from "express";
-import { db } from "../firebaseAdmin.js";
+import db from "../firebaseAdmin.js";
+import Router from "express";
 import { geohashQueryBounds, distanceBetween } from "geofire-common";
 
-const router = express.Router();
+const router = Router();
 
 /**
  * GET /api/places/nearby?lat=..&lng=..&radius=5000

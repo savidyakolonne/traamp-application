@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../../list-data.dart';
 import '../../services/guide.dart';
 import 'login_setup.dart';
@@ -12,21 +12,16 @@ class GuideSignupForm extends StatefulWidget {
 }
 
 class _GuideSignupFormState extends State<GuideSignupForm> {
-  // instance of firebase - firestore
-  final db = FirebaseFirestore.instance;
   // global key object for Form
   final GlobalKey<FormState> _formKeyGuide = GlobalKey<FormState>();
   // DOB text editing controller
   final TextEditingController _dobController = TextEditingController();
-  // creating object for fireStore users collection
-  late final users = db.collection("users");
 
   final List<String> _genders = ListData.gender;
   final List<String> _certificateType = ListData.guideCertificates;
   final List<String> _districts = ListData.districts;
 
   // global variables to store data coming from form
-  late final userId = users.doc().id;
   String firstName = "";
   String lastName = "";
   String email = "";
@@ -278,6 +273,9 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       validator: (certificate) {
         return null;
       },
+      onSaved: (certificate) {
+        guideCertificateType = certificate;
+      },
     );
   }
 
@@ -314,7 +312,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       },
       //save global variable
       onSaved: (number) {
-        if (number == "") {
+        if (number == "" || number == null) {
           certificateNumber = null;
         } else {
           certificateNumber = number;
@@ -428,10 +426,10 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                       if (_formKeyGuide.currentState!.validate()) {
                         _formKeyGuide.currentState?.save();
                         Guide guide = Guide(
-                          uid: userId,
                           firstName: firstName,
                           lastName: lastName,
                           email: email,
+                          password: password,
                           gender: gender,
                           dob: dob,
                           phoneNumber: phoneNumber,
@@ -447,41 +445,41 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                         );
                         // save to database after validation
                         try {
-                          // email and password authentication
-                          final credential = await FirebaseAuth.instance
-                              .createUserWithEmailAndPassword(
-                                email: email,
-                                password: password,
-                              );
-                          // add data to users collection
-                          await users
-                              .doc(credential.user!.uid)
-                              .set(guide.toMap());
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Successfully Created.'),
-                              backgroundColor: Colors.green,
+                          final response = await http.post(
+                            Uri.parse(
+                              "http://10.0.2.2:3000/api/users/register-guide",
                             ),
+                            headers: {
+                              "Content-Type": "application/json",
+                            }, //  tells the server the body is JSON
+                            body: jsonEncode(guide.toMap()),
                           );
-                          // return back to signin page
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return LoginSetup();
-                              },
-                            ),
-                          );
-                        } on FirebaseException catch (e) {
-                          debugPrint(
-                            'Firestore error: ${e.code} - ${e.message}',
-                          );
+                          final data = jsonDecode(response.body);
+                          print(data);
+                          if (response.statusCode == 201) {
+                            Navigator.pop(context, LoginSetup());
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${data['msg']}'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '${data['msg']} : status code = ${response.statusCode}',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        } catch (e) {
                           print(e);
-
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
-                                'Failed to create user. Please try again. Try to use another email.',
+                                'Error while connecting to server...',
                               ),
                               backgroundColor: Colors.red,
                             ),

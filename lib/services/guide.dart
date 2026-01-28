@@ -16,6 +16,7 @@ class Guide extends AppUser {
     required super.firstName,
     required super.lastName,
     required super.email,
+    required super.password,
     required super.gender,
     required super.dob,
     required super.type,
@@ -35,7 +36,7 @@ class Guide extends AppUser {
     return {
       ...super.toMap(),
       'phoneNumber': phoneNumber,
-      'certificateType': guideCertificateType,
+      'guideCertificateType': guideCertificateType,
       'certificateNumber': certificateNumber,
       'nic': nic,
       'location': location,
