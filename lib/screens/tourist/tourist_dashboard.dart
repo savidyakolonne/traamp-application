@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../possition.dart';
-import '../places/places_list_page.dart';
+// import '../../possition.dart';
+import '../places/places_list_screen.dart';
 
 class TouristDashboard extends StatefulWidget {
   const TouristDashboard({super.key});
@@ -21,7 +21,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
   void initState() {
     super.initState();
     getNameFromEmail();
-    getCurrentCity();
+    // getCurrentCity();
   }
 
   // get name from db from email
@@ -48,26 +48,26 @@ class _TouristDashboardState extends State<TouristDashboard> {
   }
 
   // get current location via GPS
-  Future<void> getCurrentCity() async {
-    try {
-      // Get current position
-      Position position = await GPSPossition.determinePosition();
-
-      // Convert coordinates to placemarks
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      // Extract city/town name
-      Placemark place = placemarks[0];
-      setState(() {
-        currentLocation = place.locality!;
-      });
-    } catch (e) {
-      print("Error: $e");
-    }
-  }
+  // Future<void> getCurrentCity() async {
+  //   try {
+  //     // Get current position
+  //     Position position = await GPSPossition.determinePosition();
+  //
+  //     // Convert coordinates to placemarks
+  //     List<Placemark> placemarks = await placemarkFromCoordinates(
+  //       position.latitude,
+  //       position.longitude,
+  //     );
+  //
+  //     // Extract city/town name
+  //     Placemark place = placemarks[0];
+  //     setState(() {
+  //       currentLocation = place.locality!;
+  //     });
+  //   } catch (e) {
+  //     print("Error: $e");
+  //   }
+  // }
 
   Widget suggestionScrollableView() {
     return Row(
@@ -176,7 +176,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
                   children: [
                     IconButton(
                       onPressed: () {
-                        getCurrentCity();
+                        // getCurrentCity();
                       },
                       icon: Icon(Icons.location_on_outlined),
                     ),
@@ -238,7 +238,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const PlacesListPage(),
+                                      builder: (_) => PlacesListScreen(),
                                     ),
                                   );
                                 },
