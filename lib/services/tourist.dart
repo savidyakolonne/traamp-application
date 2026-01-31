@@ -4,7 +4,6 @@ class Tourist extends AppUser {
   final String country;
 
   Tourist({
-    required super.uid,
     required super.firstName,
     required super.lastName,
     required super.email,

@@ -1,9 +1,10 @@
+import 'dart:convert';
 import 'package:clickable_widget/clickable_widget.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import '../../components/bottom_nav.dart';
 import 'package:text_gradiate/text_gradiate.dart';
 import '../../services/location_service.dart';
@@ -11,21 +12,54 @@ import 'guide_gallery.dart';
 import 'guide_package.dart';
 
 class GuideDashboard extends StatefulWidget {
-  const GuideDashboard({super.key});
-
   @override
   State<GuideDashboard> createState() => _GuideDashboardState();
 }
 
 class _GuideDashboardState extends State<GuideDashboard> {
   String currentLocation = "Unknown location";
+  late String? idToken = "";
   bool availability = false;
   late String dropdownValue;
-  double rating = 0.0;
-  String name = "";
+  late Map<String, dynamic> userData = {};
 
   // object for bottom navigation, isTourist = false
-  BottomNav nav = BottomNav(false);
+  BottomNav get nav => BottomNav(false);
+
+  // get user data from DB
+  Future<void> getUserData() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        idToken = await user.getIdToken(true);
+        if (idToken != null) {
+          final response = await http.post(
+            Uri.parse("http://10.0.2.2:3000/api/users/get-user-data"),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({"idToken": idToken}),
+          );
+
+          final data = await jsonDecode(response.body);
+
+          if (response.statusCode == 200) {
+            setState(() {
+              userData = data['data'];
+              availability = userData['availability'];
+            });
+            print(data['msg']);
+          } else if (response.statusCode == 401) {
+            print(data['msg']);
+          }
+        } else {
+          print("idToken is Null");
+        }
+      } else {
+        print("Something wrong during creating instance from firebase");
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 
   String getAvailability(List<String> list) {
     if (availability == true) {
@@ -55,32 +89,37 @@ class _GuideDashboardState extends State<GuideDashboard> {
               dropdownValue = value!;
               availability = (dropdownValue == list[1]);
             });
-            // create instance from database
-            final currentUser = FirebaseAuth.instance.currentUser;
-            if (currentUser == null) return;
-            final docRef = await FirebaseFirestore.instance
-                .collection('users')
-                .doc(currentUser.uid);
-
             // update database
-            if (value == "I'm currently available") {
-              await docRef
-                  .update({'availability': true})
-                  .then((_) {
-                    print("Database successfully updated!");
-                  })
-                  .catchError((error) {
-                    print("Error updating document: $error");
-                  });
-            } else if (value == "I'm not available") {
-              await docRef
-                  .update({'availability': false})
-                  .then((_) {
-                    print("Database successfully updated!");
-                  })
-                  .catchError((error) {
-                    print("Error updating document: $error");
-                  });
+            try {
+              final currentUser = FirebaseAuth.instance.currentUser;
+              if (currentUser != null && idToken != null) {
+                final response = await http.put(
+                  Uri.parse(
+                    "http://10.0.2.2:3000/api/users/update-guide-availability",
+                  ),
+                  headers: {"Content-Type": "application/json"},
+                  body: jsonEncode({
+                    "idToken": idToken,
+                    "availability": availability,
+                  }),
+                );
+                final data = jsonDecode(response.body);
+                if (response.statusCode == 200) {
+                  print('${data['msg']}');
+                }
+                if (response.statusCode == 404) {
+                  print('${data['msg']}');
+                }
+                if (response.statusCode == 400) {
+                  print('${data['msg']}');
+                }
+              } else {
+                print(
+                  "Something wrong during creating instance from firebase or idToken",
+                );
+              }
+            } catch (e) {
+              print(e.toString());
             }
           },
           items: list.map<DropdownMenuItem<String>>((String value) {
@@ -127,32 +166,6 @@ class _GuideDashboardState extends State<GuideDashboard> {
     );
   }
 
-  Future<void> getNameAndAvailabilityFromUID() async {
-    try {
-      //get firstName from firebase
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      if (doc.exists && doc.data()!.containsKey('firstName')) {
-        setState(() {
-          name = doc['firstName'];
-          if (doc['type'] == "guide") {
-            availability = doc['availability'];
-            rating = doc['rating'];
-          }
-        });
-      }
-    } catch (e) {
-      setState(() {
-        print('Error fetching name: $e');
-        name = "";
-      });
-    }
-  }
-
   Future<void> getCurrentCity() async {
     try {
       // Get current position
@@ -177,7 +190,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
   @override
   void initState() {
     super.initState();
-    getNameAndAvailabilityFromUID();
+    getUserData();
     getCurrentCity();
   }
 
@@ -222,7 +235,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
                   ),
                 ),
                 Text(
-                  "Hi ${name}",
+                  "Hi ${userData['firstName']}",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20.0,
@@ -243,7 +256,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
             child: Row(
               children: [
                 Icon(Icons.star, size: 20.0, color: Colors.yellow[700]),
-                Text('${rating}'),
+                Text('${userData['rating']}'),
               ],
             ),
           ),

@@ -12,7 +12,6 @@ class Guide extends AppUser {
   final bool availability;
 
   Guide({
-    required super.uid,
     required super.firstName,
     required super.lastName,
     required super.email,

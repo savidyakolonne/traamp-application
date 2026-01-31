@@ -454,6 +454,18 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                             }, //  tells the server the body is JSON
                             body: jsonEncode(guide.toMap()),
                           );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("Connecting... "),
+                                  CircularProgressIndicator.adaptive(),
+                                ],
+                              ),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
                           final data = jsonDecode(response.body);
                           print(data);
                           if (response.statusCode == 201) {

@@ -1,54 +1,57 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:http/http.dart' as http;
 import '../../components/bottom_nav.dart';
 import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 
 class TouristDashboard extends StatefulWidget {
-  const TouristDashboard({super.key});
-
   @override
   State<TouristDashboard> createState() => _TouristDashboardState();
 }
 
 class _TouristDashboardState extends State<TouristDashboard> {
-  String? name;
   String currentLocation = "Unknown location";
+  late Map<String, dynamic> userData = {};
 
-  // object for bottom navigation, isTourist = true
-  BottomNav nav = BottomNav(true);
-
-  @override
-  void initState() {
-    super.initState();
-    getNameFromEmail();
-    getCurrentCity();
-  }
-
-  // get name from db from email
-  Future<void> getNameFromEmail() async {
+  // get user data from DB
+  Future<void> getUserData() async {
     try {
-      //get firstName from firebase
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      if (doc.exists && doc.data()!.containsKey('firstName')) {
-        setState(() {
-          name = doc['firstName'];
-        });
+      if (user != null) {
+        String? idToken = await user.getIdToken(true);
+        if (idToken != null) {
+          final response = await http.post(
+            Uri.parse("http://10.0.2.2:3000/api/users/get-user-data"),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode({"idToken": idToken}),
+          );
+
+          final data = await jsonDecode(response.body);
+
+          if (response.statusCode == 200) {
+            setState(() {
+              userData = data['data'];
+            });
+            print(data['msg']);
+          } else if (response.statusCode == 401) {
+            print(data['msg']);
+          }
+        } else {
+          print("idToken is Null");
+        }
+      } else {
+        print("Something wrong during creating instance from firebase");
       }
     } catch (e) {
-      setState(() {
-        print('Error fetching name: $e');
-        name = null;
-      });
+      print(e.toString());
     }
   }
+
+  // object for bottom navigation, isTourist = true
+  BottomNav get nav => BottomNav(true);
 
   // get current location via GPS
   Future<void> getCurrentCity() async {
@@ -98,6 +101,13 @@ class _TouristDashboardState extends State<TouristDashboard> {
   }
 
   @override
+  initState() {
+    super.initState();
+    getUserData();
+    getCurrentCity();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -138,7 +148,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
                   ),
                 ),
                 Text(
-                  "Hi $name",
+                  "Hi ${userData['firstName']}",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20.0,

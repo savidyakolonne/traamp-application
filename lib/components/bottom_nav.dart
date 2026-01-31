@@ -9,7 +9,6 @@ import '../screens/tourist/tourist_dashboard.dart';
 
 class BottomNav {
   late bool isTourist;
-
   BottomNav(this.isTourist);
 
   Widget bottom_nav(BuildContext context) {
@@ -27,6 +26,7 @@ class BottomNav {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) {
+                    print(isTourist);
                     return isTourist ? TouristDashboard() : GuideDashboard();
                   },
                 ),
@@ -72,7 +72,7 @@ class BottomNav {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) {
-                    return Settings();
+                    return Settings(isTourist);
                   },
                 ),
               );

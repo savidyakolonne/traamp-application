@@ -1,11 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../services/auth_service.dart';
+import 'package:http/http.dart' as http;
 import '../guide/guide_dashboard.dart';
 import '../tourist/tourist_dashboard.dart';
 import 'signup.dart';
-import 'role_router.dart';
 
 class LoginSetup extends StatefulWidget {
   const LoginSetup({super.key});
@@ -19,12 +18,8 @@ class _LoginSetupState extends State<LoginSetup> {
   final passCtrl = TextEditingController();
   bool loading = false;
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  String email = "";
-  String password = "";
-  String type = "";
   bool _obscureState = true;
+  late Map<String, dynamic> userData;
 
   Widget showAndHidePasswordIcon() {
     return IconButton(
@@ -42,62 +37,99 @@ class _LoginSetupState extends State<LoginSetup> {
   }
 
   Future<void> loginEmail() async {
+    String email = emailCtrl.text.trim().toLowerCase();
+    String password = passCtrl.text;
+
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: emailCtrl.text.trim().toLowerCase(),
-        password: passCtrl.text,
+      final userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      final idToken = await userCredential.user!.getIdToken();
+      final response = await http.post(
+        Uri.parse("http://10.0.2.2:3000/api/users/loginWithEmail"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"idToken": idToken}),
       );
 
-      final user = userCredential.user;
-      if (user == null) return;
+      final data = await jsonDecode(response.body);
 
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      if (doc.exists) {
-        type = doc['type'] as String;
-      }
-
-      if (type == "tourist") {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => TouristDashboard()),
-        );
-      } else if (type == "guide") {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => GuideDashboard()),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      String message;
-      if (e.code == 'user-not-found') {
-        message = 'No user found for that email.';
-      } else if (e.code == 'wrong-password') {
-        message = 'Wrong password provided.';
-      } else {
-        message = 'Login failed: ${e.message}';
-      }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
+        SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Connecting... ", style: TextStyle(color: Colors.white)),
+              CircularProgressIndicator.adaptive(backgroundColor: Colors.green),
+            ],
+          ),
+          backgroundColor: const Color.fromARGB(123, 0, 0, 0),
+        ),
+      );
+
+      if (response.statusCode == 404 || response.statusCode == 401) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${data['msg']}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else if (response.statusCode == 200) {
+        userData = data['profile'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${data['msg']}'),
+            backgroundColor: const Color.fromARGB(125, 76, 175, 79),
+          ),
+        );
+        // routing
+        if (userData['type'] == "tourist") {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) {
+                return TouristDashboard();
+              },
+            ),
+          );
+        } else if (userData['type'] == "guide") {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) {
+                return GuideDashboard();
+              },
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Something wrong...'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error while connecting to server...'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
   Future<void> loginGoogle() async {
-    try {
-      setState(() => loading = true);
-      await AuthService.loginGoogle();
-      await RoleRouter.goToDashboard(context);
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      if (mounted) setState(() => loading = false);
-    }
+    // try {
+    //   setState(() => loading = true);
+    //   await AuthService.loginGoogle();
+    //   await RoleRouter.goToDashboard(context);
+    // } catch (e) {
+    //   ScaffoldMessenger.of(
+    //     context,
+    //   ).showSnackBar(SnackBar(content: Text(e.toString())));
+    // } finally {
+    //   if (mounted) setState(() => loading = false);
+    // }
   }
 
   @override
