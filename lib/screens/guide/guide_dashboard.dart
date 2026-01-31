@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import '../../components/bottom_nav.dart';
 import 'package:text_gradiate/text_gradiate.dart';
 import '../../services/location_service.dart';
+import '../../components/weather_screen.dart';
 import 'guide_gallery.dart';
 import 'guide_package.dart';
 
@@ -339,7 +340,15 @@ class _GuideDashboardState extends State<GuideDashboard> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return WeatherScreen(false);
+                                },
+                              ),
+                            );
+                          },
                           icon: Image.asset("assets/images/weather.png"),
                         ),
                       ),

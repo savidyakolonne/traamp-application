@@ -118,20 +118,6 @@ class _LoginSetupState extends State<LoginSetup> {
     }
   }
 
-  Future<void> loginGoogle() async {
-    // try {
-    //   setState(() => loading = true);
-    //   await AuthService.loginGoogle();
-    //   await RoleRouter.goToDashboard(context);
-    // } catch (e) {
-    //   ScaffoldMessenger.of(
-    //     context,
-    //   ).showSnackBar(SnackBar(content: Text(e.toString())));
-    // } finally {
-    //   if (mounted) setState(() => loading = false);
-    // }
-  }
-
   @override
   void dispose() {
     emailCtrl.dispose();
@@ -225,7 +211,7 @@ class _LoginSetupState extends State<LoginSetup> {
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton(
-                  onPressed: loading ? null : loginGoogle,
+                  onPressed: () {},
                   child: const Text("Continue with Google"),
                 ),
               ),

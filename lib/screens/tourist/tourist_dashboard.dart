@@ -7,6 +7,8 @@ import '../../components/bottom_nav.dart';
 import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 
+import '../../components/weather_screen.dart';
+
 class TouristDashboard extends StatefulWidget {
   @override
   State<TouristDashboard> createState() => _TouristDashboardState();
@@ -365,7 +367,15 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             ),
 
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) {
+                                      return WeatherScreen(true);
+                                    },
+                                  ),
+                                );
+                              },
                               icon: Image.asset(
                                 "assets/images/weather.png",
                                 fit: BoxFit.cover,
