@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
+import 'screens/profile/profile_screen.dart';
 import 'screens/auth/login_screen.dart';
 
 void main() async {
@@ -18,7 +18,7 @@ class TraampApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Traamp',
-      home: const LoginScreen(),
+      home: const ProfileScreen(),
     );
   }
 }

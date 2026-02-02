@@ -45,7 +45,7 @@ class GuideProfileScreen extends StatelessWidget {
                           child: const CircleAvatar(
                             radius: 45,
                             backgroundImage: NetworkImage(
-                              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+                              'https://plus.unsplash.com/premium_photo-1663089942980-b817c683b40f?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                             ),
                           ),
                         ),
@@ -491,7 +491,7 @@ class GuideProfileScreen extends StatelessWidget {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: Image.network(
-                                  'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400',
+                                  'https://images.unsplash.com/photo-1656159625990-8cd23231c218?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                                   height: 150,
                                   fit: BoxFit.cover,
                                 ),
@@ -532,7 +532,7 @@ class GuideProfileScreen extends StatelessWidget {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: Image.network(
-                                  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+                                  'https://plus.unsplash.com/premium_photo-1663089942980-b817c683b40f?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                                   height: 150,
                                   fit: BoxFit.cover,
                                 ),

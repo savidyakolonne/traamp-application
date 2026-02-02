@@ -141,6 +141,7 @@ class TouristProfileScreen extends StatelessWidget {
                       'Cultural Heritage Expert',
                       4.9,
                       124,
+                      'https://plus.unsplash.com/premium_photo-1682142702814-5999525b4346?q=80&w=883&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                     ),
                     const SizedBox(height: 12),
                     _buildGuideListTile(
@@ -148,6 +149,7 @@ class TouristProfileScreen extends StatelessWidget {
                       'Wildlife & Safari Specialist',
                       4.8,
                       89,
+                      'https://plus.unsplash.com/premium_photo-1663089942980-b817c683b40f?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                     ),
                     const SizedBox(height: 12),
                     _buildGuideListTile(
@@ -155,6 +157,7 @@ class TouristProfileScreen extends StatelessWidget {
                       'Adventure & Trekking Guide',
                       4.7,
                       56,
+                      'https://plus.unsplash.com/premium_photo-1682097908465-398bf580bf81?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                     ),
                   ],
                 ),
@@ -187,7 +190,7 @@ class TouristProfileScreen extends StatelessWidget {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
-                              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+                              'https://plus.unsplash.com/premium_photo-1663089942980-b817c683b40f?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
                               width: 60,
                               height: 60,
                               fit: BoxFit.cover,
@@ -443,7 +446,7 @@ class TouristProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGuideListTile(String name, String specialty, double rating, int reviews) {
+  Widget _buildGuideListTile(String name, String specialty, double rating, int reviews, String imageUrl) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -462,15 +465,8 @@ class TouristProfileScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: Colors.green[100],
-                child: Text(
-                  name[0],
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green[700],
-                  ),
-                ),
+                backgroundImage: NetworkImage(imageUrl),
+                backgroundColor: Colors.grey[200],
               ),
               const SizedBox(width: 16),
               Expanded(
