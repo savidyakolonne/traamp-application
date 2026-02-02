@@ -7,7 +7,7 @@ import '../../components/bottom_nav.dart';
 import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 
-import '../../components/weather_screen.dart';
+import '../../components/weather/weather_screen.dart';
 
 class TouristDashboard extends StatefulWidget {
   @override

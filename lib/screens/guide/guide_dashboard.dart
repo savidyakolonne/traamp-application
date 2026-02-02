@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import '../../components/bottom_nav.dart';
 import 'package:text_gradiate/text_gradiate.dart';
 import '../../services/location_service.dart';
-import '../../components/weather_screen.dart';
+import '../../components/weather/weather_screen.dart';
 import 'guide_gallery.dart';
 import 'guide_package.dart';
 
