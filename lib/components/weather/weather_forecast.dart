@@ -3,8 +3,8 @@ import 'package:weather/weather.dart';
 import 'package:intl/intl.dart';
 
 class WeatherForecast extends StatefulWidget {
-  late List<Weather> forecast;
-  WeatherForecast(this.forecast, {super.key});
+  final List<Weather> forecast;
+  const WeatherForecast(this.forecast, {super.key});
 
   @override
   State<WeatherForecast> createState() => _WeatherForecastState();
