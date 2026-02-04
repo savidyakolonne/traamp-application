@@ -1,4 +1,3 @@
-// functions/routes/profile.routes.js
 import express from "express";
 import mockAuthMiddleware from "../middleware/mockAuth.middleware.js";
 

@@ -1,4 +1,3 @@
-// functions/app.js
 import express from "express";
 import cors from "cors";
 import firebaseAdmin from "./firebaseAdmin.js";

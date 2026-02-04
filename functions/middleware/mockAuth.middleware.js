@@ -1,4 +1,3 @@
-// functions/middleware/mockAuth.middleware.js
 // Mock authentication middleware for development/testing
 
 const mockAuthMiddleware = (req, res, next) => {
