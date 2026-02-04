@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import firebaseAdmin from "./firebaseAdmin.js";
 import profileRouter from "./routes/profile.routes.js";
+import touristRouter from "./routes/tourist.routes.js";
 
 const app = express();
 
@@ -25,6 +26,8 @@ app.use((req, res, next) => {
 
 // Routes
 app.use("/api/profile", profileRouter);
+
+app.use("/api/tourist", touristRouter);
 
 // Default route
 app.get("/", (req, res) => {
