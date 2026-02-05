@@ -1,5 +1,3 @@
-// Mock authentication middleware for development/testing
-
 const mockAuthMiddleware = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;

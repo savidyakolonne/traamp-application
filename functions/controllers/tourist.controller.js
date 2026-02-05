@@ -1,4 +1,3 @@
-// functions/controllers/tourist.controller.js
 import firebaseAdmin from "../firebaseAdmin.js";
 
 const mockTouristProfile = {

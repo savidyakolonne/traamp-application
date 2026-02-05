@@ -3,6 +3,7 @@ import cors from "cors";
 import firebaseAdmin from "./firebaseAdmin.js";
 import profileRouter from "./routes/profile.routes.js";
 import touristRouter from "./routes/tourist.routes.js";
+import guideRouter from "./routes/guide.routes.js";
 
 const app = express();
 
@@ -28,6 +29,8 @@ app.use((req, res, next) => {
 app.use("/api/profile", profileRouter);
 
 app.use("/api/tourist", touristRouter);
+
+app.use("/api/guide", guideRouter);
 
 // Default route
 app.get("/", (req, res) => {
