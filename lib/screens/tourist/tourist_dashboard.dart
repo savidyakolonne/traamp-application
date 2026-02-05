@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
-import '../../components/bottom_nav.dart';
 import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 
@@ -51,9 +50,6 @@ class _TouristDashboardState extends State<TouristDashboard> {
       print(e.toString());
     }
   }
-
-  // object for bottom navigation, isTourist = true
-  BottomNav get nav => BottomNav(true);
 
   // get current location via GPS
   Future<void> getCurrentCity() async {
@@ -480,7 +476,6 @@ class _TouristDashboardState extends State<TouristDashboard> {
           ],
         ),
       ),
-      bottomNavigationBar: nav.bottom_nav(context),
     );
   }
 }

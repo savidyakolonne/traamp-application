@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../components/bottom_nav.dart';
-
 class TouristNotificationScreen extends StatefulWidget {
   const TouristNotificationScreen({super.key});
 
@@ -11,9 +9,6 @@ class TouristNotificationScreen extends StatefulWidget {
 }
 
 class _TouristNotificationScreenState extends State<TouristNotificationScreen> {
-  // object for bottom navigation, isTourist = true
-  BottomNav nav = BottomNav(true);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +16,6 @@ class _TouristNotificationScreenState extends State<TouristNotificationScreen> {
         automaticallyImplyLeading: false,
         title: Text("Tourist notification"),
       ),
-      bottomNavigationBar: nav.bottom_nav(context),
     );
   }
 }

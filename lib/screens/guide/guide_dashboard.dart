@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import '../../components/bottom_nav.dart';
 import 'package:text_gradiate/text_gradiate.dart';
 import '../../services/location_service.dart';
 import '../../components/weather/weather_screen.dart';
@@ -23,9 +22,6 @@ class _GuideDashboardState extends State<GuideDashboard> {
   bool availability = false;
   late String dropdownValue;
   late Map<String, dynamic> userData = {};
-
-  // object for bottom navigation, isTourist = false
-  BottomNav get nav => BottomNav(false);
 
   // get user data from DB
   Future<void> getUserData() async {
@@ -378,7 +374,6 @@ class _GuideDashboardState extends State<GuideDashboard> {
           ),
         ),
       ),
-      bottomNavigationBar: nav.bottom_nav(context),
     );
   }
 }

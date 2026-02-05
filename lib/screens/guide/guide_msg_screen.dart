@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../components/bottom_nav.dart';
-
 class GuideMsgScreen extends StatefulWidget {
   const GuideMsgScreen({super.key});
 
@@ -10,9 +8,6 @@ class GuideMsgScreen extends StatefulWidget {
 }
 
 class _GuideMsgScreenState extends State<GuideMsgScreen> {
-  // object for bottom navigation, isTourist = false
-  BottomNav nav = BottomNav(false);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +15,6 @@ class _GuideMsgScreenState extends State<GuideMsgScreen> {
         automaticallyImplyLeading: false,
         title: Text("Guide MSg"),
       ),
-      bottomNavigationBar: nav.bottom_nav(context),
     );
   }
 }

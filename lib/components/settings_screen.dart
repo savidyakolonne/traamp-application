@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'bottom_nav.dart';
 import '../screens/auth/login_screen.dart';
 
 class Settings extends StatefulWidget {
@@ -50,9 +49,6 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    // object for bottom navigation, isTourist = true
-    BottomNav nav = BottomNav(widget.isTourist);
-
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false, title: Text("Settings")),
       body: ListView(
@@ -124,7 +120,6 @@ class _SettingsState extends State<Settings> {
           ),
         ],
       ),
-      bottomNavigationBar: nav.bottom_nav(context),
     );
   }
 }

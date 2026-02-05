@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../guide/guide_dashboard.dart';
-import '../tourist/tourist_dashboard.dart';
+import '../main_tab_view.dart';
 import 'signup.dart';
 
 class LoginSetup extends StatefulWidget {
@@ -86,7 +85,7 @@ class _LoginSetupState extends State<LoginSetup> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return TouristDashboard();
+                return MainTabView(true);
               },
             ),
           );
@@ -94,7 +93,7 @@ class _LoginSetupState extends State<LoginSetup> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return GuideDashboard();
+                return MainTabView(false);
               },
             ),
           );

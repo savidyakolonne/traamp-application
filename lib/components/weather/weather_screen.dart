@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:weather/weather.dart';
 import '../../services/location_service.dart';
 import '../../services/weather_service.dart';
-import '../bottom_nav.dart';
 import 'weather_card_element.dart';
 import 'weather_forecast.dart';
 
@@ -62,10 +61,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
       setState(() {
         currentWeather = {
           "weather": w.weatherDescription,
-          "temp": w.temperature?.celsius!.round(),
-          "temp-high": w.tempMax?.celsius!.round(),
-          "temp-low": w.tempMin?.celsius!.round(),
-          "wind": w.windSpeed! * 3.6.round(),
+          "temp": (w.temperature?.celsius)!.round(),
+          "temp-high": (w.tempMax?.celsius)!.round(),
+          "temp-low": (w.tempMin?.celsius)!.round(),
+          "wind": (w.windSpeed! * 3.6).round(),
           "humidity": w.humidity,
           "pressure": w.pressure,
           "country": w.country,
@@ -94,10 +93,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
       setState(() {
         currentWeather = {
           "weather": w.weatherDescription,
-          "temp": w.temperature?.celsius!.round(),
-          "temp-high": w.tempMax?.celsius!.round(),
-          "temp-low": w.tempMin?.celsius!.round(),
-          "wind": w.windSpeed! * 3.6,
+          "temp": (w.temperature?.celsius)!.round(),
+          "temp-high": (w.tempMax?.celsius)!.round(),
+          "temp-low": (w.tempMin?.celsius)!.round(),
+          "wind": (w.windSpeed! * 3.6).round(),
           "humidity": w.humidity,
           "pressure": w.pressure,
           "country": w.country,
@@ -171,9 +170,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // bottom navbar object
-    BottomNav nav = BottomNav(widget.isTourist);
-
     return Scaffold(
       backgroundColor: Colors.blueAccent,
       appBar: AppBar(
@@ -294,7 +290,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       Column(
                         children: [
                           weatherImage,
-
                           Text(
                             currentWeather.isEmpty
                                 ? "--\u00B0C"
@@ -416,7 +411,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: nav.bottom_nav(context),
     );
   }
 }
