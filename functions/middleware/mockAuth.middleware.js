@@ -1,3 +1,5 @@
+import mockUsers from "../data/mockUsers.js";
+
 const mockAuthMiddleware = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -20,38 +22,17 @@ const mockAuthMiddleware = (req, res, next) => {
 
     const token = authHeader.substring(7);
 
-    if (!token.startsWith('MOCK_')) {
+    const user = mockUsers[token];
+
+    if (!user) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
-        message: 'Invalid mock token. Must start with MOCK_'
+        message: 'Invalid token'
       });
     }
 
-    const tokenParts = token.split('_');
-
-    if (tokenParts.length < 3) {
-      return res.status(401).json({
-        success: false,
-        error: 'Unauthorized',
-        message: 'Invalid token format. Expected: MOCK_ROLE_ID (e.g., MOCK_GUIDE_123)'
-      });
-    }
-
-    const role = tokenParts[1].toLowerCase();
-
-    if (role !== 'guide' && role !== 'tourist') {
-      return res.status(401).json({
-        success: false,
-        error: 'Unauthorized',
-        message: 'Invalid role in token. Must be GUIDE or TOURIST'
-      });
-    }
-
-    req.user = {
-      uid: token,
-      role: role
-    };
+    req.user = user;
 
     console.log(`✅ Auth: ${req.user.uid} (${req.user.role})`);
     next();
