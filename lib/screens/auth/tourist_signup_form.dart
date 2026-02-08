@@ -1,8 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/services/tourist.dart';
-import '../../list_data.dart';
+import '../../list-data.dart';
 import 'login_setup.dart';
 
 class TouristSignupForm extends StatefulWidget {
@@ -12,8 +12,6 @@ class TouristSignupForm extends StatefulWidget {
 }
 
 class _TouristSignupFormState extends State<TouristSignupForm> {
-  // instance of firebase - firestore
-  final db = FirebaseFirestore.instance;
   // global key object for Form
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   // DOB text editing controller
@@ -23,11 +21,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   final List<String> _countries = ListData.countryNames;
   final List<String> _genders = ListData.gender; // for gender dropdown menu
 
-  // creating object for fireStore users collection
-  late final users = db.collection("users");
-
   // global variables to store data coming from form
-  late String uid = users.doc().id;
   String firstName = "";
   String lastName = "";
   String gender = "";
@@ -297,49 +291,60 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                           firstName: firstName,
                           lastName: lastName,
                           email: email,
+                          password: password,
                           gender: gender,
                           dob: dob,
                           country: selectedCountry,
-                          uid: uid,
                           type: type,
                         );
-
                         try {
-                          // email and password authentication
-                          final credential = await FirebaseAuth.instance
-                              .createUserWithEmailAndPassword(
-                                email: email,
-                                password: password,
-                              );
-                          // add data to users collection
-                          await users
-                              .doc(credential.user!.uid)
-                              .set(tourist.toMap());
-
+                          final response = await http.post(
+                            Uri.parse(
+                              "http://10.0.2.2:3000/api/users/register-tourist",
+                            ),
+                            headers: {
+                              "Content-Type": "application/json",
+                            }, //  tells the server the body is JSON
+                            body: jsonEncode(tourist.toMap()),
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Successfully Created.'),
+                            SnackBar(
+                              content: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("Connecting... "),
+                                  CircularProgressIndicator.adaptive(),
+                                ],
+                              ),
                               backgroundColor: Colors.green,
                             ),
                           );
-                          // return back to signin page
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return LoginSetup();
-                              },
-                            ),
-                          );
-                        } on FirebaseException catch (e) {
-                          debugPrint(
-                            'Firestore error: ${e.code} - ${e.message}',
-                          );
+                          final data = jsonDecode(response.body);
+                          print(data);
+                          if (response.statusCode == 201) {
+                            Navigator.pop(context, LoginSetup());
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${data['msg']}'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '${data['msg']} : status code = ${response.statusCode}',
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        } catch (e) {
                           print(e);
-
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
-                                'Failed to create user. Please try again. Try to use another email.',
+                                'Error while connecting to server...',
                               ),
                               backgroundColor: Colors.red,
                             ),
