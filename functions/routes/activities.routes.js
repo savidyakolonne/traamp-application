@@ -9,12 +9,14 @@ router.get("/" , async (req, res) => {
 
         const activities = snapshot.docs.map(doc =>({
             id: doc.id,
-            name: doc.data().name,
-            category: doc.data().category,
-            district: doc.data().district,
-            province: doc.data().province,
+            name: doc.data().name || "",
+            category: doc.data().category || "",
+            district: doc.data().district || "",
+            province: doc.data().province || "",
             coverImage: doc.data().coverImage,
-            location: doc.data().location,
+            images: doc.data().images || [],
+            description: doc.data().description || "",
+            location: doc.data().location || {},
             keywords: doc.data().search?.keywords || [],
         }));
 

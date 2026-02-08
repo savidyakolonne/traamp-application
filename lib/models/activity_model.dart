@@ -32,7 +32,7 @@ class Activity {
       province: json['province'],
       coverImage: json['coverImage'],
       images: json['images'] ?? [],
-      location: json['location'],
+      location: json['location'] ?? {},
       description: json['description'] ?? "",
       keywords: json['keywords'] ?? [],
     );
