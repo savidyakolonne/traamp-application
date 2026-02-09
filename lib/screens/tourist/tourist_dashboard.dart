@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
+import 'package:traamp_frontend/screens/emergency_services/emergency_services.dart';
 import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 
@@ -253,7 +254,11 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             ),
 
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                                  return EmergencyServices();
+                                }));
+                              },
                               icon: Image.asset(
                                 "assets/images/places.png",
                                 fit: BoxFit.cover,
@@ -403,7 +408,11 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             ),
 
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(builder: (_){
+                                  return EmergencyServices();
+                                }));
+                              },
                               icon: Image.asset(
                                 "assets/images/sos.png",
                                 fit: BoxFit.cover,
