@@ -16,6 +16,16 @@ class EditTouristProfile extends StatefulWidget {
 }
 
 class _EditTouristProfileState extends State<EditTouristProfile> {
+  final _formKey = GlobalKey<FormState>();
+  final _auth = FirebaseAuth.instance;
+  final _db = FirebaseFirestore.instance;
+  final _storage = FirebaseStorage.instance;
+
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _emailController;
+  late TextEditingController _dobController;
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(body: Center(child: Text("Edit Profile")));
