@@ -1,57 +1,31 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# Flutter/Dart
 .dart_tool/
-.flutter-plugins-dependencies
-.pub-cache/
+.packages
 .pub/
+
+# Build outputs
 /build/
-/coverage/
+*.lock
 
-# Symbolication related
-app.*.symbols
+# Android
+android/.gradle/
+android/captures/
+android/local.properties
+android/gradlew
+android/gradlew.bat
+android/gradle-wrapper.jar
+GeneratedPluginRegistrant.java
 
-# Obfuscation related
-app.*.map.json
+# iOS/macOS
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+macos/Flutter/
+**/GeneratedPluginRegistrant.*
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Linux/Windows
+linux/flutter/
+windows/flutter/
+**/generated_plugin_registrant.*
 
-
-
-# ======================
-# Backend (Node / Firebase)
-# ======================
-functions/node_modules/
-functions/serviceAccountKey.json
-functions/.env
-
-# Safety net (any nested node project)
-**/node_modules/
+# C++ build
+.cxx/
