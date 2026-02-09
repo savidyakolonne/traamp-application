@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../models/activity_model.dart';
 import '../../services/activities_service.dart';
 
 class ActivityDetailScreen extends StatelessWidget {
@@ -8,7 +9,10 @@ class ActivityDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text("Activity Details"),
+        centerTitle: true,
+      ),
       body: FutureBuilder(
         future: ActivitiesService.getActivityById(activityId),
         builder: (context, snapshot) {
@@ -16,75 +20,114 @@ class ActivityDetailScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator.adaptive());
           }
 
-          final activity = snapshot.data!;
+          final Activity activity = snapshot.data!;
 
           return ListView(
             children: [
-              // ----------- IMAGES SLIDER ----------
+              // ---------- IMAGE SLIDER ----------
               SizedBox(
                 height: 220,
                 child: PageView(
                   children: activity.images
-                      .map<Widget>(
-                        (img) => Image.network(img, fit: BoxFit.cover),
-                  )
+                      .map<Widget>((img) => ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(img,
+                        fit: BoxFit.cover, width: double.infinity),
+                  ))
                       .toList(),
                 ),
               ),
+              const SizedBox(height: 12),
 
-              // ----------- DETAILS SECTION ----------
+              // ---------- ACTIVITY NAME ----------
               Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  activity.name,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // ---------- SHORT DESCRIPTION ----------
+              if (activity.shortDesc != null && activity.shortDesc!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Card(
+                    color: Colors.green[50],
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        activity.shortDesc!,
+                        style: const TextStyle(
+                            fontSize: 16, fontStyle: FontStyle.italic),
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 12),
+
+              // ---------- FULL DESCRIPTION ----------
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  activity.description,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // ---------- LOCATION ----------
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
                   children: [
-                    // Activity Name
-                    Text(
-                      activity.name,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                    const Icon(Icons.location_on, size: 20, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        "${activity.district}, ${activity.province}",
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ),
-                    const SizedBox(height: 8),
-
-                    // Description
-                    Text(activity.description),
-                    const SizedBox(height: 10),
-
-                    // Location
-                    Text(
-                      "📍 ${activity.district}, ${activity.province}",
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // ---------------- NEW FIELDS ----------------
-                    if (activity.bestTime != null) ...[
-                      // Season Note
-                      const Text(
-                        "🌱 Season Note",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(activity.bestTime!['seasonNote'] ?? "Not available"),
-                      const SizedBox(height: 16),
-
-                      // Best Hours
-                      const Text(
-                        "⏰ Best Hours",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                          activity.bestTime!['timeOfDayNote'] ?? "Not available"),
-                      const SizedBox(height: 16),
-                    ],
                   ],
                 ),
               ),
+              const SizedBox(height: 20),
+
+              // ---------- BEST TIME ----------
+              if (activity.bestTime != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Card(
+                    color: Colors.orange[50],
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("🌱 Best Time",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          Text(
+                              "Season Note: ${activity.bestTime!['seasonNote'] ?? 'Not available'}",
+                              style: const TextStyle(fontSize: 16)),
+                          Text(
+                              "Best Hours: ${activity.bestTime!['timeOfDayNote'] ?? 'Not available'}",
+                              style: const TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 20),
             ],
           );
         },
