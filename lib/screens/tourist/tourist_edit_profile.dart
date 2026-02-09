@@ -32,6 +32,14 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  String? _selectedCountry;
+  String? _selectedGender;
+  String? _profileImageUrl;
+  DateTime? _selectedDate;
+  bool _isLoading = true;
+
+  File? _pickedImage;
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(body: Center(child: Text("Edit Profile")));
