@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
-import placesRouter from "./routes/places.routes.js";
-import activitiesRouter from "./routes/activities.routes.js";
+import placeRouter from "./routes/place.routes.js";
+import activityRouter from "./routes/activity.routes.js";
 
 const app = express();
 
@@ -12,7 +12,7 @@ app.use(express.json());
 
 app.get("/", (req, res) => res.send("Traamp Backend is runninggggggg!!!"));
 
-app.use("/api/places", placesRouter);
-app.use("/api/activities", activitiesRouter);
+app.use("/api/place", placeRouter);
+app.use("/api/activity", activityRouter);
 
 export default app;

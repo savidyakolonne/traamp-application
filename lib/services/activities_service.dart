@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/activity_model.dart';
 
 class ActivitiesService {
-  static const String baseUrl = "http://localhost:3000/api/activities";
+  static const String baseUrl = "http://localhost:3000/api/activity";
 
   static Future<List<Activity>> getActivities() async {
     final res = await http.get(Uri.parse(baseUrl));
