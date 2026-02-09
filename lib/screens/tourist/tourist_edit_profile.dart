@@ -26,6 +26,12 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
   late TextEditingController _emailController;
   late TextEditingController _dobController;
 
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(body: Center(child: Text("Edit Profile")));
