@@ -30,7 +30,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
               future: ActivitiesService.getActivities(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator.adaptive());
                 }
 
                 final activities = snapshot.data!

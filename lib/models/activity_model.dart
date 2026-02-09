@@ -9,6 +9,9 @@ class Activity {
   final Map location;
   final String description;
   final List keywords;
+  final String shortDesc;
+
+  final Map<String, String>? bestTime; // contains seasonNote + timeOfDayNote
 
   Activity({
     required this.id,
@@ -21,6 +24,8 @@ class Activity {
     required this.location,
     required this.description,
     required this.keywords,
+    this.bestTime,
+    required this.shortDesc,
   });
 
   factory Activity.fromJson(Map<String, dynamic> json) {
@@ -35,6 +40,10 @@ class Activity {
       location: json['location'] ?? {},
       description: json['description'] ?? "",
       keywords: json['keywords'] ?? [],
+      shortDesc: json['shortDesc'],
+      bestTime: json['bestTime'] != null
+          ? Map<String, String>.from(json['bestTime'])
+          : null,
     );
   }
 }

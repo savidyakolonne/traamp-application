@@ -9,6 +9,10 @@ class Place {
   final Map location;
   final String description;
   final List keywords;
+  final Map<String, String>? activities;       // map of activityName: description
+  final Map<String, String>? bestTimeToVisit;  // seasonNote + timeOfDayNote
+  final Map<String, String>? visitingHours;
+  final String shortDesc;
 
   Place({
     required this.id,
@@ -21,6 +25,10 @@ class Place {
     required this.location,
     required this.description,
     required this.keywords,
+    this.activities,
+    this.bestTimeToVisit,
+    this.visitingHours,
+    required this.shortDesc,
   });
 
   factory Place.fromJson(Map<String, dynamic> json) {
@@ -35,6 +43,16 @@ class Place {
       location: json['location'],
       description: json['description'] ?? "",
       keywords: json['keywords'] ?? [],
+      shortDesc: json['shortDesc'],
+      activities: json['activities'] != null
+          ? Map<String, String>.from(json['activities'])
+          : null,
+      bestTimeToVisit: json['bestTimeToVisit'] != null
+          ? Map<String, String>.from(json['bestTimeToVisit'])
+          : null,
+      visitingHours: json['visitingHours'] != null
+          ? Map<String, String>.from(json['visitingHours'])
+          : null,
     );
   }
 }

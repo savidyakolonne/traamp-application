@@ -18,6 +18,11 @@ router.get("/" , async (req, res) => {
             description: doc.data().description || "",
             location: doc.data().location || {},
             keywords: doc.data().search?.keywords || [],
+            bestTime: doc.data().bestTime || {},
+            activities: doc.data().activities || {},        // map of activityName: description
+            bestTimeToVisit: doc.data().bestTimeToVisit || {}, // map with seasonNote & timeOfDayNote
+            visitingHours: doc.data().visitingHours || {},
+            shortDesc: doc.data().shortDesc || "",
         }));
 
          res.json(activities);

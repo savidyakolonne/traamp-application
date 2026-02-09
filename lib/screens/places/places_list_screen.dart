@@ -30,7 +30,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
               future: PlacesService.getPlaces(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator.adaptive());
                 }
 
                 final places = snapshot.data!

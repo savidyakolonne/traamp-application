@@ -88,6 +88,7 @@ router.get("/", async (req, res) => {
       coverImage: doc.data().coverImage,
       location: doc.data().location,
       keywords: doc.data().search?.keywords || [],
+      shortDesc: doc.data().shortDesc,
     }));
 
     res.json(places);
