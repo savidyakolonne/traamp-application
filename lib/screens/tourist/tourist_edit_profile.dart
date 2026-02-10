@@ -127,6 +127,22 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
     }
   }
 
+  Future<String?> _uploadImage(String uid) async {
+    final user = FirebaseAuth.instance.currentUser;
+    debugPrint("CURRENT USER UID: ${user?.uid}");
+    if (_pickedImage == null) return _profileImageUrl;
+
+    try {
+      Reference ref = _storage.ref().child('profile_pictures').child(uid);
+      UploadTask uploadTask = ref.putFile(_pickedImage!);
+      TaskSnapshot snapshot = await uploadTask;
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      debugPrint("Image Upload Error: $e");
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(body: Center(child: Text("Edit Profile")));
