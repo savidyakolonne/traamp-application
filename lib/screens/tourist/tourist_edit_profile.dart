@@ -21,11 +21,13 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
   final _db = FirebaseFirestore.instance;
   final _storage = FirebaseStorage.instance;
 
+  // Controllers
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _emailController;
   late TextEditingController _dobController;
 
+  // Dialog Controllers
   final TextEditingController _currentPasswordController =
       TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
@@ -116,6 +118,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
     }
   }
 
+  // image picker
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -127,6 +130,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
     }
   }
 
+  // upload image to firebase storage
   Future<String?> _uploadImage(String uid) async {
     final user = FirebaseAuth.instance.currentUser;
     debugPrint("CURRENT USER UID: ${user?.uid}");
@@ -143,8 +147,100 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
     }
   }
 
+  Future<void> _saveAllChanges() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      // Upload image
+      String? imageUrl = await _uploadImage(user.uid);
+
+      // UPDATE UI immediately
+      if (imageUrl != null) {
+        setState(() {
+          _profileImageUrl = imageUrl;
+        });
+      }
+      // Save data to Firestore
+      await _db.collection('users').doc(user.uid).update({
+        'profilePicture': imageUrl,
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Profile updated Successfully!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text("Edit Profile")));
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.lightGreen),
+        ),
+      );
+    }
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 55,
+                      backgroundColor: Colors.grey[200],
+
+                      backgroundImage: _pickedImage != null
+                          ? FileImage(_pickedImage!)
+                          : (_profileImageUrl != null &&
+                                        _profileImageUrl!.isNotEmpty
+                                    ? NetworkImage(_profileImageUrl!)
+                                    : const AssetImage(
+                                        'assets/images/user_placeholder.png',
+                                      ))
+                                as ImageProvider,
+                    ),
+                    TextButton(
+                      onPressed: _pickImage,
+                      child: const Text(
+                        "Change Photo",
+                        style: TextStyle(
+                          color: Colors.lightGreen,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
