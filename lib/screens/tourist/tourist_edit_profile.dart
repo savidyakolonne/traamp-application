@@ -80,7 +80,6 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
             _selectedCountry = data['country'];
             _selectedGender = data['gender'];
             _profileImageUrl = data['profilePicture'];
-            _isLoading = false;
 
             if (data['dob'] != null && data['dob'].toString().isNotEmpty) {
               final dobString = data['dob'].toString();
@@ -231,6 +230,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
         'lastName': _lastNameController.text.trim(),
         'email': _emailController.text.trim(),
         'country': _selectedCountry,
+        'gender': _selectedGender,
         'dob': _selectedDate?.toIso8601String(),
         'profilePicture': imageUrl,
       });
@@ -321,7 +321,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
                     TextButton(
                       onPressed: _pickImage,
                       child: const Text(
-                        "Change Photo",
+                        "Upload Photo",
                         style: TextStyle(
                           color: Colors.lightGreen,
                           fontWeight: FontWeight.bold,
@@ -396,6 +396,13 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
                       ],
                     ),
                   ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [_buildLabel("Gender"), _buildGenderToggle()],
+                    ),
+                  ),
                 ],
               ),
 
@@ -455,6 +462,45 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
           decoration: _inputDecoration(label),
         ),
       ],
+    );
+  }
+
+  Widget _buildGenderToggle() {
+    return Container(
+      height: 55,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: ["Male", "Female"]
+            .map(
+              (g) => Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _selectedGender = g),
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: _selectedGender == g
+                          ? Colors.lightGreen.withOpacity(0.1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      g,
+                      style: TextStyle(
+                        color: _selectedGender == g
+                            ? Colors.lightGreen
+                            : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 
