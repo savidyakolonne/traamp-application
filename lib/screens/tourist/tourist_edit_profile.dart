@@ -199,7 +199,36 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
     }
     return Scaffold(
       backgroundColor: Colors.white,
-
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leadingWidth: 100,
+        leading: TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
+            "Cancel",
+            style: TextStyle(color: Colors.grey, fontSize: 16),
+          ),
+        ),
+        title: const Text(
+          "Edit Profile",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        actions: [
+          TextButton(
+            onPressed: _saveAllChanges,
+            child: const Text(
+              "Save",
+              style: TextStyle(
+                color: Colors.lightGreen,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         child: Form(
