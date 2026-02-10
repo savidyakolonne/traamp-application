@@ -167,6 +167,8 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
       }
       // Save data to Firestore
       await _db.collection('users').doc(user.uid).update({
+        'firstName': _firstNameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
         'profilePicture': imageUrl,
       });
 
@@ -266,10 +268,74 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
                   ],
                 ),
               ),
+
+              const SizedBox(height: 10),
+              const Text(
+                "Personal Information",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+
+              _buildLabel("First Name"),
+              TextFormField(
+                controller: _firstNameController,
+                decoration: _inputDecoration("First Name"),
+              ),
+              const SizedBox(height: 15),
+              _buildLabel("Last Name"),
+              TextFormField(
+                controller: _lastNameController,
+                decoration: _inputDecoration("Last Name"),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  Widget _inputField(String label, TextEditingController ctrl, bool obscure) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        const SizedBox(height: 5),
+        TextField(
+          controller: ctrl,
+          obscureText: obscure,
+          decoration: _inputDecoration(label),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLabel(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: const TextStyle(
+        color: Colors.lightGreen,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
+
+  InputDecoration _inputDecoration(String hint) => InputDecoration(
+    hintText: hint,
+    filled: true,
+    fillColor: Colors.white,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+  );
 }
