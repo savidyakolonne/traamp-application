@@ -230,6 +230,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
         'firstName': _firstNameController.text.trim(),
         'lastName': _lastNameController.text.trim(),
         'email': _emailController.text.trim(),
+        'dob': _selectedDate?.toIso8601String(),
         'profilePicture': imageUrl,
       });
 
@@ -347,6 +348,43 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
               TextFormField(
                 controller: _lastNameController,
                 decoration: _inputDecoration("Last Name"),
+              ),
+
+              const SizedBox(height: 15),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildLabel("Birthday"),
+                        TextFormField(
+                          controller: _dobController,
+                          readOnly: true,
+                          decoration: _inputDecoration("Birthday").copyWith(
+                            suffixIcon: const Icon(Icons.calendar_month),
+                          ),
+                          onTap: () async {
+                            DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: _selectedDate ?? DateTime(2000),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            );
+
+                            if (picked != null) {
+                              setState(() {
+                                _selectedDate = picked;
+                                _dobController.text =
+                                    "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 30),
