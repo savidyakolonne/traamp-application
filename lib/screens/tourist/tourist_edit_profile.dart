@@ -147,6 +147,66 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
     }
   }
 
+  void _showPasswordChangeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text(
+          "Change Password",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _inputField("Current Password", _currentPasswordController, true),
+            _inputField("New Password", _newPasswordController, true),
+            const SizedBox(height: 10),
+            _inputField("Confirm Password", _confirmPasswordController, true),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.lightGreen),
+            onPressed: () async {
+              Navigator.pop(context);
+              await _changePassword();
+            },
+            child: const Text("Change", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _changePassword() async {
+    if (_newPasswordController.text != _confirmPasswordController.text) {
+      _showSnack("Passwords do not match");
+      return;
+    }
+    try {
+      final user = _auth.currentUser!;
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: _currentPasswordController.text,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(_newPasswordController.text.trim());
+
+      _showSnack("Password updated successfully");
+      _currentPasswordController.clear();
+      _newPasswordController.clear();
+      _confirmPasswordController.clear();
+    } catch (_) {
+      _showSnack("Current password is incorrect");
+    }
+  }
+
   Future<void> _saveAllChanges() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -169,6 +229,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
       await _db.collection('users').doc(user.uid).update({
         'firstName': _firstNameController.text.trim(),
         'lastName': _lastNameController.text.trim(),
+        'email': _emailController.text.trim(),
         'profilePicture': imageUrl,
       });
 
@@ -287,6 +348,40 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
                 controller: _lastNameController,
                 decoration: _inputDecoration("Last Name"),
               ),
+
+              const SizedBox(height: 30),
+              const Text(
+                "Account & Security",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+
+              _buildLabel("Email Address"),
+              TextFormField(
+                controller: _emailController,
+                decoration: _inputDecoration("Email"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Password"),
+              TextFormField(
+                readOnly: true,
+                obscureText: true,
+                initialValue: "••••••••",
+                decoration: _inputDecoration("").copyWith(
+                  suffixIcon: TextButton(
+                    onPressed: _showPasswordChangeDialog,
+                    child: const Text(
+                      "Change",
+                      style: TextStyle(
+                        color: Colors.lightGreen,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
