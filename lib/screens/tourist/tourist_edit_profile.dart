@@ -230,6 +230,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
         'firstName': _firstNameController.text.trim(),
         'lastName': _lastNameController.text.trim(),
         'email': _emailController.text.trim(),
+        'country': _selectedCountry,
         'dob': _selectedDate?.toIso8601String(),
         'profilePicture': imageUrl,
       });
@@ -348,6 +349,17 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
               TextFormField(
                 controller: _lastNameController,
                 decoration: _inputDecoration("Last Name"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Country"),
+              DropdownButtonFormField<String>(
+                value: _selectedCountry,
+                items: ListData.countryNames
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
+                onChanged: (val) => setState(() => _selectedCountry = val),
+                decoration: _inputDecoration("Select Country"),
               ),
 
               const SizedBox(height: 15),
