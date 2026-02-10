@@ -78,6 +78,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
             _selectedCountry = data['country'];
             _selectedGender = data['gender'];
             _profileImageUrl = data['profilePicture'];
+            _isLoading = false;
 
             if (data['dob'] != null && data['dob'].toString().isNotEmpty) {
               final dobString = data['dob'].toString();
@@ -112,6 +113,17 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
         debugPrint("Error loading user data: $e");
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _pickedImage = File(image.path);
+      });
     }
   }
 
