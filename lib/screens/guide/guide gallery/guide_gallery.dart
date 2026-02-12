@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class GuideGallery extends StatefulWidget {
-  const GuideGallery({super.key});
+  String idToken;
+  String uid;
+  GuideGallery(this.idToken, this.uid);
 
   @override
   State<GuideGallery> createState() => _GuideGalleryState();
