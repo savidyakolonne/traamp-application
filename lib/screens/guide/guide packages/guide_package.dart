@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'create_package/create_guide_package.dart';
 
+// ignore: must_be_immutable
 class GuidePackage extends StatefulWidget {
   String idToken;
   String uid;
-  GuidePackage(this.idToken, this.uid);
+  GuidePackage(this.idToken, this.uid, {super.key});
 
   @override
   State<GuidePackage> createState() => _GuidePackageState();
