@@ -39,6 +39,14 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  String? _selectedLocation;
+  String? _selectedGender;
+  String? _profileImageUrl;
+  DateTime? _selectedDate;
+  bool _isLoading = true;
+
+  File? _pickedImage;
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
