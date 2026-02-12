@@ -14,6 +14,31 @@ class EditGuideProfile extends StatefulWidget {
 }
 
 class _EditGuideProfileState extends State<EditGuideProfile> {
+  final _formKey = GlobalKey<FormState>();
+  final _auth = FirebaseAuth.instance;
+  final _db = FirebaseFirestore.instance;
+  final _storage = FirebaseStorage.instance;
+
+  // Controllers
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
+  late TextEditingController _addressController;
+  late TextEditingController _dobController;
+
+  // Read-only Controllers for Credentials
+  late TextEditingController _nicController;
+  late TextEditingController _certTypeController;
+  late TextEditingController _certNumController;
+
+  // Dialog Controllers
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
