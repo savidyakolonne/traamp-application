@@ -1,8 +1,10 @@
 import { Router } from "express";
+import multer from "multer";
 import firebaseAdmin from "../firebaseAdmin.js";
 
 const userRouter = Router();
-const { auth, db } = firebaseAdmin;
+const { auth, db, bucket } = firebaseAdmin;
+const upload = multer({ storage: multer.memoryStorage() });
 
 // tourist register router
 userRouter.post("/register-tourist", async (req, res) => {
@@ -39,62 +41,83 @@ userRouter.post("/register-tourist", async (req, res) => {
 });
 
 // guide register router
-userRouter.post("/register-guide", async (req, res) => {
-  try {
-    const createdAt = new Date(req.body.createdAt);
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      gender,
-      dob,
-      type,
-      phoneNumber,
-      guideCertificateType,
-      certificateNumber,
-      nic,
-      location,
-      address,
-      country,
-      rating,
-      availability,
-    } = req.body;
-    // create user with firebase auth
-    const userRecord = await auth.createUser({
-      email,
-      password,
-    });
-    // save to database
-    await db.collection("users").doc(userRecord.uid).set({
-      uid: userRecord.uid,
-      firstName,
-      lastName,
-      email,
-      gender,
-      dob,
-      type,
-      createdAt,
-      phoneNumber,
-      guideCertificateType,
-      certificateNumber,
-      nic,
-      location,
-      address,
-      country,
-      rating,
-      availability,
-    });
-    // return response
-    res.status(201).json({
-      msg: "Guide registered successfully",
-    });
-  } catch (error) {
-    res.status(400).json({
-      msg: error.message,
-    });
-  }
-});
+userRouter.post(
+  "/register-guide",
+  upload.single("certificate"),
+  async (req, res) => {
+    try {
+      const {
+        firstName,
+        lastName,
+        email,
+        password,
+        gender,
+        dob,
+        type,
+        phoneNumber,
+        guideCertificateType,
+        certificateNumber,
+        nic,
+        location,
+        address,
+        country,
+        rating,
+        availability,
+      } = req.body;
+
+      // Upload file to Firebase Storage
+      let certificateUrl = null;
+      if (req.file) {
+        const blob = bucket.file(`guide_certificates/${req.file.originalname}`);
+        const blobStream = blob.createWriteStream({
+          metadata: { contentType: req.file.mimetype },
+        });
+
+        await new Promise((resolve, reject) => {
+          blobStream.on("error", reject);
+          blobStream.on("finish", resolve);
+          blobStream.end(req.file.buffer);
+        });
+
+        const [url] = await blob.getSignedUrl({
+          action: "read",
+          expires: "03-09-2491",
+        });
+        certificateUrl = url;
+      }
+
+      // Create user in Firebase Auth
+      const userRecord = await auth.createUser({ email, password });
+
+      // Save to Firestore
+      await db.collection("users").doc(userRecord.uid).set({
+        uid: userRecord.uid,
+        firstName,
+        lastName,
+        email,
+        gender,
+        dob,
+        type,
+        phoneNumber,
+        guideCertificateType,
+        certificateNumber,
+        nic,
+        location,
+        address,
+        country,
+        rating,
+        availability,
+        certificate: certificateUrl,
+      });
+
+      res.status(201).json({ msg: "Guide registered successfully" });
+    } catch (error) {
+      res.status(400).json({
+        msg: error.message,
+      });
+    }
+  },
+);
 
 // Login with email & password router
 userRouter.post("/loginWithEmail", async (req, res) => {
