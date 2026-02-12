@@ -6,9 +6,10 @@ import 'pricing_tab.dart';
 import 'route_tab.dart';
 import 'shedule_tab.dart';
 
+// ignore: must_be_immutable
 class CreateGuidePackage extends StatefulWidget {
   String uid;
-  CreateGuidePackage(this.uid);
+  CreateGuidePackage(this.uid, {super.key});
 
   @override
   State<CreateGuidePackage> createState() => _CreateGuidePackageState();
