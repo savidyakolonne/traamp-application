@@ -22,7 +22,9 @@ class _SettingsState extends State<Settings> {
         String? idToken = await user.getIdToken(true);
         if (idToken != null) {
           final response = await http.post(
-            Uri.parse("http://10.0.2.2:3000/api/users/user-logout"),
+            Uri.parse(
+              "http://localhost:3000/api/users/user-logout",
+            ), // http;//address:port/   => for testing - savidyakolonne
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({"idToken": idToken}),
           );

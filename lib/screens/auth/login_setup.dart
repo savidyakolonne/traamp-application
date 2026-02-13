@@ -45,7 +45,7 @@ class _LoginSetupState extends State<LoginSetup> {
 
       final idToken = await userCredential.user!.getIdToken();
       final response = await http.post(
-        Uri.parse("http://10.0.2.2:3000/api/users/loginWithEmail"),
+        Uri.parse("http://localhost:3000/api/users/loginWithEmail"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"idToken": idToken}),
       );

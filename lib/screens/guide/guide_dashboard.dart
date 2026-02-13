@@ -31,7 +31,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
         idToken = await user.getIdToken(true);
         if (idToken != null) {
           final response = await http.post(
-            Uri.parse("http://10.0.2.2:3000/api/users/get-user-data"),
+            Uri.parse("http://localhost:3000/api/users/get-user-data"),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({"idToken": idToken}),
           );
@@ -92,7 +92,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
               if (currentUser != null && idToken != null) {
                 final response = await http.put(
                   Uri.parse(
-                    "http://10.0.2.2:3000/api/users/update-guide-availability",
+                    "http://localhost:3000/api/users/update-guide-availability",
                   ),
                   headers: {"Content-Type": "application/json"},
                   body: jsonEncode({

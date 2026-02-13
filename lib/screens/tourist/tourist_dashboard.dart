@@ -7,6 +7,7 @@ import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 
 import '../../components/weather/weather_screen.dart';
+import 'package:traamp_frontend/screens/tourist/tourist_find_guide.dart';
 
 class TouristDashboard extends StatefulWidget {
   @override
@@ -25,7 +26,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
         String? idToken = await user.getIdToken(true);
         if (idToken != null) {
           final response = await http.post(
-            Uri.parse("http://10.0.2.2:3000/api/users/get-user-data"),
+            Uri.parse("http://localhost:3000/api/users/get-user-data"),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({"idToken": idToken}),
           );
@@ -221,7 +222,14 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             ),
 
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const FindGuidesScreen(),
+                                  ),
+                                );
+                              },
                               icon: Image.asset(
                                 "assets/images/guidesIcon.png",
                                 fit: BoxFit.cover,
