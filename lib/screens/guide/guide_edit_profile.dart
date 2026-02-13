@@ -44,7 +44,6 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   String? _profileImageUrl;
   DateTime? _selectedDate;
   bool _isLoading = true;
-
   File? _pickedImage;
 
   @override
@@ -137,6 +136,31 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() => _pickedImage = File(image.path));
+    }
+  }
+
+  Future<String?> _uploadImage(String uid) async {
+    final user = FirebaseAuth.instance.currentUser;
+    debugPrint("CURRENT USER UID: ${user?.uid}");
+    if (_pickedImage == null) return _profileImageUrl;
+
+    try {
+      Reference ref = _storage.ref().child('profile_pictures').child(uid);
+      UploadTask uploadTask = ref.putFile(_pickedImage!);
+      TaskSnapshot snapshot = await uploadTask;
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      debugPrint("Image Upload Error: $e");
+      return null;
+    }
+  }
+
   Future<void> _saveAllChanges() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
@@ -144,8 +168,20 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     if (user == null) return;
 
     try {
+      // Upload image
+      String? imageUrl = await _uploadImage(user.uid);
+
+      // UPDATE UI immediately
+      if (imageUrl != null) {
+        setState(() {
+          _profileImageUrl = imageUrl;
+        });
+      }
+
       // Save data to Firestore
-      await _db.collection('users').doc(user.uid).update({});
+      await _db.collection('users').doc(user.uid).update({
+        'profilePicture': imageUrl,
+      });
 
       if (mounted) {
         _showSnackBar("Profile updated successfully!", Colors.green);
@@ -204,6 +240,46 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
             ),
           ),
         ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 55,
+                      backgroundColor: Colors.grey[200],
+                      backgroundImage: _pickedImage != null
+                          ? FileImage(_pickedImage!)
+                          : (_profileImageUrl != null &&
+                                _profileImageUrl!.isNotEmpty)
+                          ? NetworkImage(_profileImageUrl!)
+                          : const AssetImage(
+                                  'assets/images/user_placeholder.png',
+                                )
+                                as ImageProvider,
+                    ),
+                    TextButton(
+                      onPressed: _pickImage,
+                      child: const Text(
+                        "Upload Photo",
+                        style: TextStyle(
+                          color: Colors.lightGreen,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
