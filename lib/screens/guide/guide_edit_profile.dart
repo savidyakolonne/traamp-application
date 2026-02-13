@@ -137,10 +137,74 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     }
   }
 
+  Future<void> _saveAllChanges() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      // Save data to Firestore
+      await _db.collection('users').doc(user.uid).update({});
+
+      if (mounted) {
+        _showSnackBar("Profile updated successfully!", Colors.green);
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      _showSnackBar("Error: $e", Colors.red);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator(color: Colors.lightGreen)),
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.lightGreen),
+        ),
+      );
+    }
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leadingWidth: 100,
+        leading: TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
+            "Cancel",
+            style: TextStyle(color: Colors.grey, fontSize: 16),
+          ),
+        ),
+        title: const Text(
+          "Edit Profile",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        actions: [
+          TextButton(
+            onPressed: _saveAllChanges,
+            child: const Text(
+              "Save",
+              style: TextStyle(
+                color: Colors.lightGreen,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
