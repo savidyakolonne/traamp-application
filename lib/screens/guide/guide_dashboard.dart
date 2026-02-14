@@ -6,6 +6,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:text_gradiate/text_gradiate.dart';
+import 'package:traamp_frontend/screens/emergency_services/emergency_services.dart';
 import '../../services/location_service.dart';
 import '../../components/weather/weather_screen.dart';
 import 'guide_gallery.dart';
@@ -92,7 +93,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
               if (currentUser != null && idToken != null) {
                 final response = await http.put(
                   Uri.parse(
-                    "http://10.0.2.2:3000/api/users/update-guide-availability",
+                    "http://localhost:3000/api/users/update-guide-availability",
                   ),
                   headers: {"Content-Type": "application/json"},
                   body: jsonEncode({
@@ -361,7 +362,11 @@ class _GuideDashboardState extends State<GuideDashboard> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                                Navigator.of(context).push(MaterialPageRoute(builder: (_){
+                                  return EmergencyServices();
+                                }));
+                              },
                           icon: Image.asset("assets/images/sos.png"),
                         ),
                       ),
