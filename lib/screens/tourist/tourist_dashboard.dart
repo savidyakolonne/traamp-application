@@ -5,6 +5,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
+import '../places/places_list_screen.dart';
+import '../activities/activities_list_screen.dart';
 
 import '../../components/weather/weather_screen.dart';
 import 'package:traamp_frontend/screens/tourist/tourist_find_guide.dart';
@@ -261,7 +263,14 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             ),
 
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => PlacesListScreen(),
+                                  ),
+                                );
+                              },
                               icon: Image.asset(
                                 "assets/images/places.png",
                                 fit: BoxFit.cover,
@@ -293,7 +302,14 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             ),
 
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ActivitiesListScreen(),
+                                  ),
+                                );
+                              },
                               icon: Image.asset(
                                 "assets/images/activity.png",
                                 fit: BoxFit.cover,
