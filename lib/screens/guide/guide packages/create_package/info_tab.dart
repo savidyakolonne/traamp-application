@@ -216,6 +216,7 @@ class _InfoTabState extends State<InfoTab> {
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 8),
                     child: TextFormField(
+                      maxLength: 26,
                       decoration: InputDecoration(
                         border: InputBorder.none, // removes the bottom line
                         enabledBorder:
