@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../../../../AppConfig.dart';
 import '../guide_package.dart';
 import 'guide_package_data.dart';
 import 'info_tab.dart';
@@ -43,7 +47,7 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
     }
   }
 
-  void submitAll() {
+  Future<void> submitAll() async {
     final Map<String, dynamic> packageData = {
       "uid": widget.uid,
       "packageTitle": guidePackageData.packageTitle,
@@ -67,13 +71,57 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
       "packageExclude": guidePackageData.packageExclude,
     };
     print(packageData);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Guide package created successfully.'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    Navigator.pop(context, GuidePackage);
+
+    try {
+      final response = await http.post(
+        Uri.parse("${AppConfig.SERVER_URL}/api/guidePackage/add-package"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(packageData),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Trying to add your package... "),
+              CircularProgressIndicator.adaptive(),
+            ],
+          ),
+          backgroundColor: const Color.fromARGB(180, 76, 175, 79),
+        ),
+      );
+
+      final data = jsonDecode(response.body);
+      print(data);
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${data['msg']}'),
+            backgroundColor: const Color.fromARGB(180, 76, 175, 79),
+          ),
+        );
+        Navigator.pop(context, GuidePackage);
+      } else {
+        print(data['msg']);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error while creating package'),
+            backgroundColor: const Color.fromARGB(180, 244, 67, 54),
+          ),
+        );
+        //Navigator.pop(context, GuidePackage);
+      }
+    } catch (error) {
+      print(error.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error while connecting to server'),
+          backgroundColor: const Color.fromARGB(180, 244, 67, 54),
+        ),
+      );
+    }
   }
 
   Step step1() {
@@ -89,7 +137,7 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
     return Step(
       stepStyle: StepStyle(color: Colors.green),
       title: Text("Schedule"),
-      content: SheduleTab(formKey2, guidePackageData),
+      content: ScheduleTab(formKey2, guidePackageData),
       isActive: currentStep >= 1,
     );
   }
@@ -116,11 +164,14 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Create Guide Package"),
+        title: Text(
+          "Create Guide Package",
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
         backgroundColor: Colors.green,
       ),
       body: Stepper(
-        type: StepperType.horizontal,
+        type: StepperType.vertical,
         currentStep: currentStep,
         onStepTapped: (step) {}, //disable jumping
         onStepContinue: nextStep,

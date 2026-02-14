@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'guide_package_data.dart';
 
-class SheduleTab extends StatefulWidget {
+class ScheduleTab extends StatefulWidget {
   final GlobalKey<FormState> _formKey;
   final GuidePackageData data;
 
-  SheduleTab(this._formKey, this.data, {super.key});
+  const ScheduleTab(this._formKey, this.data, {super.key});
 
   @override
-  State<SheduleTab> createState() => _SheduleTabState();
+  State<ScheduleTab> createState() => _ScheduleTabTabState();
 }
 
-class _SheduleTabState extends State<SheduleTab> {
+class _ScheduleTabTabState extends State<ScheduleTab> {
   List<String> _units = ["Hours", "Days"];
   List<String> _season = ["All Year", "Summer", "Winter", "Monsoon"];
   List<String> durationArray = ["", ""];
@@ -67,7 +67,7 @@ class _SheduleTabState extends State<SheduleTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("Duration Value*", style: TextStyle(fontSize: 18)),
-                    SizedBox(height: 5),
+                    SizedBox(height: 4),
                     Container(
                       width: 150,
                       height: 60,
@@ -75,8 +75,9 @@ class _SheduleTabState extends State<SheduleTab> {
                         border: Border.all(color: Colors.black, width: 1.0),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
                       child: TextFormField(
+                        maxLength: 2,
                         decoration: InputDecoration(
                           border: InputBorder.none, // removes the bottom line
                           enabledBorder:

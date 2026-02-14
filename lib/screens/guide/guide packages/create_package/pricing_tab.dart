@@ -88,6 +88,7 @@ class _PricingTabState extends State<PricingTab> {
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 8),
                       child: TextFormField(
+                        maxLength: 2,
                         decoration: InputDecoration(
                           border: InputBorder.none, // removes the bottom line
                           enabledBorder:
@@ -128,6 +129,7 @@ class _PricingTabState extends State<PricingTab> {
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 8),
                       child: TextFormField(
+                        maxLength: 3,
                         decoration: InputDecoration(
                           border: InputBorder.none, // removes the bottom line
                           enabledBorder:

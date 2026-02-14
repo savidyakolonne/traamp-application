@@ -101,7 +101,7 @@ class _LoginSetupState extends State<LoginSetup> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Something wrong...'),
+              content: Text('User type is invalid...'),
               backgroundColor: Colors.red,
             ),
           );
