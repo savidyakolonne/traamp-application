@@ -6,6 +6,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
+import '../places/place_detail_screen.dart'; // ✅ adjust path if needed
+
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
@@ -17,15 +19,22 @@ class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _controller;
 
   LatLng? _currentLocation;
-  Set<Marker> _markers = {};
 
+  // Markers
+  Set<Marker> _markers = {};
+  bool _showPlaceMarkers = true;
+  String? _selectedPlaceId;
+
+  // loading
   bool _loading = true;
   bool _loadingPlaces = false;
+
+  // radius (meters)
   int _radius = 5000;
 
   String get baseUrl {
     if (kIsWeb) return "http://localhost:3000";
-    return "http://localhost:3000"; // later: real device -> http://YOUR_PC_IP:3000
+    return "http://localhost:3000"; // real device -> http://YOUR_PC_IP:3000
   }
 
   @override
@@ -43,10 +52,12 @@ class _MapScreenState extends State<MapScreen> {
         _currentLocation = LatLng(pos.latitude, pos.longitude);
       });
 
-      // Smooth move to current location (works on all)
-      _controller?.animateCamera(
-        CameraUpdate.newLatLngZoom(_currentLocation!, 14),
-      );
+      // If controller not ready yet, onMapCreated will animate
+      if (_controller != null) {
+        await _controller!.animateCamera(
+          CameraUpdate.newLatLngZoom(_currentLocation!, 14),
+        );
+      }
 
       await _loadPlaces();
     } catch (e) {
@@ -57,12 +68,9 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<Position> _getLocation() async {
-    // On web this check can be unreliable, skip it.
     if (!kIsWeb) {
       final enabled = await Geolocator.isLocationServiceEnabled();
-      if (!enabled) {
-        throw Exception("Please enable GPS / Location services");
-      }
+      if (!enabled) throw Exception("Please enable GPS / Location services");
     }
 
     var permission = await Geolocator.checkPermission();
@@ -89,6 +97,7 @@ class _MapScreenState extends State<MapScreen> {
     setState(() => _loadingPlaces = true);
 
     try {
+      // ✅ keep your endpoint name here
       final url = Uri.parse(
         "$baseUrl/api/places/nearby"
         "?lat=${_currentLocation!.latitude}"
@@ -105,7 +114,7 @@ class _MapScreenState extends State<MapScreen> {
 
       final Set<Marker> newMarkers = {};
 
-      // ✅ Current location marker (blue) — works on Web + Mobile
+      // ✅ Current location marker (blue)
       newMarkers.add(
         Marker(
           markerId: const MarkerId("me"),
@@ -117,7 +126,61 @@ class _MapScreenState extends State<MapScreen> {
         ),
       );
 
-      // Place markers
+      // ✅ Place markers (green/red)
+      if (_showPlaceMarkers) {
+        for (final p in data) {
+          final loc = p["location"];
+          if (loc == null) continue;
+
+          final lat = (loc["lat"] as num).toDouble();
+          final lng = (loc["lng"] as num).toDouble();
+          final id = (p["id"] ?? "${lat}_$lng").toString();
+
+          final isSelected = _selectedPlaceId == id;
+
+          newMarkers.add(
+            Marker(
+              markerId: MarkerId(id),
+              position: LatLng(lat, lng),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                isSelected
+                    ? BitmapDescriptor.hueRed
+                    : BitmapDescriptor.hueGreen,
+              ),
+              onTap: () {
+                setState(() => _selectedPlaceId = id);
+                _openBottomSheet(p);
+                // refresh markers to apply red icon
+                _rebuildMarkersKeepingData(data);
+              },
+            ),
+          );
+        }
+      }
+
+      if (!mounted) return;
+      setState(() => _markers = newMarkers);
+    } finally {
+      if (mounted) setState(() => _loadingPlaces = false);
+    }
+  }
+
+  /// Rebuild markers quickly after selecting a place without calling API again
+  void _rebuildMarkersKeepingData(List data) {
+    if (_currentLocation == null) return;
+
+    final Set<Marker> newMarkers = {};
+
+    newMarkers.add(
+      Marker(
+        markerId: const MarkerId("me"),
+        position: _currentLocation!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        infoWindow: const InfoWindow(title: "You are here"),
+      ),
+    );
+
+    if (_showPlaceMarkers) {
       for (final p in data) {
         final loc = p["location"];
         if (loc == null) continue;
@@ -126,20 +189,26 @@ class _MapScreenState extends State<MapScreen> {
         final lng = (loc["lng"] as num).toDouble();
         final id = (p["id"] ?? "${lat}_$lng").toString();
 
+        final isSelected = _selectedPlaceId == id;
+
         newMarkers.add(
           Marker(
             markerId: MarkerId(id),
             position: LatLng(lat, lng),
-            onTap: () => _openBottomSheet(p),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              isSelected ? BitmapDescriptor.hueRed : BitmapDescriptor.hueGreen,
+            ),
+            onTap: () {
+              setState(() => _selectedPlaceId = id);
+              _openBottomSheet(p);
+              _rebuildMarkersKeepingData(data);
+            },
           ),
         );
       }
-
-      if (!mounted) return;
-      setState(() => _markers = newMarkers);
-    } finally {
-      if (mounted) setState(() => _loadingPlaces = false);
     }
+
+    setState(() => _markers = newMarkers);
   }
 
   void _openBottomSheet(dynamic place) {
@@ -161,16 +230,44 @@ class _MapScreenState extends State<MapScreen> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text((place["shortDesc"] ?? "").toString()),
+            if ((place["shortDesc"] ?? "").toString().isNotEmpty)
+              Text((place["shortDesc"] ?? "").toString()),
             const SizedBox(height: 8),
             Text("Distance: ${(place["distanceKm"] ?? "-").toString()} km"),
             const SizedBox(height: 12),
-            ElevatedButton.icon(
-              onPressed: (lat != null && lng != null)
-                  ? () => _openDirections(lat, lng)
-                  : null,
-              icon: const Icon(Icons.directions),
-              label: const Text("Directions"),
+
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: (lat != null && lng != null)
+                        ? () => _openDirections(lat, lng)
+                        : null,
+                    icon: const Icon(Icons.directions),
+                    label: const Text("Directions"),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: (place["id"] != null)
+                        ? () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PlaceDetailScreen(
+                                  placeId: place["id"].toString(),
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
+                    icon: const Icon(Icons.info_outline),
+                    label: const Text("Details"),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -189,6 +286,14 @@ class _MapScreenState extends State<MapScreen> {
   void _showError(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  String _radiusLabel() {
+    if (_radius == 5000) return "5 km";
+    if (_radius == 10000) return "10 km";
+    if (_radius == 15000) return "15 km";
+    if (_radius == 20000) return "20 km";
+    return "${(_radius / 1000).round()} km";
   }
 
   @override
@@ -216,15 +321,45 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: const Text("Discover Hidden Places"),
         actions: [
+          // ✅ toggle show/hide markers
+          IconButton(
+            tooltip: _showPlaceMarkers ? "Hide places" : "Show places",
+            onPressed: () async {
+              setState(() => _showPlaceMarkers = !_showPlaceMarkers);
+              await _loadPlaces(); // rebuild markers
+            },
+            icon: Icon(
+              _showPlaceMarkers ? Icons.visibility : Icons.visibility_off,
+            ),
+          ),
+
+          // ✅ radius selection
           PopupMenuButton<int>(
+            tooltip: "Radius (${_radiusLabel()})",
             onSelected: (v) async {
-              _radius = v;
+              setState(() => _radius = v);
               await _loadPlaces();
             },
             itemBuilder: (_) => const [
               PopupMenuItem(value: 5000, child: Text("5 km")),
               PopupMenuItem(value: 10000, child: Text("10 km")),
+              PopupMenuItem(value: 15000, child: Text("15 km")),
+              PopupMenuItem(value: 20000, child: Text("20 km")),
             ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Center(
+                child: Row(
+                  children: [
+                    const Icon(Icons.tune, size: 18),
+                    const SizedBox(width: 6),
+                    Text(_radiusLabel()),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.arrow_drop_down),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -235,11 +370,18 @@ class _MapScreenState extends State<MapScreen> {
               target: _currentLocation!,
               zoom: 14,
             ),
-            myLocationEnabled: true, // ✅ native blue dot on Android/iOS
-            myLocationButtonEnabled: true, // ✅ recenter button
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
             markers: _markers,
-            onMapCreated: (c) => _controller = c,
+            onMapCreated: (c) async {
+              _controller = c;
+              // ensure camera moves after controller ready
+              await _controller!.animateCamera(
+                CameraUpdate.newLatLngZoom(_currentLocation!, 14),
+              );
+            },
           ),
+
           if (_loadingPlaces)
             const Positioned(
               top: 12,
@@ -252,12 +394,25 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ),
             ),
+
+          // little status chip
+          Positioned(
+            bottom: 12,
+            left: 12,
+            child: Chip(
+              label: Text(
+                _showPlaceMarkers
+                    ? "Showing places • ${_radiusLabel()}"
+                    : "Places hidden • ${_radiusLabel()}",
+              ),
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _loadPlaces,
         icon: const Icon(Icons.refresh),
-        label: const Text("Refresh"),
+        label: const Text("Search"),
       ),
     );
   }

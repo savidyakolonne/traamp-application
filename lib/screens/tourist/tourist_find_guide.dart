@@ -232,13 +232,6 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                         style: TextStyle(fontWeight: FontWeight.w800),
                       ),
                       SizedBox(height: 2),
-                      Text(
-                        "Pick by location + language",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
                     ],
                   ),
                   bottom: PreferredSize(
