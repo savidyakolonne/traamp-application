@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 class EmergencyServices extends StatelessWidget {
   const EmergencyServices({super.key});
 
-  // 🌐 Open website
+  // Open website
   Future<void> _openWebsite(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.platformDefault)) {
@@ -44,7 +44,7 @@ class EmergencyServices extends StatelessWidget {
                     },
                   ),
 
-                  // Tourism Police → call
+                  // Tourism Police - call
                   EmergencyItem(
                     image: "assets/images/police.png",
                     title: "Sri Lanka Tourism Police",
@@ -54,7 +54,7 @@ class EmergencyServices extends StatelessWidget {
                     },
                   ),
 
-                  // Suwa Sariya → call
+                  // Suwa Sariya - call
                   EmergencyItem(
                     image: "assets/images/ambulance.png",
                     title: "Suwa Sariya Ambulance Service",
@@ -64,7 +64,7 @@ class EmergencyServices extends StatelessWidget {
                     },
                   ),
 
-                  // RDMNS → website
+                  // RDMNS - website
                   EmergencyItem(
                     image: "assets/images/rdmns.png",
                     title:
@@ -84,9 +84,7 @@ class EmergencyServices extends StatelessWidget {
   }
 }
 
-//
-// ================= EMERGENCY ITEM =================
-//
+//EMERGENCY ITEM
 
 class EmergencyItem extends StatelessWidget {
   final String image;
@@ -102,7 +100,7 @@ class EmergencyItem extends StatelessWidget {
     required this.onWebsiteTap,
   });
 
-  // 📞 Make phone call
+  //Make phone call
   Future<void> _makeCall(String number) async {
     final Uri uri = Uri(scheme: 'tel', path: number);
     if (await canLaunchUrl(uri)) {
@@ -113,7 +111,7 @@ class EmergencyItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // 🌐 Tap anywhere on card → website
+      //Tap anywhere on card - website
       onTap: onWebsiteTap,
       child: Container(
         padding: const EdgeInsets.all(10),
@@ -138,7 +136,7 @@ class EmergencyItem extends StatelessWidget {
 
             const SizedBox(height: 6),
 
-            // 📞 ONLY phone row triggers call
+            //ONLY phone row triggers call
             if (phone.isNotEmpty)
               InkWell(
                 onTap: () async {
@@ -167,26 +165,3 @@ class EmergencyItem extends StatelessWidget {
   }
 }
 
-
-
-// class EmergencyServices extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: Scaffold(
-//         appBar: AppBar(
-//           title: Text('Emergency Services'),
-//         ),
-//         body: Center(
-//           child: Column(
-//             mainAxisAlignment: MainAxisAlignment.center,
-//             children: <Widget> [
-//               Text('Emergency Services Screen'),
-//               Image(image:  AssetImage('assets/images/logo.png'))
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
