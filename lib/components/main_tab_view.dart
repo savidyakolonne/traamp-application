@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../components/settings_screen.dart';
-import 'guide/guide_dashboard.dart';
-import 'guide/guide_msg_screen.dart';
-import 'guide/guide_notification_screen.dart';
-import 'tourist/tourist_dashboard.dart';
-import 'tourist/tourist_msg_screen.dart';
-import 'tourist/tourist_notification_screen.dart';
+import 'settings_screen.dart';
+import '../screens/guide/guide_dashboard.dart';
+import '../screens/guide/guide_msg_screen.dart';
+import '../screens/guide/guide_notification_screen.dart';
+import '../screens/tourist/tourist_dashboard.dart';
+import '../screens/tourist/tourist_msg_screen.dart';
+import '../screens/tourist/tourist_notification_screen.dart';
 
 // ignore: must_be_immutable
 class MainTabView extends StatefulWidget {
