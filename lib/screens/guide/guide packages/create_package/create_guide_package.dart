@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../../../AppConfig.dart';
@@ -48,29 +47,32 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
   }
 
   Future<void> submitAll() async {
-    final Map<String, dynamic> packageData = {
-      "uid": widget.uid,
-      "packageTitle": guidePackageData.packageTitle,
-      "category": guidePackageData.category,
-      "shortDescription": guidePackageData.shortDescription,
-      "description": guidePackageData.description,
-      "location": guidePackageData.location,
-      "languages": guidePackageData.languages,
-      "duration": guidePackageData.duration,
-      "availableDays": guidePackageData.availableDays,
-      "season": guidePackageData.season,
-      "price": guidePackageData.price,
-      "minGuests": guidePackageData.minGuests,
-      "maxGuests": guidePackageData.maxGuests,
-      "havePrivateTourOption": guidePackageData.havePrivateTourOption,
-      "haveGroupDiscounts": guidePackageData.haveGroupDiscounts,
-      "startLocation": guidePackageData.startLocation,
-      "endLocation": guidePackageData.endLocation,
-      "stops": guidePackageData.stops,
-      "packageInclude": guidePackageData.packageInclude,
-      "packageExclude": guidePackageData.packageExclude,
-    };
-    print(packageData);
+    Map<String, dynamic> packageData = {};
+    setState(() {
+      packageData = {
+        "uid": widget.uid,
+        "packageTitle": guidePackageData.packageTitle,
+        "category": guidePackageData.category,
+        "shortDescription": guidePackageData.shortDescription,
+        "description": guidePackageData.description,
+        "location": guidePackageData.location,
+        "languages": guidePackageData.languages,
+        "duration": guidePackageData.duration,
+        "availableDays": guidePackageData.availableDays,
+        "season": guidePackageData.season,
+        "price": guidePackageData.price,
+        "minGuests": guidePackageData.minGuests,
+        "maxGuests": guidePackageData.maxGuests,
+        "havePrivateTourOption": guidePackageData.havePrivateTourOption,
+        "haveGroupDiscounts": guidePackageData.haveGroupDiscounts,
+        "startLocation": guidePackageData.startLocation,
+        "endLocation": guidePackageData.endLocation,
+        "stops": guidePackageData.stops,
+        "packageInclude": guidePackageData.packageInclude,
+        "packageExclude": guidePackageData.packageExclude,
+      };
+      print(packageData);
+    });
 
     try {
       final response = await http.post(
