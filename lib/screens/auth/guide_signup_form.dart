@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../../AppConfig.dart';
 import '../../list-data.dart';
 import '../../services/guide.dart';
 import 'login_setup.dart';
+import 'package:file_picker/file_picker.dart';
 
 class GuideSignupForm extends StatefulWidget {
   const GuideSignupForm({super.key});
@@ -32,6 +35,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   String phoneNumber = "";
   String? guideCertificateType;
   String? certificateNumber;
+  File? uploadedCertificatePath;
   String nic = "";
   String location = "";
   String address = "";
@@ -155,7 +159,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
         }
         return null;
       },
-      onSaved: (cPass) {},
     );
   }
 
@@ -345,6 +348,39 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
     );
   }
 
+  // upload certificate section
+  String hint = "";
+  Widget uploadDocumentField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          readOnly: true,
+          decoration: hint.isEmpty
+              ? InputDecoration(hintText: "Upload your certificate")
+              : InputDecoration(hintText: hint),
+        ),
+        OutlinedButton(
+          onPressed: () async {
+            FilePickerResult? result = await FilePicker.platform.pickFiles(
+              type: FileType.custom,
+              allowedExtensions: ['jpg', 'pdf', 'doc', 'heif', 'png', 'jpeg'],
+            );
+            if (result != null) {
+              PlatformFile platformFile = result.files.single;
+              uploadedCertificatePath = File(platformFile.path!);
+              setState(() {
+                hint = platformFile.name;
+              });
+            }
+          },
+          child: Text("Upload", style: TextStyle(color: Colors.green)),
+          style: ButtonStyle(),
+        ),
+      ],
+    );
+  }
+
   //Address
   Widget addressFormField() {
     return TextFormField(
@@ -413,6 +449,9 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                         certificateTypeFormField(),
                         SizedBox(height: 15.0),
                         certificateNumberField(),
+                        SizedBox(height: 15.0),
+                        uploadDocumentField(),
+                        SizedBox(height: 15.0),
                         addressFormField(),
                         SizedBox(height: 15.0),
                         locationFormField(),
@@ -435,6 +474,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                           phoneNumber: phoneNumber,
                           guideCertificateType: guideCertificateType,
                           certificateNumber: certificateNumber,
+                          uploadedCertificatePath: uploadedCertificatePath,
                           nic: nic,
                           location: location,
                           address: address,
@@ -445,15 +485,29 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                         );
                         // save to database after validation
                         try {
-                          final response = await http.post(
-                            Uri.parse(
-                              "http://10.0.2.2:3000/api/users/register-guide",
-                            ),
-                            headers: {
-                              "Content-Type": "application/json",
-                            }, //  tells the server the body is JSON
-                            body: jsonEncode(guide.toMap()),
+                          var uri = Uri.parse(
+                            "${AppConfig.SERVER_URL}/api/users/register-guide",
                           );
+
+                          var request = http.MultipartRequest("POST", uri);
+
+                          // Add JSON fields
+                          guide.toMap().forEach((key, value) {
+                            if (value != null) {
+                              request.fields[key] = value.toString();
+                            }
+                          });
+
+                          // Add file
+                          if (guide.uploadedCertificatePath != null) {
+                            request.files.add(
+                              await http.MultipartFile.fromPath(
+                                "certificate", // field name to backend
+                                guide.uploadedCertificatePath!.path,
+                              ),
+                            );
+                          }
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Row(
@@ -463,26 +517,48 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                                   CircularProgressIndicator.adaptive(),
                                 ],
                               ),
-                              backgroundColor: Colors.green,
+                              backgroundColor: const Color.fromARGB(
+                                180,
+                                76,
+                                175,
+                                79,
+                              ),
                             ),
                           );
-                          final data = jsonDecode(response.body);
-                          print(data);
+
+                          var response = await request.send();
+                          var resp = await http.Response.fromStream(response);
+                          final data = jsonDecode(resp.body);
+
                           if (response.statusCode == 201) {
-                            Navigator.pop(context, LoginSetup());
+                            print("Guide registered successfully");
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('${data['msg']}'),
-                                backgroundColor: Colors.green,
+                                content: Text(data['msg']),
+                                backgroundColor: const Color.fromARGB(
+                                  180,
+                                  76,
+                                  175,
+                                  79,
+                                ),
                               ),
                             );
+                            Navigator.pop(context, LoginSetup());
                           } else {
+                            print("Error: ${data['msg']}");
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  '${data['msg']} : status code = ${response.statusCode}',
+                                  "Error: Already registered with this email. Please try a different email.",
                                 ),
-                                backgroundColor: Colors.red,
+                                backgroundColor: const Color.fromARGB(
+                                  180,
+                                  244,
+                                  67,
+                                  54,
+                                ),
                               ),
                             );
                           }
@@ -493,7 +569,12 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                               content: Text(
                                 'Error while connecting to server...',
                               ),
-                              backgroundColor: Colors.red,
+                              backgroundColor: const Color.fromARGB(
+                                180,
+                                244,
+                                67,
+                                54,
+                              ),
                             ),
                           );
                         }
