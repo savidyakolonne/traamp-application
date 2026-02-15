@@ -35,25 +35,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
-  try {
-    const docRef = db.collection("places").doc(req.params.id);
-    const docSnap = await docRef.get();
-
-    if (!docSnap.exists) {
-      return res.status(404).json({ error: "place_not_found" });
-    }
-
-    res.json({
-      id: docSnap.id,
-      ...docSnap.data(),
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "server_error" });
-  }
-});
-
 //routers for map feature - savidyakolonne 
 
 router.get("/nearby", async (req, res) => {
@@ -121,6 +102,27 @@ router.get("/nearby", async (req, res) => {
     res.json(results.slice(0, 30));
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: "server_error" });
+  }
+});
+
+//-----------------------------------------------------------------------------------------------
+
+router.get("/:id", async (req, res) => {
+  try {
+    const docRef = db.collection("places").doc(req.params.id);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      return res.status(404).json({ error: "place_not_found" });
+    }
+
+    res.json({
+      id: docSnap.id,
+      ...docSnap.data(),
+    });
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "server_error" });
   }
 });

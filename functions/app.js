@@ -14,7 +14,6 @@ app.get("/", (_, res) => res.send("Server is running..."));
 
 app.use("/api/places", placesRouter);
 app.use("/api/users", userRouter);
-app.use("/api/place", placesRouter);
 app.use("/api/activity", activityRouter);
 
 export default app;

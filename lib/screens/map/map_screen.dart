@@ -5,7 +5,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
-
 import '../places/place_detail_screen.dart'; // ✅ adjust path if needed
 
 class MapScreen extends StatefulWidget {
@@ -45,12 +44,20 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _initMap() async {
     try {
-      final pos = await _getLocation();
-      if (!mounted) return;
+      // final pos = await _getLocation();
+      // if (!mounted) return;
+
+      // setState(() {
+      //   _currentLocation = LatLng(pos.latitude, pos.longitude);
+      // });
+
+      // for testing purpose tangalle lat and lang points ----------------------------------------------------------
 
       setState(() {
-        _currentLocation = LatLng(pos.latitude, pos.longitude);
+        _currentLocation = const LatLng(6.0243, 80.7891);
       });
+
+      //------------------------------------------------------------------------------------------------------------------
 
       // If controller not ready yet, onMapCreated will animate
       if (_controller != null) {
