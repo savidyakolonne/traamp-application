@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../AppConfig.dart';
 import '../screens/auth/login_screen.dart';
+import '../screens/tourist/tourist_edit_profile.dart';
 
 class Settings extends StatefulWidget {
   final bool isTourist;
