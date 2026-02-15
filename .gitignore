@@ -55,3 +55,4 @@ functions/.env
 
 # Safety net (any nested node project)
 **/node_modules/
+android/.gradle/
