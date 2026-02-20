@@ -260,6 +260,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
 
       // Save data to Firestore
       await _db.collection('users').doc(user.uid).update({
+        'email': _emailController.text.trim(),
         'profilePicture': imageUrl,
       });
 
@@ -356,6 +357,18 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                     ),
                   ],
                 ),
+              ),
+
+              const SizedBox(height: 30),
+              const Text(
+                "Account & Security",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 15),
+              _buildLabel("Email Address"),
+              TextFormField(
+                controller: _emailController,
+                decoration: _inputDecoration("Email"),
               ),
 
               const SizedBox(height: 15),
