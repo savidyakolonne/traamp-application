@@ -161,6 +161,86 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     }
   }
 
+  void _showPasswordChangeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text(
+          "Change Password",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _dialogInputField(
+              "Current Password",
+              _currentPasswordController,
+              true,
+            ),
+            _dialogInputField("New Password", _newPasswordController, true),
+            const SizedBox(height: 10),
+            _dialogInputField(
+              "Confirm Password",
+              _confirmPasswordController,
+              true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.lightGreen),
+            onPressed: () {
+              Navigator.pop(context);
+              _updatePasswordLogic();
+            },
+            child: const Text("Change", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _updatePasswordLogic() async {
+    final newPass = _newPasswordController.text.trim();
+    final confirmPass = _confirmPasswordController.text.trim();
+    final currentPass = _currentPasswordController.text.trim();
+
+    if (newPass.isEmpty || confirmPass.isEmpty || currentPass.isEmpty) {
+      _showSnackBar("All password fields are required", Colors.red);
+      return;
+    }
+
+    if (newPass != confirmPass) {
+      _showSnackBar("Passwords do not match!", Colors.red);
+      return;
+    }
+
+    try {
+      final user = _auth.currentUser!;
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPass,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+
+      await user.updatePassword(newPass);
+
+      _currentPasswordController.clear();
+      _newPasswordController.clear();
+      _confirmPasswordController.clear();
+
+      _showSnackBar("Password updated successfully!", Colors.green);
+    } catch (e) {
+      _showSnackBar("Current password is incorrect", Colors.red);
+    }
+  }
+
   Future<void> _saveAllChanges() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
@@ -277,10 +357,75 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                   ],
                 ),
               ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Password"),
+              TextFormField(
+                obscureText: true,
+                readOnly: true,
+                initialValue: "••••••••",
+                decoration: _inputDecoration("").copyWith(
+                  suffixIcon: TextButton(
+                    onPressed: _showPasswordChangeDialog,
+                    child: const Text(
+                      "Change",
+                      style: TextStyle(
+                        color: Colors.lightGreen,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget _dialogInputField(
+    String label,
+    TextEditingController ctrl,
+    bool obscure,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        const SizedBox(height: 5),
+        TextField(
+          controller: ctrl,
+          obscureText: obscure,
+          decoration: _inputDecoration(label),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLabel(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: const TextStyle(
+        color: Colors.lightGreen,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
+
+  InputDecoration _inputDecoration(String hint) => InputDecoration(
+    hintText: hint,
+    filled: true,
+    fillColor: Colors.white,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+  );
 }
