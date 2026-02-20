@@ -260,6 +260,8 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
 
       // Save data to Firestore
       await _db.collection('users').doc(user.uid).update({
+        'firstName': _firstNameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
         'email': _emailController.text.trim(),
         'profilePicture': imageUrl,
       });
@@ -357,6 +359,23 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                     ),
                   ],
                 ),
+              ),
+
+              const Text(
+                "Personal Information",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 15),
+              _buildLabel("First Name"),
+              TextFormField(
+                controller: _firstNameController,
+                decoration: _inputDecoration("First Name"),
+              ),
+              const SizedBox(height: 15),
+              _buildLabel("Last Name"),
+              TextFormField(
+                controller: _lastNameController,
+                decoration: _inputDecoration("Last Name"),
               ),
 
               const SizedBox(height: 30),
