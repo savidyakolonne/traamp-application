@@ -263,6 +263,9 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
         'firstName': _firstNameController.text.trim(),
         'lastName': _lastNameController.text.trim(),
         'email': _emailController.text.trim(),
+        'phoneNumber': _phoneController.text.trim(),
+        'address': _addressController.text.trim(),
+        'location': _selectedLocation,
         'gender': _selectedGender,
         'dob': _selectedDate?.toIso8601String(),
         'profilePicture': imageUrl,
@@ -436,6 +439,32 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                     ),
                   ),
                 ],
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Location"),
+              DropdownButtonFormField<String>(
+                value: _selectedLocation,
+                items: ListData.districts
+                    .map((d) => DropdownMenuItem(value: d, child: Text(d)))
+                    .toList(), //
+                onChanged: (val) => setState(() => _selectedLocation = val),
+                decoration: _inputDecoration("Select Location"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Address"),
+              TextFormField(
+                controller: _addressController,
+                maxLines: 2,
+                decoration: _inputDecoration("Address"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Phone Number"),
+              TextFormField(
+                controller: _phoneController,
+                decoration: _inputDecoration("Phone Number"),
               ),
 
               const SizedBox(height: 30),
