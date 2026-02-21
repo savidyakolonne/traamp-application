@@ -618,6 +618,43 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                   ),
                 ),
               ),
+
+              const SizedBox(height: 30),
+              Row(
+                children: const [
+                  Text(
+                    "Professional Credentials",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(width: 10),
+                  Icon(Icons.lock_outline, size: 18, color: Colors.grey),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("National Identity Card (NIC)"),
+              TextFormField(
+                controller: _nicController,
+                readOnly: true,
+                decoration: _inputDecoration("NIC"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Type Of Certificate"),
+              TextFormField(
+                controller: _certTypeController,
+                readOnly: true,
+                decoration: _inputDecoration("Certificate Type"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Certificate Number"),
+              TextFormField(
+                controller: _certNumController,
+                readOnly: true,
+                decoration: _inputDecoration("Certificate Number"),
+              ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
