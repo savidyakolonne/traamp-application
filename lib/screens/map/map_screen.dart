@@ -8,7 +8,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../places/place_detail_screen.dart'; // ✅ adjust path if needed
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final String? focusPlaceId;
+  final LatLng? focusLatLng;
+
+  const MapScreen({super.key, this.focusPlaceId, this.focusLatLng});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -39,23 +42,27 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+
+    _selectedPlaceId = widget
+        .focusPlaceId; //  pre select locatin for the navigate from the place_detail_screen
+
     _initMap();
   }
 
   Future<void> _initMap() async {
     try {
-      // final pos = await _getLocation();
-      // if (!mounted) return;
+      final pos = await _getLocation();
+      if (!mounted) return;
 
-      // setState(() {
-      //   _currentLocation = LatLng(pos.latitude, pos.longitude);
-      // });
+      setState(() {
+        _currentLocation = LatLng(pos.latitude, pos.longitude);
+      });
 
       // for testing purpose tangalle lat and lang points ----------------------------------------------------------
 
-      setState(() {
-        _currentLocation = const LatLng(6.0243, 80.7891);
-      });
+      // setState(() {
+      //   _currentLocation = const LatLng(6.0243, 80.7891);
+      // });
 
       //------------------------------------------------------------------------------------------------------------------
 
@@ -67,6 +74,12 @@ class _MapScreenState extends State<MapScreen> {
       }
 
       await _loadPlaces();
+
+      if (widget.focusLatLng != null) {
+        await _controller?.animateCamera(
+          CameraUpdate.newLatLngZoom(widget.focusLatLng!, 15),
+        );
+      }
     } catch (e) {
       _showError(e.toString());
     } finally {
@@ -95,6 +108,38 @@ class _MapScreenState extends State<MapScreen> {
 
     return Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
+    );
+  }
+
+  //add a marker when select place from the place_detail_screen --------------
+  // void _addFocusMarkerIfAny() {
+  //   if (widget.focusLatLng == null) return;
+
+  //   final id = widget.focusPlaceId ?? "focus_place";
+
+  //   _markers = {
+  //     ..._markers,
+  //     Marker(
+  //       markerId: MarkerId(id),
+  //       position: widget.focusLatLng!,
+  //       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+  //       infoWindow: const InfoWindow(title: "Selected place"),
+  //     ),
+  //   };
+  // }
+
+  void _addFocusMarkerIfAny(Set<Marker> markers) {
+    if (widget.focusLatLng == null) return;
+
+    final id = widget.focusPlaceId ?? "focus_place";
+
+    markers.add(
+      Marker(
+        markerId: MarkerId(id),
+        position: widget.focusLatLng!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: const InfoWindow(title: "Selected place"),
+      ),
     );
   }
 
@@ -165,6 +210,9 @@ class _MapScreenState extends State<MapScreen> {
         }
       }
 
+      // FORCE add selected place marker if coming from detail screen
+      _addFocusMarkerIfAny(newMarkers);
+
       if (!mounted) return;
       setState(() => _markers = newMarkers);
     } finally {
@@ -214,6 +262,9 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     }
+
+    // keep focus marker even after rebuild
+    _addFocusMarkerIfAny(newMarkers);
 
     setState(() => _markers = newMarkers);
   }
@@ -382,10 +433,18 @@ class _MapScreenState extends State<MapScreen> {
             markers: _markers,
             onMapCreated: (c) async {
               _controller = c;
-              // ensure camera moves after controller ready
-              await _controller!.animateCamera(
-                CameraUpdate.newLatLngZoom(_currentLocation!, 14),
-              );
+
+              // ✅ if opened from PlaceDetailScreen -> go to that place
+              if (widget.focusLatLng != null) {
+                await _controller!.animateCamera(
+                  CameraUpdate.newLatLngZoom(widget.focusLatLng!, 15),
+                );
+              } else {
+                // ✅ normal open -> go to current location
+                await _controller!.animateCamera(
+                  CameraUpdate.newLatLngZoom(_currentLocation!, 14),
+                );
+              }
             },
           ),
 

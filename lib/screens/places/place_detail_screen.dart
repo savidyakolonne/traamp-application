@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/place_model.dart';
 import '../../services/places_service.dart';
+import '../../screens/map/map_screen.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PlaceDetailScreen extends StatefulWidget {
   final String placeId;
@@ -173,6 +175,41 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                 ),
               ),
 
+              const SizedBox(height: 14),
+              //map navigate button ------------------------------------------------------------------------
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.map),
+                    label: const Text("Open with Map"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7DC06C),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: () {
+                      final lat = (place.location['lat'] as num).toDouble();
+                      final lng = (place.location['lng'] as num).toDouble();
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MapScreen(
+                            focusPlaceId: place.id,
+                            focusLatLng: LatLng(lat, lng),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              //------------------------------------------------------------------------------------------
               const SizedBox(height: 22),
 
               // ================= QUICK INFO =================
