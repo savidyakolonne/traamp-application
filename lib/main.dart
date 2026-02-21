@@ -21,7 +21,7 @@ class TraampApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Traamp',
-      home: const GuideProfileScreen(),
+      home: const TouristProfileScreen(),
     );
   }
 }

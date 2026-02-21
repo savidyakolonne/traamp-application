@@ -1,10 +1,108 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class TouristProfileScreen extends StatelessWidget {
+class TouristProfileScreen extends StatefulWidget {
   const TouristProfileScreen({Key? key}) : super(key: key);
 
   @override
+  State<TouristProfileScreen> createState() => _TouristProfileScreenState();
+}
+
+class _TouristProfileScreenState extends State<TouristProfileScreen> {
+  bool _isLoading = false;
+  Map<String, dynamic>? _profileData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:3000/api/tourist/profile'),
+        headers: {
+          'Authorization': 'Bearer MOCK_TOURIST_456',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          setState(() {
+            _profileData = data['data'];
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading profile: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _updateProfile() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.put(
+        Uri.parse('http://10.0.2.2:3000/api/tourist/profile'),
+        headers: {
+          'Authorization': 'Bearer MOCK_TOURIST_456',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'firstName': 'Alex',
+          'lastName': 'Chen',
+          'country': 'United States',
+          'bio': 'Adventure seeker and culture enthusiast',
+          'preferences': ['Wildlife', 'Cultural Tours', 'Hiking'],
+        }),
+      );
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200 && data['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile updated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadProfile();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message'] ?? 'Failed to update profile'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading && _profileData == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: Colors.green)),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -56,9 +154,9 @@ class TouristProfileScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Alex Chen',
-                            style: TextStyle(
+                          Text(
+                            '${_profileData?['firstName'] ?? 'Alex'} ${_profileData?['lastName'] ?? 'Chen'}',
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
@@ -84,9 +182,7 @@ class TouristProfileScreen extends StatelessWidget {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      print('Edit Profile tapped');
-                    },
+                    onPressed: _isLoading ? null : _updateProfile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
@@ -96,13 +192,22 @@ class TouristProfileScreen extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Edit Profile',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Edit Profile',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
               ),
