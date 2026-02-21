@@ -202,7 +202,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                           line2: place.visitingHours!['note'] ?? "",
                           iconColor: Colors.blue,
                           iconBg: const Color(0xffE3F2FD),
-                          cardColor: const Color(0xFFD8FCEA),
+                          cardColor: const Color.fromARGB(255, 220, 246, 217),
                         ),
 
                       const SizedBox(height: 14),
@@ -218,7 +218,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                           line2: place.bestTimeToVisit!['timeOfDayNote'] ?? "",
                           iconColor: Colors.orange,
                           iconBg: const Color(0xffFFF3E0),
-                          cardColor: const Color(0xFFD8FCEA),
+                          cardColor: const Color.fromARGB(255, 220, 246, 217),
                         ),
                     ],
                   ),

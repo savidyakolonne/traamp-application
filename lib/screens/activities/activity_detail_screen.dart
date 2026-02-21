@@ -179,7 +179,12 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD8FCEA), // light green card
+                      color: const Color.fromARGB(
+                        255,
+                        220,
+                        246,
+                        217,
+                      ), // light green card
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
@@ -221,7 +226,7 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> {
                         line2: activity.bestTime!['timeOfDayNote'] ?? "",
                         iconColor: Colors.orange,
                         iconBg: const Color(0xffFFF3E0),
-                        cardColor: const Color(0xFFD8FCEA),
+                        cardColor: const Color.fromARGB(255, 220, 246, 217),
                       ),
                     ],
                   ),
