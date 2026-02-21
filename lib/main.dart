@@ -3,6 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/profile/profile_screen.dart';
+import 'screens/profile/guide_profile_screen.dart';
+import 'screens/profile/tourist_profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +21,7 @@ class TraampApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Traamp',
-      home: const ProfileScreen(),
+      home: const GuideProfileScreen(),
     );
   }
 }

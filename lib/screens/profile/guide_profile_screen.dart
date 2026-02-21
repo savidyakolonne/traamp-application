@@ -1,10 +1,108 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class GuideProfileScreen extends StatelessWidget {
+class GuideProfileScreen extends StatefulWidget {
   const GuideProfileScreen({Key? key}) : super(key: key);
 
   @override
+  State<GuideProfileScreen> createState() => _GuideProfileScreenState();
+}
+
+class _GuideProfileScreenState extends State<GuideProfileScreen> {
+  bool _isLoading = false;
+  Map<String, dynamic>? _profileData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:3000/api/guide/profile'),
+        headers: {
+          'Authorization': 'Bearer MOCK_GUIDE_123',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          setState(() {
+            _profileData = data['data'];
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading profile: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _updateProfile() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.put(
+        Uri.parse('http://10.0.2.2:3000/api/guide/profile'),
+        headers: {
+          'Authorization': 'Bearer MOCK_GUIDE_123',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'bio': 'Expert wildlife and cultural guide with 10 years of experience',
+          'specialties': ['Wildlife Tours', 'Cultural Heritage', 'Photography'],
+          'pricePerDay': 100,
+          'availability': 'Available',
+          'languages': ['English', 'Sinhala', 'French', 'German'],
+        }),
+      );
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200 && data['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile updated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadProfile();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message'] ?? 'Failed to update profile'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading && _profileData == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: Colors.green)),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -84,27 +182,27 @@ class GuideProfileScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Kasun Perera',
-                            style: TextStyle(
+                          Text(
+                            '${_profileData?['firstName'] ?? 'Kasun'} ${_profileData?['lastName'] ?? 'Perera'}',
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Row(
-                            children: const [
-                              Icon(Icons.star, color: Colors.amber, size: 16),
-                              SizedBox(width: 4),
+                            children: [
+                              const Icon(Icons.star, color: Colors.amber, size: 16),
+                              const SizedBox(width: 4),
                               Text(
-                                '4.9',
-                                style: TextStyle(
+                                '${_profileData?['rating'] ?? 4.9}',
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              SizedBox(width: 16),
-                              Text(
+                              const SizedBox(width: 16),
+                              const Text(
                                 '8 Years Experience',
                                 style: TextStyle(
                                   fontSize: 14,
@@ -125,18 +223,18 @@ class GuideProfileScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
+                  children: [
+                    const Text(
                       'Bio',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      'Passionate about sharing the hidden gems of Sri Lanka. Specializing in ancient history and tea plantation tours with a focus on sustainable travel.',
-                      style: TextStyle(
+                      _profileData?['bio'] ?? 'Passionate about sharing the hidden gems of Sri Lanka. Specializing in ancient history and tea plantation tours with a focus on sustainable travel.',
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black87,
                         height: 1.4,
@@ -154,10 +252,7 @@ class GuideProfileScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {
-                          // Edit profile
-                          print('Edit Profile tapped');
-                        },
+                        onPressed: _isLoading ? null : _updateProfile,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
@@ -167,10 +262,19 @@ class GuideProfileScreen extends StatelessWidget {
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
-                          'Edit Profile',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Edit Profile',
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
                       ),
                     ),
                     const SizedBox(width: 12),
