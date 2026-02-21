@@ -45,6 +45,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   DateTime? _selectedDate;
   bool _isLoading = true;
   File? _pickedImage;
+  List<String> _selectedLanguages = [];
 
   @override
   void initState() {
@@ -94,6 +95,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
             _selectedLocation = data['location'];
             _selectedGender = data['gender'];
             _profileImageUrl = data['profilePicture'];
+            _selectedLanguages = List<String>.from(data['languages'] ?? []);
 
             // Read-only fields
             _nicController.text = data['nic'] ?? "";
@@ -269,6 +271,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
         'gender': _selectedGender,
         'dob': _selectedDate?.toIso8601String(),
         'profilePicture': imageUrl,
+        'languages': _selectedLanguages,
       });
 
       if (mounted) {
@@ -280,6 +283,41 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showLanguageDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Select Language"),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(
+              shrinkWrap: true,
+              children: ListData.languages.map((language) {
+                final isSelected = _selectedLanguages.contains(language);
+
+                return CheckboxListTile(
+                  title: Text(language),
+                  value: isSelected,
+                  onChanged: (val) {
+                    setState(() {
+                      if (val == true) {
+                        _selectedLanguages.add(language);
+                      } else {
+                        _selectedLanguages.remove(language);
+                      }
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showSnackBar(String message, Color color) {
@@ -450,6 +488,88 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                     .toList(), //
                 onChanged: (val) => setState(() => _selectedLocation = val),
                 decoration: _inputDecoration("Select Location"),
+              ),
+
+              // Languages Section
+              const SizedBox(height: 20),
+              _buildLabel("Languages"),
+              const SizedBox(height: 10),
+
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  ..._selectedLanguages.map((language) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDCE9C8), // soft green background
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            language,
+                            style: const TextStyle(
+                              color: Color(0xFF2E7D32), // dark green text
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedLanguages.remove(language);
+                              });
+                            },
+                            child: const Icon(
+                              Icons.close,
+                              size: 18,
+                              color: Color(0xFF2E7D32),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+
+                  // Add Language Button
+                  GestureDetector(
+                    onTap: _showLanguageDialog,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(
+                          color: Colors.grey.shade400,
+                          style: BorderStyle.solid,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.add, color: Colors.grey),
+                          const SizedBox(width: 6),
+                          Text(
+                            "Add Language",
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 15),
