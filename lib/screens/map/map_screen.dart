@@ -5,8 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../AppConfig.dart';
+import '../../appConfig.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});

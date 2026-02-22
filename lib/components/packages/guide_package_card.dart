@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../AppConfig.dart';
-import '../../screens/guide/guide packages/create_package/detailed_guide_package.dart';
+import '../../appConfig.dart';
+import '../../screens/guide/guide packages/detailed_guide_package.dart';
 
 // ignore: must_be_immutable
 class GuidePackageCard extends StatefulWidget {
@@ -81,8 +81,8 @@ class _GuidePackageCardState extends State<GuidePackageCard> {
             width: double.infinity,
             decoration: BoxDecoration(
               border: Border.all(
-                width: 2,
-                color: const Color.fromARGB(255, 0, 151, 68),
+                width: 3,
+                color: const Color.fromARGB(255, 15, 84, 20),
               ),
               borderRadius: BorderRadius.circular(16),
             ),
@@ -94,7 +94,7 @@ class _GuidePackageCardState extends State<GuidePackageCard> {
                 Container(
                   width: 130,
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 157, 253, 160),
+                    color: const Color.fromARGB(255, 85, 205, 89),
                     border: BoxBorder.all(
                       color: const Color.fromARGB(255, 115, 194, 117),
                     ),
@@ -107,12 +107,12 @@ class _GuidePackageCardState extends State<GuidePackageCard> {
                     children: [
                       Icon(
                         Icons.widgets_outlined,
-                        color: const Color.fromARGB(255, 51, 119, 54),
+                        color: const Color.fromARGB(255, 15, 84, 20),
                       ),
                       Text(
                         "${widget.packageData['category']}",
                         style: TextStyle(
-                          color: const Color.fromARGB(255, 51, 119, 54),
+                          color: const Color.fromARGB(255, 15, 84, 20),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -123,7 +123,11 @@ class _GuidePackageCardState extends State<GuidePackageCard> {
                 // 2nd element
                 Text(
                   "${widget.packageData['packageTitle']}",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: const Color.fromARGB(255, 15, 84, 20),
+                  ),
                 ),
 
                 // 3rd element
@@ -139,7 +143,7 @@ class _GuidePackageCardState extends State<GuidePackageCard> {
                   children: [
                     Icon(
                       Icons.calendar_today_outlined,
-                      color: Colors.green,
+                      color: const Color.fromARGB(255, 15, 84, 20),
                       size: 28,
                     ),
                     Column(
@@ -172,7 +176,7 @@ class _GuidePackageCardState extends State<GuidePackageCard> {
                       children: [
                         Icon(
                           Icons.location_on_outlined,
-                          color: Colors.green,
+                          color: const Color.fromARGB(255, 15, 84, 20),
                           size: 28,
                         ),
                         Column(
@@ -207,7 +211,7 @@ class _GuidePackageCardState extends State<GuidePackageCard> {
                       children: [
                         Icon(
                           Icons.attach_money_outlined,
-                          color: Colors.green,
+                          color: const Color.fromARGB(255, 15, 84, 20),
                           size: 28,
                         ),
                         Column(
@@ -243,7 +247,7 @@ class _GuidePackageCardState extends State<GuidePackageCard> {
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(
-                    width: 1,
+                    width: 1.5,
                     color: const Color.fromARGB(255, 183, 13, 1),
                   ),
                   //color: const Color.fromARGB(75, 158, 158, 158),

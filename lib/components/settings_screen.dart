@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../AppConfig.dart';
+import '../appConfig.dart';
 import '../screens/auth/login_screen.dart';
 
 class Settings extends StatefulWidget {
