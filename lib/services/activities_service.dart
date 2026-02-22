@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../AppConfig.dart';
 import '../models/activity_model.dart';
 
 class ActivitiesService {
-  static const String baseUrl = "http://localhost:3000/api/activity";
+  static const String baseUrl = "${AppConfig.SERVER_URL}/api/activity";
 
   static Future<List<Activity>> getActivities() async {
     final res = await http.get(Uri.parse(baseUrl));

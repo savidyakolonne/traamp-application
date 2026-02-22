@@ -7,7 +7,7 @@ import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 import '../places/places_list_screen.dart';
 import '../activities/activities_list_screen.dart';
-
+import '../../AppConfig.dart';
 import '../../components/weather/weather_screen.dart';
 import 'package:traamp_frontend/screens/tourist/tourist_find_guide.dart';
 import 'package:traamp_frontend/screens/assistant/assistant_home.dart';
@@ -29,7 +29,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
         String? idToken = await user.getIdToken(true);
         if (idToken != null) {
           final response = await http.post(
-            Uri.parse("http://localhost:3000/api/users/get-user-data"),
+            Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({"idToken": idToken}),
           );

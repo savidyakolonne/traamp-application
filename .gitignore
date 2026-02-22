@@ -44,7 +44,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-android/local.properties
+/android/local.properties
 
 
 
@@ -57,3 +57,4 @@ functions/.env
 
 # Safety net (any nested node project)
 **/node_modules/
+android/.gradle/
