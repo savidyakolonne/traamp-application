@@ -9,6 +9,8 @@ import '../places/places_list_screen.dart';
 import '../activities/activities_list_screen.dart';
 import '../../AppConfig.dart';
 import '../../components/weather/weather_screen.dart';
+import 'package:traamp_frontend/screens/tourist/tourist_find_guide.dart';
+import 'package:traamp_frontend/screens/assistant/assistant_home.dart';
 
 class TouristDashboard extends StatefulWidget {
   @override
@@ -223,7 +225,14 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             ),
 
                             child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const FindGuidesScreen(),
+                                  ),
+                                );
+                              },
                               icon: Image.asset(
                                 "assets/images/guidesIcon.png",
                                 fit: BoxFit.cover,
@@ -479,16 +488,33 @@ class _TouristDashboardState extends State<TouristDashboard> {
           ),
         ),
       ),
-      floatingActionButton: Container(
+      floatingActionButton: SizedBox(
         height: 90,
         width: 80,
         child: Column(
           children: [
-            IconButton(
-              onPressed: () {},
-              icon: Image.asset("assets/images/chatBot.png"),
+            FloatingActionButton(
+              heroTag: "ai_assistant_fab",
+              backgroundColor: Colors.white,
+              elevation: 6,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AssistantHome()),
+                );
+              },
+              child: Image.asset(
+                "assets/images/chatBot.png",
+                height: 34,
+                width: 34,
+                fit: BoxFit.contain,
+              ),
             ),
-            Text("Need help?", style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            const Text(
+              "Need help?",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            ),
           ],
         ),
       ),
