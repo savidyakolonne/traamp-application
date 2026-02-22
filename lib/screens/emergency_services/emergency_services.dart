@@ -4,164 +4,86 @@ import 'package:url_launcher/url_launcher.dart';
 class EmergencyServices extends StatelessWidget {
   const EmergencyServices({super.key});
 
-  // Open website
-  Future<void> _openWebsite(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.platformDefault)) {
-      throw Exception("Could not launch $url");
-    }
-  }
+  Future<void> open(String u) async =>
+      launchUrl(Uri.parse(u), mode: LaunchMode.externalApplication);
+
+  final data = const [
+    ["assets/images/tourism.png","Sri Lanka Tourism Development Authority","Official Tourism Support","1912",Colors.green,"https://www.sltda.gov.lk"],
+    ["assets/images/police.png","Sri Lanka Tourism Police","Security & Assistance","119",Colors.blue,"https://www.police.lk"],
+    ["assets/images/ambulance.png","Suwa Sariya Ambulance Service","Medical Emergencies","1990",Colors.red,"https://1990.lk"],
+    ["assets/images/rdmns.png","RDMNS.LK Network","Railway Passenger Network","",Colors.teal,"https://www.rdmns.lk"],
+  ];
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 30),
-            const Center(
-              child: Text(
-                'Emergency Contacts',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            // GRID
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 10,
-                padding: const EdgeInsets.all(20),
-                children: [
-                  // SLTDA → website
-                  EmergencyItem(
-                    image: "assets/images/tourism.png",
-                    title: "Sri Lanka Tourism Development Authority",
-                    phone: "1912",
-                    onWebsiteTap: () {
-                      _openWebsite("https://www.sltda.gov.lk");
-                    },
-                  ),
-
-                  // Tourism Police - call
-                  EmergencyItem(
-                    image: "assets/images/police.png",
-                    title: "Sri Lanka Tourism Police",
-                    phone: "119",
-                    onWebsiteTap: () {
-                      _openWebsite("https://www.police.lk");
-                    },
-                  ),
-
-                  // Suwa Sariya - call
-                  EmergencyItem(
-                    image: "assets/images/ambulance.png",
-                    title: "Suwa Sariya Ambulance Service",
-                    phone: "1990",
-                    onWebsiteTap: () {
-                      _openWebsite("https://1990.lk");
-                    },
-                  ),
-
-                  // RDMNS - website
-                  EmergencyItem(
-                    image: "assets/images/rdmns.png",
-                    title:
-                        "RDMNS.LK Nationwide Official Railway Passengers' Network",
-                    phone: "",
-                    onWebsiteTap: () {
-                      _openWebsite("https://www.rdmns.lk");
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext c) => Scaffold(
+    backgroundColor: Colors.grey.shade100,
+    appBar: AppBar(title: const Text("Emergency Contacts"),centerTitle: true,
+      backgroundColor: Colors.white,foregroundColor: Colors.black),
+    body: ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        ...data.map((e)=>EmergencyItem(
+          image:e[0] as String,title:e[1] as String,subtitle:e[2] as String,
+          phone:e[3] as String,color:e[4] as Color,
+          onWebsiteTap:()=>open(e[5] as String))),
+        const TravelSafeTip()
+      ],
+    ),
+  );
 }
-
-//EMERGENCY ITEM
 
 class EmergencyItem extends StatelessWidget {
-  final String image;
-  final String title;
-  final String phone;
+  final String image,title,subtitle,phone;
+  final Color color;
   final VoidCallback onWebsiteTap;
+  const EmergencyItem({super.key,required this.image,required this.title,
+    required this.subtitle,required this.phone,required this.color,
+    required this.onWebsiteTap});
 
-  const EmergencyItem({
-    super.key,
-    required this.image,
-    required this.title,
-    required this.phone,
-    required this.onWebsiteTap,
-  });
-
-  //Make phone call
-  Future<void> _makeCall(String number) async {
-    final Uri uri = Uri(scheme: 'tel', path: number);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
+  Future<void> call(String n) async => launchUrl(Uri(scheme:'tel',path:n));
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      //Tap anywhere on card - website
-      onTap: onWebsiteTap,
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(image, height: 70, fit: BoxFit.contain),
-
-            const SizedBox(height: 8),
-
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
-            ),
-
-            const SizedBox(height: 6),
-
-            //ONLY phone row triggers call
-            if (phone.isNotEmpty)
-              InkWell(
-                onTap: () async {
-                  final Uri uri = Uri(scheme: 'tel', path: phone);
-                  await launchUrl(uri);
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.phone, size: 14, color: Colors.red),
-                    const SizedBox(width: 4),
-                    Text(
-                      phone,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext c)=>Card(
+    margin: const EdgeInsets.only(bottom:16),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+    child: Padding(
+      padding: const EdgeInsets.all(14),
+      child: Row(children:[
+        Expanded(child: InkWell(onTap:onWebsiteTap,child: Row(children:[
+          Container(padding:const EdgeInsets.all(10),
+            decoration:BoxDecoration(color:Colors.grey.shade100,
+            borderRadius:BorderRadius.circular(12)),
+            child:Image.asset(image,height:45)),
+          const SizedBox(width:12),
+          Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,
+            children:[Text(title,style:const TextStyle(fontWeight:FontWeight.bold)),
+              Text(subtitle,style:TextStyle(color:Colors.grey.shade600))]))
+        ]))),
+        InkWell(
+          onTap: phone.isEmpty?onWebsiteTap:()=>call(phone),
+          child: CircleAvatar(backgroundColor:color,
+            child: Icon(phone.isEmpty?Icons.link:Icons.phone,color:Colors.white)))
+      ]),
+    ),
+  );
 }
 
+class TravelSafeTip extends StatelessWidget {
+  const TravelSafeTip({super.key});
+  @override
+  Widget build(BuildContext c)=>Card(
+    color: const Color(0xFFE8F5E9),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+    child: const Padding(
+      padding: EdgeInsets.all(16),
+      child: Row(children:[
+        Icon(Icons.shield,color:Colors.green),
+        SizedBox(width:12),
+        Expanded(child: Text(
+          "Travel Safe Tip\nKeep passport & important documents digitally. "
+          "If lost, contact Tourism Police immediately."
+        ))
+      ]),
+    ),
+  );
+}
