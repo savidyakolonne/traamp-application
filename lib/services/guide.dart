@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'appUser.dart';
 
 class Guide extends AppUser {
   final String phoneNumber;
   final String? guideCertificateType;
   final String? certificateNumber;
+  final File? uploadedCertificatePath;
   final String nic;
   final String location;
   final String address;
@@ -22,6 +24,7 @@ class Guide extends AppUser {
     required this.phoneNumber,
     required this.guideCertificateType,
     required this.certificateNumber,
+    required this.uploadedCertificatePath,
     required this.nic,
     required this.location,
     required this.address,

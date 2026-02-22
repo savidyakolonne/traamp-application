@@ -6,6 +6,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../AppConfig.dart';
+
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
@@ -24,8 +26,8 @@ class _MapScreenState extends State<MapScreen> {
   int _radius = 5000;
 
   String get baseUrl {
-    if (kIsWeb) return "http://localhost:3000";
-    return "http://localhost:3000"; // later: real device -> http://YOUR_PC_IP:3000
+    if (kIsWeb) return "${AppConfig.SERVER_URL}";
+    return "${AppConfig.SERVER_URL}"; // later: real device -> http://YOUR_PC_IP:3000
   }
 
   @override
