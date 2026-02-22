@@ -76,3 +76,6 @@ node index.js
 
 Start Flutter App - 
 flutter run 
+
+
+flutter run -d chrome --dart-define=GEMINI_API_KEY=YOUR_KEY  for the running on the chrome .(check the traamp assistant)
