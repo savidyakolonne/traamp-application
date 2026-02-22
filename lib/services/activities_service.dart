@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../AppConfig.dart';
+import '../appConfig.dart';
 import '../models/activity_model.dart';
 
 class ActivitiesService {

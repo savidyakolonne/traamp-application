@@ -65,14 +65,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.2"
-  clickable_widget:
-    dependency: "direct main"
-    description:
-      name: clickable_widget
-      sha256: "12d8fcf0b58988d9f66b69076b56620523e205a6f035bd877758842e86a989d8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.5"
   clock:
     dependency: transitive
     description:
@@ -970,14 +962,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.8"
-  text_gradiate:
-    dependency: "direct main"
-    description:
-      name: text_gradiate
-      sha256: "3a456f1955ef1a254a0b0b572b87129462ad78b48e875375bd10fd916185b11e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   typed_data:
     dependency: transitive
     description:

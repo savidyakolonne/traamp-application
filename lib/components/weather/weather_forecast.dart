@@ -25,7 +25,7 @@ class _WeatherForecastState extends State<WeatherForecast> {
                 width: 130,
                 padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(87, 255, 255, 255),
+                  color: const Color.fromARGB(255, 198, 239, 205),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Column(
@@ -42,6 +42,7 @@ class _WeatherForecastState extends State<WeatherForecast> {
                       "http://openweathermap.org/img/wn/${widget.forecast[i].weatherIcon}@2x.png",
                       width: 60,
                       height: 60,
+                      //color: const Color.fromARGB(255, 15, 84, 20),
                     ),
                     Text(widget.forecast[i].weatherDescription!),
                     Text(

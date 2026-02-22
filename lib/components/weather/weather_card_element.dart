@@ -12,14 +12,18 @@ class WeatherCardElement {
       padding: EdgeInsets.all(8.0),
       width: MediaQuery.of(context).size.width * 0.4,
       decoration: BoxDecoration(
-        color: const Color.fromARGB(87, 255, 255, 255),
+        color: const Color.fromARGB(255, 198, 239, 205),
         borderRadius: BorderRadius.circular(24.0),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            Icon(leadingIcon, color: Colors.white, size: 35),
+            Icon(
+              leadingIcon,
+              color: const Color.fromARGB(255, 15, 84, 20),
+              size: 35,
+            ),
             SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

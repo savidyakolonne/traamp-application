@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../../../AppConfig.dart';
+import '../../../../appConfig.dart';
 import '../guide_package.dart';
 import 'guide_package_data.dart';
 import 'info_tab.dart';
@@ -113,7 +113,6 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
             backgroundColor: const Color.fromARGB(180, 244, 67, 54),
           ),
         );
-        //Navigator.pop(context, GuidePackage);
       }
     } catch (error) {
       print(error.toString());

@@ -62,10 +62,17 @@ class _InfoTabState extends State<InfoTab> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Package Title *", style: TextStyle(fontSize: 18)),
+                  Text(
+                    "Package Title *",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: const Color.fromARGB(255, 15, 84, 20),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0),
+                      border: Border.all(width: 1.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 8),
@@ -100,7 +107,14 @@ class _InfoTabState extends State<InfoTab> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Category *", style: TextStyle(fontSize: 18)),
+                  Text(
+                    "Category *",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: const Color.fromARGB(255, 15, 84, 20),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   Container(
                     child: DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
@@ -134,10 +148,17 @@ class _InfoTabState extends State<InfoTab> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Short Description *", style: TextStyle(fontSize: 18)),
+                  Text(
+                    "Short Description *",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Color.fromARGB(255, 15, 84, 20),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0),
+                      border: Border.all(width: 1.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 8),
@@ -171,10 +192,17 @@ class _InfoTabState extends State<InfoTab> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Full Description *", style: TextStyle(fontSize: 18)),
+                  Text(
+                    "Full Description *",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: const Color.fromARGB(255, 15, 84, 20),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0),
+                      border: Border.all(color: Colors.black, width: 1.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 8),
@@ -208,10 +236,17 @@ class _InfoTabState extends State<InfoTab> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("location/City *", style: TextStyle(fontSize: 18)),
+                  Text(
+                    "location/City *",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Color.fromARGB(255, 15, 84, 20),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0),
+                      border: Border.all(color: Colors.black, width: 1.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 8),
@@ -246,7 +281,14 @@ class _InfoTabState extends State<InfoTab> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Languages Offered ", style: TextStyle(fontSize: 18)),
+                  Text(
+                    "Languages Offered ",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: const Color.fromARGB(255, 15, 84, 20),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Column(

@@ -1,15 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:traamp_frontend/AppConfig.dart';
+import 'package:traamp_frontend/appConfig.dart';
 import '../../../components/packages/guide_package_card.dart';
 import 'create_package/create_guide_package.dart';
 
 // ignore: must_be_immutable
 class GuidePackage extends StatefulWidget {
-  String idToken;
   String uid;
-  GuidePackage(this.idToken, this.uid, {super.key});
+  GuidePackage(this.uid, {super.key});
 
   @override
   State<GuidePackage> createState() => _GuidePackageState();
@@ -68,13 +67,29 @@ class _GuidePackageState extends State<GuidePackage> {
                   onPressed: () {
                     getGuidePackages();
                   },
-                  icon: Row(children: [Icon(Icons.refresh), Text("Refresh")]),
+                  icon: Container(
+                    padding: EdgeInsets.only(right: 16),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.refresh,
+                          color: const Color.fromARGB(255, 15, 84, 20),
+                        ),
+                        Text(
+                          "Refresh",
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 15, 84, 20),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
             // check condition that package array empty or not
             if (packages.isEmpty)
-              Container(
+              SizedBox(
                 width: double.infinity,
                 height: MediaQuery.of(context).size.height * 0.8,
                 child: Center(child: Text("No Packages to Show")),
@@ -99,10 +114,19 @@ class _GuidePackageState extends State<GuidePackage> {
           padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: const Color.fromARGB(168, 255, 255, 255),
-            border: Border.all(color: Colors.green, width: 2.0),
+            border: Border.all(
+              color: const Color.fromARGB(255, 15, 84, 20),
+              width: 2.0,
+            ),
             borderRadius: BorderRadius.circular(50),
           ),
-          child: Text("+", style: TextStyle(fontSize: 50, color: Colors.green)),
+          child: Text(
+            "+",
+            style: TextStyle(
+              fontSize: 50,
+              color: const Color.fromARGB(255, 15, 84, 20),
+            ),
+          ),
         ),
       ),
     );

@@ -7,7 +7,7 @@ import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 import '../places/places_list_screen.dart';
 import '../activities/activities_list_screen.dart';
-import '../../AppConfig.dart';
+import '../../appConfig.dart';
 import '../../components/weather/weather_screen.dart';
 
 class TouristDashboard extends StatefulWidget {
@@ -17,6 +17,7 @@ class TouristDashboard extends StatefulWidget {
 
 class _TouristDashboardState extends State<TouristDashboard> {
   String currentLocation = "Unknown location";
+  String profilePicture = "";
   late Map<String, dynamic> userData = {};
 
   // get user data from DB
@@ -37,6 +38,9 @@ class _TouristDashboardState extends State<TouristDashboard> {
           if (response.statusCode == 200) {
             setState(() {
               userData = data['data'];
+              if (userData['profilePicture'] != null) {
+                profilePicture = userData['profilePicture'];
+              }
             });
             print(data['msg']);
           } else if (response.statusCode == 401) {
@@ -80,22 +84,162 @@ class _TouristDashboardState extends State<TouristDashboard> {
   }
 
   Widget suggestionScrollableView() {
-    return Row(
+    return Container(
+      width: 250,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromARGB(47, 0, 0, 0),
+            spreadRadius: 1,
+            blurRadius: 1,
+            offset: Offset(0, 0),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // image
+          Container(
+            width: double.infinity,
+            height: 150,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              image: DecorationImage(
+                fit: BoxFit.fill,
+                image: NetworkImage(
+                  "https://media.gettyimages.com/id/2210026760/photo/sri-lanka-central-province-polonnaruwa-district-sigiriya-ancient-city-and-fortress-of.jpg?s=2048x2048&w=gi&k=20&c=VKN5d3SgPZSiV7Yq46VNXPo2143B4M-ibuZeO-Tienw=",
+                ),
+              ),
+            ),
+          ),
+          // below image
+          Container(
+            padding: EdgeInsets.all(8),
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // package title
+                Text(
+                  "Sigiriya Rock Fortress",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: const Color.fromARGB(255, 30, 41, 59),
+                  ),
+                ),
+                // location
+                Row(
+                  spacing: 8,
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      size: 18,
+                      color: const Color.fromARGB(255, 100, 116, 139),
+                    ),
+                    Text(
+                      "Matale district",
+                      style: TextStyle(
+                        color: const Color.fromARGB(255, 100, 116, 139),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                // price
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          "LKR 3000",
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 153, 204, 102),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          "/pp",
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 100, 116, 139),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: Container(
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 153, 204, 102),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 16,
+                        ),
+                        child: Text(
+                          "View Now",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget detailIcons(
+    Color backgroundColor,
+    Widget icon,
+    String name,
+    Function() function,
+  ) {
+    return Column(
       children: [
-        Column(
-          children: [
-            Container(
-              height: 70,
-              width: 70,
-              child: Image.asset("assets/images/logo.png", fit: BoxFit.contain),
+        IconButton(
+          onPressed: function,
+          icon: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: const Color.fromARGB(47, 0, 0, 0),
+                  spreadRadius: 1,
+                  blurRadius: 8,
+                  offset: Offset(0, 1),
+                ),
+              ],
+
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(24),
             ),
-            Text(
-              "Shehan Kumar",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10.0),
-            ),
-          ],
+            child: icon,
+          ),
         ),
-        SizedBox(width: 10),
+        Text(
+          name,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: name == "Emergency"
+                ? const Color.fromARGB(255, 239, 68, 68)
+                : Colors.black,
+          ),
+        ),
       ],
     );
   }
@@ -112,384 +256,310 @@ class _TouristDashboardState extends State<TouristDashboard> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.white, Colors.green],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
         title: Row(
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              fit: BoxFit.contain,
-              height: 60,
+            CircleAvatar(
+              backgroundImage: (profilePicture.isNotEmpty)
+                  ? NetworkImage(profilePicture)
+                  : (userData['gender'] == "Female"
+                        ? AssetImage('assets/images/avatar-female.avif')
+                        : AssetImage('assets/images/avatar-male.avif')),
             ),
             SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ShaderMask(
-                  shaderCallback: (bounds) => LinearGradient(
-                    colors: [Colors.black, Colors.green],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ).createShader(bounds),
-                  child: Text(
-                    "Traamp",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
+                Text(
+                  "Welcome back,",
+                  style: TextStyle(
+                    color: const Color.fromARGB(255, 100, 116, 139),
+                    fontSize: 16,
                   ),
                 ),
+
                 Text(
-                  "Hi ${userData['firstName']}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20.0,
-                    color: Colors.amber[900],
-                  ),
+                  "Ayubowan, ${userData['firstName']}!",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
                 ),
               ],
             ),
           ],
         ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(30.0),
-          child: Container(),
-        ),
         actions: [
           IconButton(
             padding: EdgeInsets.only(right: 15),
             onPressed: () {},
-            icon: Icon(Icons.favorite, size: 25.0, color: Colors.red[700]),
+            icon: CircleAvatar(
+              backgroundColor: const Color.fromARGB(255, 241, 245, 249),
+              child: Icon(
+                Icons.favorite,
+                color: const Color.fromARGB(255, 71, 85, 105),
+              ),
+            ),
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          padding: EdgeInsets.only(
-            top: 20.0,
-            left: 18.0,
-            right: 18.0,
-            bottom: 20,
-          ),
+          padding: EdgeInsets.all(10),
           child: Column(
             children: [
-              Text(
-                "Welcome to your\nDashboard",
-                style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      getCurrentCity();
-                    },
-                    icon: Icon(Icons.location_on_outlined),
+              SizedBox(height: 10),
+              // cover image section
+              Container(
+                padding: EdgeInsets.all(10),
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: AssetImage(
+                      'assets/images/tourist_wallpaper_darked.png',
+                    ),
                   ),
-                  Text(currentLocation),
-                ],
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Explore the Pearl of the Indian\nOcean",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "Discover hidden gems in Sri Lanka",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  ],
+                ),
               ),
-
-              // menu icons
+              SizedBox(height: 20),
+              // icon section
               Column(
-                spacing: 20.0,
                 children: [
                   // first row
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      // 1st row - 1st icon
-                      Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: BoxBorder.all(
-                                width: 1.5,
-                                color: Colors.grey,
-                              ),
-                              borderRadius: BorderRadiusGeometry.all(
-                                Radius.circular(16.0),
-                              ),
-                            ),
-
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: Image.asset(
-                                "assets/images/guidesIcon.png",
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "Guides",
-                            style: TextStyle(
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                      // find guides
+                      detailIcons(
+                        const Color.fromARGB(255, 240, 253, 244),
+                        Icon(
+                          Icons.hail,
+                          size: 30,
+                          color: const Color.fromARGB(255, 153, 204, 102),
+                        ),
+                        "Find guides",
+                        () {},
                       ),
 
-                      // 1st row - 2nd icon
-                      Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: BoxBorder.all(
-                                width: 1.5,
-                                color: Colors.grey,
-                              ),
-                              borderRadius: BorderRadiusGeometry.all(
-                                Radius.circular(16.0),
-                              ),
-                            ),
-
-                            child: IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => PlacesListScreen(),
-                                  ),
-                                );
+                      // places
+                      detailIcons(
+                        const Color.fromARGB(255, 239, 246, 255),
+                        Icon(
+                          Icons.landscape,
+                          size: 30,
+                          color: const Color.fromARGB(255, 59, 130, 246),
+                        ),
+                        "Places",
+                        () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return PlacesListScreen();
                               },
-                              icon: Image.asset(
-                                "assets/images/places.png",
-                                fit: BoxFit.cover,
-                              ),
                             ),
-                          ),
-                          Text(
-                            "Places",
-                            style: TextStyle(
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
 
-                      // 1st row - 3rd icon
-                      Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: BoxBorder.all(
-                                width: 1.5,
-                                color: Colors.grey,
-                              ),
-                              borderRadius: BorderRadiusGeometry.all(
-                                Radius.circular(16.0),
-                              ),
-                            ),
-
-                            child: IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ActivitiesListScreen(),
-                                  ),
-                                );
+                      // activities
+                      detailIcons(
+                        const Color.fromARGB(255, 255, 247, 237),
+                        Icon(
+                          Icons.surfing,
+                          size: 30,
+                          color: const Color.fromARGB(255, 249, 115, 22),
+                        ),
+                        "Activities",
+                        () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ActivitiesListScreen();
                               },
-                              icon: Image.asset(
-                                "assets/images/activity.png",
-                                fit: BoxFit.cover,
-                              ),
                             ),
-                          ),
-                          Text(
-                            "Activities",
-                            style: TextStyle(
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ],
                   ),
-                  // 2nd row
+                  SizedBox(height: 10),
+                  // second row
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      // 2nd row - first icon
-                      Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: BoxBorder.all(
-                                width: 1.5,
-                                color: Colors.grey,
-                              ),
-                              borderRadius: BorderRadiusGeometry.all(
-                                Radius.circular(16.0),
-                              ),
-                            ),
-
-                            child: IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const MapScreen(),
-                                  ),
-                                );
+                      // map
+                      detailIcons(
+                        const Color.fromARGB(255, 238, 242, 255),
+                        Icon(
+                          Icons.map,
+                          size: 30,
+                          color: const Color.fromARGB(255, 99, 102, 241),
+                        ),
+                        "Map",
+                        () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return MapScreen();
                               },
-                              icon: Image.asset(
-                                "assets/images/AImap.png",
-                                fit: BoxFit.cover,
-                              ),
                             ),
-                          ),
-                          SizedBox(height: 8.0),
-                          Text(
-                            "AI Map",
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
 
-                      // 2nd row - 2nd icon
-                      Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: BoxBorder.all(
-                                width: 1.5,
-                                color: Colors.grey,
-                              ),
-                              borderRadius: BorderRadiusGeometry.all(
-                                Radius.circular(16.0),
-                              ),
-                            ),
-
-                            child: IconButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) {
-                                      return WeatherScreen(true);
-                                    },
-                                  ),
-                                );
+                      // weather
+                      detailIcons(
+                        const Color.fromARGB(255, 240, 249, 255),
+                        Icon(
+                          Icons.wb_sunny,
+                          size: 30,
+                          color: const Color.fromARGB(255, 56, 189, 248),
+                        ),
+                        "Weather",
+                        () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return WeatherScreen();
                               },
-                              icon: Image.asset(
-                                "assets/images/weather.png",
-                                fit: BoxFit.cover,
-                              ),
                             ),
-                          ),
-                          Text(
-                            "Weather",
-                            style: TextStyle(
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
 
-                      // 2nd row - 3rd icon
-                      Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: BoxBorder.all(
-                                width: 1.5,
-                                color: Colors.grey,
-                              ),
-                              borderRadius: BorderRadiusGeometry.all(
-                                Radius.circular(16.0),
-                              ),
-                            ),
-
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: Image.asset(
-                                "assets/images/sos.png",
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            "Emergency\nContacts",
-                            style: TextStyle(
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                      // emergency
+                      detailIcons(
+                        const Color.fromARGB(255, 254, 242, 242),
+                        Icon(
+                          Icons.sos,
+                          size: 30,
+                          color: const Color.fromARGB(255, 239, 68, 68),
+                        ),
+                        "Emergency",
+                        () {},
                       ),
                     ],
                   ),
                 ],
               ),
-
-              // suggestion area
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              SizedBox(height: 20),
+              // recommendation section
+              Column(
                 children: [
-                  Text(
-                    "We suggest you",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  // heading
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Recommendations for you",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {},
+                        icon: Text(
+                          "See more",
+                          style: TextStyle(color: Colors.green),
+                        ),
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Text(
-                      "See more",
-                      style: TextStyle(
-                        fontSize: 13.0,
-                        color: const Color.fromARGB(255, 8, 5, 172),
+                  SizedBox(
+                    width: double.infinity,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        spacing: 20,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          suggestionScrollableView(),
+                          suggestionScrollableView(),
+                          suggestionScrollableView(),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
+              SizedBox(height: 30),
+              // AI guide
               Container(
-                padding: EdgeInsets.all(10.0),
+                padding: EdgeInsets.all(10),
+                width: double.infinity,
+                height: 200,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 1.5),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: SizedBox(
-                  height: 100,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [suggestionScrollableView()],
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color.fromARGB(255, 15, 23, 42),
+                      const Color.fromARGB(255, 42, 58, 53),
+                    ],
+                    begin: Alignment.topLeft, // start point
+                    end: Alignment.bottomRight, // end point
                   ),
                 ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 15,
+                  children: [
+                    Text(
+                      "Need a customized\ntour plan?",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        width: 150,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Ask AI Guide",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              SizedBox(height: 20),
             ],
           ),
-        ),
-      ),
-      floatingActionButton: Container(
-        height: 90,
-        width: 80,
-        child: Column(
-          children: [
-            IconButton(
-              onPressed: () {},
-              icon: Image.asset("assets/images/chatBot.png"),
-            ),
-            Text("Need help?", style: TextStyle(fontWeight: FontWeight.bold)),
-          ],
         ),
       ),
     );
