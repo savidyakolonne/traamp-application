@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import '../places/place_detail_screen.dart'; // ✅ adjust path if needed
 
+import '../../AppConfig.dart';
+
 class MapScreen extends StatefulWidget {
   final String? focusPlaceId;
   final LatLng? focusLatLng;
@@ -35,8 +37,8 @@ class _MapScreenState extends State<MapScreen> {
   int _radius = 5000;
 
   String get baseUrl {
-    if (kIsWeb) return "http://localhost:3000";
-    return "http://localhost:3000"; // real device -> http://YOUR_PC_IP:3000
+    if (kIsWeb) return "${AppConfig.SERVER_URL}";
+    return "${AppConfig.SERVER_URL}"; // later: real device -> http://YOUR_PC_IP:3000
   }
 
   @override
