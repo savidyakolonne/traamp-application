@@ -263,29 +263,24 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
               const SizedBox(height: 18),
 
-              // ================= TITLE =================
+
               // ================= TITLE =================
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   place.name,
                   style: const TextStyle(
-                    fontSize: 24,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 6),
 
               const SizedBox(height: 6),
 
-              // ================= LOCATION =================
               // ================= LOCATION =================
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
@@ -294,15 +289,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                       size: 18,
                       color: Color(0xff1BA672),
                     ),
-                    const Icon(
-                      Icons.location_on,
-                      size: 18,
-                      color: Color(0xff1BA672),
-                    ),
+
                     const SizedBox(width: 4),
-                    Text(
-                      "${place.district}, ${place.province}",
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    
                     Text(
                       "${place.district}, ${place.province}",
                       style: const TextStyle(fontSize: 14, color: Colors.grey),
@@ -330,7 +319,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                     ),
                     onPressed: () {
                       final lat = (place.location['lat'] as num).toDouble();
-                      final lng = (place.location['lng'] as num).toDouble();
 
                       Navigator.push(
                         context,
