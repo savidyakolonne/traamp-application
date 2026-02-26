@@ -77,7 +77,7 @@ class _MainTabViewState extends State<MainTabView> {
               Tab(icon: Icon(Icons.home, size: 30)),
               Tab(icon: Icon(Icons.email, size: 30)),
               Tab(icon: Icon(Icons.notifications_active, size: 30)),
-              Tab(icon: Icon(Icons.settings, size: 30)),
+              Tab(icon: Icon(Icons.person, size: 30)),
             ],
           ),
         ),

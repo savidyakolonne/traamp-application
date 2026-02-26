@@ -21,6 +21,7 @@ class _LoginSetupState extends State<LoginSetup> {
   bool _obscureState = true;
   late Map<String, dynamic> userData;
 
+  // function to hide and visible password
   Widget showAndHidePasswordIcon() {
     return IconButton(
       icon: Icon(
@@ -36,6 +37,7 @@ class _LoginSetupState extends State<LoginSetup> {
     );
   }
 
+  // function to login with email and password
   Future<void> loginEmail() async {
     String email = emailCtrl.text.trim().toLowerCase();
     String password = passCtrl.text;
@@ -111,7 +113,7 @@ class _LoginSetupState extends State<LoginSetup> {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error while connecting to server...'),
+          content: Text('Incorrect username or password.'),
           backgroundColor: Colors.red,
         ),
       );

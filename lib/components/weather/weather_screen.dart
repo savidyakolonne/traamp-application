@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:weather/weather.dart';
+import '../../screens/guide/guide_dashboard.dart';
 import '../../services/location_service.dart';
 import '../../services/weather_service.dart';
 import 'weather_card_element.dart';
@@ -170,11 +171,31 @@ class _WeatherScreenState extends State<WeatherScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context, GuideDashboard());
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
         title: Text(
           "Stay Prepared",
-          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 25),
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 22),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              getCurrentCityAndWeather();
+              _textController.text = "";
+            },
+            icon: Icon(
+              Icons.refresh_outlined,
+              color: const Color.fromARGB(255, 15, 84, 20),
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -184,14 +205,20 @@ class _WeatherScreenState extends State<WeatherScreen> {
             children: [
               // search bar section
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 16),
-                padding: EdgeInsets.symmetric(horizontal: 10),
+                margin: EdgeInsets.all(16),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
-                  border: Border.all(width: 1.5),
-                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(61, 0, 0, 0),
+                      blurRadius: 10,
+                    ),
+                  ],
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(50),
                 ),
                 width: double.infinity,
-                height: 40,
+                height: 60,
                 child: Center(
                   child: TextField(
                     keyboardType: TextInputType.text,
@@ -200,7 +227,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       border: InputBorder.none,
                       hintText: "Search any location in Sri Lanka",
                       hintStyle: TextStyle(
-                        fontWeight: FontWeight.w500,
                         color: const Color.fromARGB(255, 100, 116, 139),
                       ),
                       suffixIcon: IconButton(
@@ -210,6 +236,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         icon: Icon(
                           Icons.location_on_outlined,
                           color: const Color.fromARGB(255, 100, 116, 139),
+                          size: 28,
                         ),
                       ),
                     ),
@@ -227,23 +254,15 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
               // Weather info section
               Container(
-                margin: EdgeInsets.all(16.0),
                 width: double.infinity,
-                decoration: BoxDecoration(
-                  border: BoxBorder.all(
-                    width: 2,
-                    color: const Color.fromARGB(255, 153, 204, 102),
-                  ),
-                  color: const Color.fromARGB(255, 240, 253, 244),
-                  borderRadius: BorderRadius.circular(24.0),
-                ),
-                padding: EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(16.0),
                 child: Column(
                   children: [
+                    // last update
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width * 0.50,
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
@@ -254,89 +273,135 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                   ),
                           ),
                         ),
-                        IconButton(
-                          onPressed: () {
-                            getCurrentCityAndWeather();
-                            _textController.text = "";
-                          },
-                          icon: Row(
-                            children: [
-                              Icon(
-                                Icons.refresh_outlined,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                "Refresh",
-                                style: TextStyle(
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
+
+                    SizedBox(height: 30),
+
+                    // image
+                    Container(
+                      width: 128,
+                      height: 128,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: Color.fromARGB(26, 125, 212, 33),
+                      ),
+                      child: Center(child: weatherImage),
+                    ),
+
+                    SizedBox(height: 20),
 
                     SizedBox(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
+                          // location
                           Column(
                             children: [
                               Text(
-                                "${currentLocation}",
+                                currentLocation,
                                 style: TextStyle(
-                                  fontSize: 30.0,
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 25.0,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ),
-                              Text(
-                                "${formattedDate}",
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                ),
-                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),
 
+                          // condition
+                          Text(
+                            currentWeather.isEmpty
+                                ? "--"
+                                : "${currentWeather['weather']}",
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: const Color.fromARGB(255, 100, 116, 139),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          // temperature
                           Column(
                             children: [
-                              weatherImage,
                               Text(
                                 currentWeather.isEmpty
                                     ? "--\u00B0C"
                                     : "${currentWeather['temp']}\u00B0C",
                                 style: TextStyle(
-                                  fontSize: 50.0,
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 72.0,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text(
-                                currentWeather.isEmpty
-                                    ? "--"
-                                    : "${currentWeather['weather']}",
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                  fontWeight: FontWeight.w400,
-                                ),
+
+                              // high - low temperature
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                spacing: 16,
+                                children: [
+                                  // high
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.arrow_upward,
+                                        size: 20,
+                                        color: const Color.fromARGB(
+                                          255,
+                                          100,
+                                          116,
+                                          139,
+                                        ),
+                                      ),
+                                      Text(
+                                        currentWeather.isEmpty
+                                            ? "H: --\u00B0"
+                                            : "H: ${currentWeather['temp-high']}\u00B0",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
+                                          color: const Color.fromARGB(
+                                            255,
+                                            100,
+                                            116,
+                                            139,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  // low
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.arrow_downward,
+                                        size: 20,
+                                        color: const Color.fromARGB(
+                                          255,
+                                          100,
+                                          116,
+                                          139,
+                                        ),
+                                      ),
+                                      Text(
+                                        currentWeather.isEmpty
+                                            ? "L: --\u00B0"
+                                            : "L: ${currentWeather['temp-low']}\u00B0",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
+                                          color: const Color.fromARGB(
+                                            255,
+                                            100,
+                                            116,
+                                            139,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                              Text(
-                                currentWeather.isEmpty
-                                    ? "H: --\u00B0 L: --\u00B0"
-                                    : "H: ${currentWeather['temp-high']}\u00B0 L: ${currentWeather['temp-low']}\u00B0",
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              SizedBox(height: 20),
+                              SizedBox(height: 30),
                             ],
                           ),
                           Column(
@@ -344,7 +409,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               // first row
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   // wind card
                                   WeatherCardElement.card(
@@ -372,13 +437,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
                               // second row
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   // Wind direction card
                                   WeatherCardElement.card(
                                     context,
                                     Icons.explore_outlined,
-                                    "Wind Direction",
+                                    "Direction",
                                     currentWeather.isEmpty
                                         ? "--"
                                         : currentWeather['wind-direction'],
@@ -396,27 +461,31 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: 30),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "Weather Forecast",
                                     style: TextStyle(
-                                      fontSize: 26,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                  Text(
+                                    "Next 7 Days",
+                                    style: TextStyle(
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w500,
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
-                                      ),
+                                      color: Color.fromARGB(255, 125, 212, 33),
                                     ),
                                     textAlign: TextAlign.start,
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: 20),
                               forecast.isNotEmpty
                                   ? WeatherForecast(forecast)
                                   : Center(

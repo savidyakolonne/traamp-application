@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:traamp_frontend/appConfig.dart';
+import 'guide_package.dart';
 
 // ignore: must_be_immutable
 class DetailedGuidePackage extends StatefulWidget {
@@ -16,884 +20,795 @@ class _DetailedGuidePackageState extends State<DetailedGuidePackage> {
   late List<dynamic> stops = widget.packageData['stops'];
   late List<dynamic> packageInclude = widget.packageData['packageInclude'];
   late List<dynamic> packageExclude = widget.packageData['packageExclude'];
+  late List<dynamic> images = widget.packageData['images'];
+
+  Future<void> deletePackage() async {
+    try {
+      final response = await http.delete(
+        Uri.parse("${AppConfig.SERVER_URL}/api/guidePackage/delete-package"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          'packageId': widget.packageData['packageId'],
+          'coverImage': widget.packageData['coverImage'],
+          'images': widget.packageData['images'],
+        }),
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${data['msg']}'),
+            backgroundColor: const Color.fromARGB(180, 244, 67, 54),
+          ),
+        );
+        Navigator.pop(context, GuidePackage(widget.packageData['uid']));
+      } else {
+        print('${data['msg']}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error while deleting the package.'),
+            backgroundColor: const Color.fromARGB(180, 244, 67, 54),
+          ),
+        );
+      }
+    } catch (error) {
+      print(error.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error while connecting to server'),
+          backgroundColor: const Color.fromARGB(180, 244, 67, 54),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green,
-        title: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Text(
-            widget.packageData['packageTitle'],
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 25),
-          ),
-        ),
-      ),
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       body: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            spacing: 10,
-            children: [
-              // description
-              Text(
-                "Description",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: const Color.fromARGB(255, 15, 84, 20),
+        child: Column(
+          children: [
+            // Cover image
+            Container(
+              padding: EdgeInsets.only(top: 60, left: 16),
+              height: 600,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: NetworkImage(widget.packageData['coverImage']),
                 ),
-                textAlign: TextAlign.justify,
               ),
-              Text(
-                widget.packageData['description'],
-                style: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 16,
-                  //color: const Color.fromARGB(255, 101, 101, 101),
-                ),
-                textAlign: TextAlign.justify,
-              ),
-              SizedBox(height: 20),
-              // category section
-              Container(
-                width: MediaQuery.of(context).size.width * 0.9,
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  border: BoxBorder.all(
-                    width: 1.5,
-                    color: const Color.fromARGB(255, 15, 84, 20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: const Color.fromARGB(162, 141, 145, 145),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.pop(
+                          context,
+                          GuidePackage(widget.packageData['uid']),
+                        );
+                      },
+                      icon: Icon(Icons.arrow_back, color: Colors.white),
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    spacing: 20,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
+                ],
+              ),
+            ),
+
+            // title section
+            Transform.translate(
+              offset: Offset(0, -50), // move up
+              child: Container(
+                width: double.infinity,
+                margin: EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  spacing: 30,
+                  children: [
+                    // heading section
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color.fromARGB(74, 0, 0, 0),
+                            blurRadius: 20,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Column(
                         spacing: 10,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // category
-                          Row(
-                            spacing: 10,
-                            children: [
-                              Icon(
-                                Icons.widgets_outlined,
-                                size: 30,
-                                color: const Color.fromARGB(255, 15, 84, 20),
+                          Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 229, 246, 211),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(
+                              widget.packageData['category'],
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 125, 212, 33),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Category",
-                                    style: TextStyle(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
-                                      ),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    widget.packageData['category'],
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                            ),
+                          ),
+                          // title
+                          Text(
+                            widget.packageData['packageTitle'],
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25,
+                            ),
                           ),
                           // location
                           Row(
-                            spacing: 10,
+                            spacing: 8,
                             children: [
                               Icon(
                                 Icons.location_on_outlined,
-                                size: 30,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Location",
-                                    style: TextStyle(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
-                                      ),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    widget.packageData['location'],
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          // duration
-                          Row(
-                            spacing: 10,
-                            children: [
-                              Icon(
-                                Icons.access_time_rounded,
-                                size: 30,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Duration",
-                                    style: TextStyle(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
-                                      ),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    widget.packageData['duration'],
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                      Column(
-                        spacing: 10,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // season
-                          Row(
-                            spacing: 10,
-                            children: [
-                              Icon(
-                                Icons.beach_access_outlined,
-                                size: 30,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Season",
-                                    style: TextStyle(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
-                                      ),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    widget.packageData['season'],
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          // min guests
-                          Row(
-                            spacing: 10,
-                            children: [
-                              Icon(
-                                Icons.person_3_outlined,
-                                size: 30,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Min Guests",
-                                    style: TextStyle(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
-                                      ),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${widget.packageData['minGuests']}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          // max guests
-                          Row(
-                            spacing: 10,
-                            children: [
-                              Icon(
-                                Icons.groups_3_outlined,
-                                size: 30,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Max Guests",
-                                    style: TextStyle(
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
-                                      ),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${widget.packageData['maxGuests']}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 20),
-              // start and end locations
-              Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  border: BoxBorder.all(
-                    width: 1.5,
-                    color: const Color.fromARGB(255, 15, 84, 20),
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                height: 360,
-                child: Row(
-                  children: [
-                    Column(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.hail_outlined,
-                                  size: 40,
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              "|\n|\n|\n|\n|\n|",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 30,
-                                color: Colors.brown,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.location_on_outlined,
-                                  size: 40,
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(width: 20),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Start",
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                            ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.6,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Text(
-                                  widget.packageData['startLocation'],
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "End",
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                            ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.6,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Text(
-                                  widget.packageData['endLocation'],
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // languages
-              if (languages.isNotEmpty)
-                Column(
-                  children: [
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border: BoxBorder.all(
-                          width: 1.5,
-                          color: const Color.fromARGB(255, 15, 84, 20),
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        spacing: 10,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 10,
-                            children: [
-                              Icon(
-                                Icons.language_rounded,
-                                color: const Color.fromARGB(255, 15, 84, 20),
+                                color: Color.fromARGB(255, 100, 116, 139),
                               ),
                               Text(
-                                "Languages",
+                                widget.packageData['location'],
                                 style: TextStyle(
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: 17,
+                                  color: Color.fromARGB(255, 100, 116, 139),
                                 ),
-                                textAlign: TextAlign.justify,
                               ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 10,
-                            children: [
-                              for (int i = 0; i < languages.length; i++)
-                                Row(
-                                  spacing: 10,
-                                  children: [
-                                    Icon(
-                                      Icons.check_box,
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${languages[i]}',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                             ],
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
 
-              // available days
-              if (availableDays.isNotEmpty)
-                Column(
-                  children: [
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border: BoxBorder.all(
-                          width: 1.5,
-                          color: const Color.fromARGB(255, 15, 84, 20),
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        spacing: 10,
-                        children: [
-                          Row(
+                    // duration, season, guest section
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      spacing: 10,
+                      children: [
+                        // duration
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          width: 105,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color.fromARGB(74, 0, 0, 0),
+                                blurRadius: 5,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 10,
+                            spacing: 5,
+                            children: [
+                              Icon(
+                                Icons.access_time,
+                                color: Color.fromARGB(255, 125, 212, 33),
+                                size: 28,
+                              ),
+                              Text(
+                                "DURATION",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 100, 116, 139),
+                                ),
+                              ),
+                              Text(
+                                widget.packageData['duration'],
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // season
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          width: 105,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color.fromARGB(74, 0, 0, 0),
+                                blurRadius: 5,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 5,
                             children: [
                               Icon(
                                 Icons.calendar_today_outlined,
-                                color: const Color.fromARGB(255, 15, 84, 20),
+                                color: Color.fromARGB(255, 125, 212, 33),
+                                size: 28,
                               ),
                               Text(
-                                "Available Days",
+                                "SEASON",
                                 style: TextStyle(
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 100, 116, 139),
                                 ),
-                                textAlign: TextAlign.justify,
+                              ),
+                              Text(
+                                widget.packageData['season'],
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
                             ],
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 10,
+                        ),
+
+                        // guests
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          width: 105,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color.fromARGB(74, 0, 0, 0),
+                                blurRadius: 5,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 5,
                             children: [
-                              for (int i = 0; i < availableDays.length; i++)
-                                Row(
-                                  spacing: 10,
-                                  children: [
-                                    Icon(
-                                      Icons.check_box,
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${availableDays[i]}',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
+                              Icon(
+                                Icons.groups_3_outlined,
+                                color: Color.fromARGB(255, 125, 212, 33),
+                                size: 28,
+                              ),
+                              Text(
+                                "GUESTS",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 100, 116, 139),
                                 ),
+                              ),
+                              Text(
+                                '${widget.packageData['minGuests']}-${widget.packageData['maxGuests']}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ],
                           ),
+                        ),
+                      ],
+                    ),
+
+                    // description
+                    SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        spacing: 10,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Description",
+                            style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            textAlign: TextAlign.justify,
+                            widget.packageData['shortDescription'],
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 104, 188, 14),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            widget.packageData['description'],
+                            textAlign: TextAlign.justify,
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 100, 116, 139),
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16,
+                            ),
+                          ),
+
+                          if (images.isNotEmpty)
+                            Container(
+                              margin: EdgeInsets.only(top: 20),
+                              width: double.infinity,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  spacing: 20,
+                                  children: [
+                                    for (int i = 0; i < images.length; i++)
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color.fromARGB(
+                                                74,
+                                                0,
+                                                0,
+                                                0,
+                                              ),
+                                              blurRadius: 5,
+                                              spreadRadius: 1,
+                                            ),
+                                          ],
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          image: DecorationImage(
+                                            fit: BoxFit.contain,
+                                            image: NetworkImage(images[i]),
+                                          ),
+                                        ),
+
+                                        width: 200,
+                                        height: 150,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
-                  ],
-                ),
 
-              // stops
-              if (stops.isNotEmpty)
-                Column(
-                  children: [
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border: BoxBorder.all(
-                          width: 1,
-                          color: const Color.fromARGB(255, 15, 84, 20),
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        spacing: 10,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 10,
-                            children: [
-                              Icon(
-                                Icons.tram_outlined,
-                                color: const Color.fromARGB(255, 15, 84, 20),
+                    // what's include section
+                    if (packageInclude.isNotEmpty)
+                      Container(
+                        margin: EdgeInsets.only(top: 20),
+                        width: double.infinity,
+                        child: Column(
+                          spacing: 20,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "What's Included",
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
                               ),
-                              Text(
-                                "Stops",
-                                style: TextStyle(
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.justify,
-                              ),
-                            ],
-                          ),
-                          Column(
-                            spacing: 10,
-                            children: [
-                              for (int i = 0; i < stops.length; i++)
-                                Row(
-                                  spacing: 10,
-                                  children: [
-                                    Icon(
-                                      Icons.stop_circle_outlined,
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
+                            ),
+                            // elements
+                            for (int i = 0; i < packageInclude.length; i++)
+                              Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color.fromRGBO(
+                                        0,
+                                        0,
+                                        0,
+                                        0.435,
                                       ),
+                                      blurRadius: 10,
+                                      spreadRadius: 1,
                                     ),
-                                    SizedBox(
-                                      width:
-                                          MediaQuery.of(context).size.width *
-                                          0.75,
-                                      child: Text(
-                                        '${stops[i]}',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      spacing: 10,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          packageInclude[i]
+                                              .toString()
+                                              .toUpperCase(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Icon(
+                                      Icons.check_circle_outline,
+                                      color: Color.fromARGB(255, 125, 212, 33),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+
+                    // what's excluded section
+                    if (packageExclude.isNotEmpty)
+                      Container(
+                        margin: EdgeInsets.only(top: 20),
+                        width: double.infinity,
+                        child: Column(
+                          spacing: 10,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "What's Excluded",
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(),
+                            // elements
+                            for (int i = 0; i < packageExclude.length; i++)
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  Icon(
+                                    Icons.close,
+                                    color: Colors.red,
+                                    size: 30,
+                                  ),
+                                  Text(
+                                    packageExclude[i].toString(),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w400,
+                                      color: .fromARGB(255, 100, 116, 139),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+
+                    // planned stops
+                    if (stops.isNotEmpty)
+                      SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Planned Stops",
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            // elements
+                            for (int i = 0; i < stops.length; i++)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    spacing: 40,
+                                    children: [
+                                      Container(
+                                        width: 25,
+                                        height: 25,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            50,
+                                          ),
+                                          color: Colors.white,
+                                        ),
+                                        child: Center(
+                                          child: Icon(
+                                            Icons.circle,
+                                            size: 15,
+                                            color: const Color.fromARGB(
+                                              255,
+                                              125,
+                                              212,
+                                              33,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-              // Package Includes
-              if (packageInclude.isNotEmpty)
-                Column(
-                  children: [
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border: BoxBorder.all(
-                          width: 1.5,
-                          color: const Color.fromARGB(255, 15, 84, 20),
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        spacing: 10,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 10,
-                            children: [
-                              Icon(
-                                Icons.card_giftcard_outlined,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                              Text(
-                                "Package Includes",
-                                style: TextStyle(
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.justify,
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              for (int i = 0; i < packageInclude.length; i++)
-                                Row(
-                                  spacing: 10,
-                                  children: [
-                                    Icon(
-                                      Icons.check_box,
+                                      Text(
+                                        stops[i].toString(),
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (i != stops.length - 1)
+                                    Container(
+                                      margin: EdgeInsets.only(left: 10),
+                                      width: 3,
+                                      height: 30,
                                       color: const Color.fromARGB(
                                         255,
-                                        15,
-                                        84,
-                                        20,
+                                        181,
+                                        235,
+                                        122,
                                       ),
                                     ),
-                                    Text(
-                                      '${packageInclude[i]}',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-              // Package Exclude
-              if (packageExclude.isNotEmpty)
-                Column(
-                  children: [
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border: BoxBorder.all(
-                          width: 1.5,
-                          color: const Color.fromARGB(255, 15, 84, 20),
+                                ],
+                              ),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Column(
-                        spacing: 10,
-                        children: [
-                          Row(
-                            spacing: 10,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.explicit_outlined,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                              Text(
-                                "Package Excludes",
-                                style: TextStyle(
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.justify,
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              for (int i = 0; i < packageExclude.length; i++)
-                                Row(
-                                  spacing: 10,
-                                  children: [
-                                    Icon(
-                                      Icons.not_interested,
-                                      color: const Color.fromARGB(
-                                        255,
-                                        15,
-                                        84,
-                                        20,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${packageExclude[i]}',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
+              ),
+            ),
 
-              // options
-              if (widget.packageData['havePrivateTourOption'] ||
-                  widget.packageData['haveGroupDiscounts'])
-                Column(
-                  children: [
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        border: BoxBorder.all(
-                          width: 1.5,
-                          color: const Color.fromARGB(255, 15, 84, 20),
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        spacing: 10,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 10,
-                            children: [
-                              Icon(
-                                Icons.plus_one_outlined,
-                                color: const Color.fromARGB(255, 15, 84, 20),
-                              ),
-                              Text(
-                                "Additional Options",
-                                style: TextStyle(
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.justify,
-                              ),
-                            ],
-                          ),
-                          if (widget.packageData['havePrivateTourOption'])
-                            Row(
-                              spacing: 10,
-                              children: [
-                                Icon(
-                                  Icons.lock_person_sharp,
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                ),
-                                Text(
-                                  "Private Tour Option Available",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                          if (widget.packageData['haveGroupDiscounts'])
-                            Row(
-                              spacing: 10,
-                              children: [
-                                Icon(
-                                  Icons.lock_person_sharp,
-                                  color: const Color.fromARGB(255, 15, 84, 20),
-                                ),
-                                Text(
-                                  "Group Discounts Available",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              SizedBox(height: 20),
-
-              //price
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Container(
-                  margin: EdgeInsets.only(bottom: 20),
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 15, 84, 20),
-                    border: BoxBorder.all(width: 1, color: Colors.green),
-                    borderRadius: BorderRadius.circular(16),
+            // price
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color.fromARGB(28, 0, 0, 0),
+                    blurRadius: 10,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                ],
+              ),
+              child: Row(
+                spacing: 20,
+                children: [
+                  Text(
+                    "TOTAL PRICE",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: .fromARGB(255, 100, 116, 139),
+                    ),
+                  ),
+                  Text(
+                    "${widget.packageData['price']} LKR",
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: const Color.fromARGB(255, 130, 185, 70),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // additional details
+            Container(
+              margin: EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
+              width: double.infinity,
+              color: Color.fromARGB(255, 241, 245, 249),
+              child: Column(
+                spacing: 10,
+                children: [
+                  // 1
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.attach_money_outlined, color: Colors.green),
+                      Text("Start Location", style: TextStyle(fontSize: 16)),
                       Text(
-                        "Package Price: ",
+                        textAlign: TextAlign.right,
+                        "${widget.packageData['startLocation']}",
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
+                          fontSize: 17,
                           fontWeight: FontWeight.w500,
                         ),
-                        textAlign: TextAlign.justify,
-                      ),
-                      Text(
-                        '${widget.packageData['price']}',
-                        style: TextStyle(fontSize: 20, color: Colors.white),
-
-                        textAlign: TextAlign.justify,
-                      ),
-                      Text(
-                        " LKR ",
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                        textAlign: TextAlign.justify,
-                      ),
-                      Text(
-                        "(p/p) ",
-                        style: TextStyle(fontSize: 15, color: Colors.white),
-                        textAlign: TextAlign.justify,
                       ),
                     ],
                   ),
+
+                  // 2
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("End Location", style: TextStyle(fontSize: 16)),
+                      Text(
+                        textAlign: TextAlign.right,
+                        "${widget.packageData['endLocation']}",
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // 3
+                  if (languages.isNotEmpty)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Languages", style: TextStyle(fontSize: 16)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            for (int i = 0; i < languages.length; i++)
+                              Text(
+                                textAlign: TextAlign.right,
+                                "${languages[i].toString()}",
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                  // 4
+                  if (widget.packageData['haveGroupDiscounts'] ||
+                      widget.packageData['havePrivateTourOption'])
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Tour Options", style: TextStyle(fontSize: 16)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            widget.packageData['havePrivateTourOption']
+                                ? Text(
+                                    textAlign: TextAlign.right,
+                                    "Private Tour Available",
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  )
+                                : Text(
+                                    textAlign: TextAlign.right,
+                                    "No Private Tours",
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+
+                            widget.packageData['haveGroupDiscounts']
+                                ? Text(
+                                    textAlign: TextAlign.right,
+                                    "Group Discounts Available",
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  )
+                                : Text(
+                                    textAlign: TextAlign.right,
+                                    "No Group Discounts",
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                  // 5
+                  if (availableDays.isNotEmpty)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Available Days", style: TextStyle(fontSize: 16)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            if (availableDays.length == 7)
+                              Text(
+                                textAlign: TextAlign.right,
+                                "Mon - Sun",
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+
+                            if (availableDays.length != 7)
+                              for (int i = 0; i < availableDays.length; i++)
+                                Text(
+                                  textAlign: TextAlign.right,
+                                  "${availableDays[i].toString()}",
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                          ],
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+
+            Divider(),
+
+            // delete button
+            IconButton(
+              onPressed: () {
+                deletePackage();
+              },
+              icon: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16),
+                margin: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 10,
+                  bottom: 10,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                  color: Colors.white,
+                  border: BoxBorder.all(
+                    width: 2,
+                    color: const Color.fromARGB(106, 158, 158, 158),
+                  ),
+                ),
+                child: Row(
+                  spacing: 10,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.delete_outline, color: Colors.red, size: 30),
+                    Text(
+                      "Delete",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: const Color.fromARGB(255, 71, 85, 105),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
