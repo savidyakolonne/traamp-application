@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/appConfig.dart';
+import 'package:traamp_frontend/screens/guide/guide_dashboard.dart';
 import '../../../components/packages/guide_package_card.dart';
 import 'create_package/create_guide_package.dart';
 
@@ -31,6 +32,7 @@ class _GuidePackageState extends State<GuidePackage> {
         print(data["msg"]);
         setState(() {
           packages = data["packages"];
+          print(packages);
         });
       } else {
         print(data["msg"]);
@@ -52,41 +54,31 @@ class _GuidePackageState extends State<GuidePackage> {
       appBar: AppBar(
         title: Text(
           "Your Packages",
-          style: TextStyle(fontWeight: FontWeight.w500),
+          style: TextStyle(fontWeight: FontWeight.w700),
         ),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context, GuideDashboard());
+          },
+          icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 71, 85, 105)),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              getGuidePackages();
+            },
+            icon: Container(
+              padding: EdgeInsets.only(right: 16),
+              child: Row(children: [Icon(Icons.refresh)]),
+            ),
+          ),
+        ],
       ),
       body: Container(
         width: double.infinity,
         padding: EdgeInsets.only(top: 20),
         child: ListView(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    getGuidePackages();
-                  },
-                  icon: Container(
-                    padding: EdgeInsets.only(right: 16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.refresh,
-                          color: const Color.fromARGB(255, 15, 84, 20),
-                        ),
-                        Text(
-                          "Refresh",
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 15, 84, 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
             // check condition that package array empty or not
             if (packages.isEmpty)
               SizedBox(
@@ -111,22 +103,20 @@ class _GuidePackageState extends State<GuidePackage> {
           );
         },
         icon: Container(
-          padding: EdgeInsets.all(8),
+          height: 60,
+          width: 60,
           decoration: BoxDecoration(
-            color: const Color.fromARGB(168, 255, 255, 255),
-            border: Border.all(
-              color: const Color.fromARGB(255, 15, 84, 20),
-              width: 2.0,
-            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color.fromARGB(131, 0, 0, 0),
+                blurRadius: 5,
+                spreadRadius: 1,
+              ),
+            ],
+            color: const Color.fromARGB(255, 125, 212, 33),
             borderRadius: BorderRadius.circular(50),
           ),
-          child: Text(
-            "+",
-            style: TextStyle(
-              fontSize: 50,
-              color: const Color.fromARGB(255, 15, 84, 20),
-            ),
-          ),
+          child: Center(child: Icon(Icons.add, color: Colors.black, size: 40)),
         ),
       ),
     );

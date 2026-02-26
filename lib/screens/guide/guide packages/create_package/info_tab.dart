@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:traamp_frontend/screens/guide/guide%20packages/create_package/guide_package_data.dart';
 
@@ -13,6 +15,8 @@ class InfoTab extends StatefulWidget {
 
 class _InfoTabState extends State<InfoTab> {
   Set<String> _selectedLanguages = {};
+  String coverImageName = "";
+  int imageCount = 0;
 
   Widget clickableIcons(String language) {
     final isSelected = _selectedLanguages.contains(language);
@@ -316,6 +320,136 @@ class _InfoTabState extends State<InfoTab> {
                           ],
                         ),
                       ],
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 10),
+
+              // #7
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Cover Image *",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Color.fromARGB(255, 15, 84, 20),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: TextFormField(
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        border: InputBorder.none, // removes the bottom line
+                        enabledBorder:
+                            InputBorder.none, // also removes when not focused
+                        focusedBorder: InputBorder.none,
+                        hintText: coverImageName.isEmpty
+                            ? "Please upload a cover image"
+                            : coverImageName,
+                      ),
+                      validator: (text) {
+                        if (coverImageName.isEmpty) {
+                          return "Cover Image cannot be empty";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      FilePickerResult? result = await FilePicker.platform
+                          .pickFiles(
+                            type: FileType.custom,
+                            allowedExtensions: ['jpg', 'jpeg', 'png', 'heif'],
+                          );
+
+                      if (result != null) {
+                        PlatformFile file = result.files.single;
+                        // set file name as hintText
+                        setState(() {
+                          coverImageName = file.name;
+                          widget.data.coverImage = File(file.path!);
+                          print("cover image path: ${widget.data.coverImage}");
+                        });
+                      } else {
+                        // User canceled the picker
+                        print("User canceled the picker");
+                      }
+                    },
+                    child: Text(
+                      "Select",
+                      style: TextStyle(color: Color.fromARGB(255, 15, 84, 20)),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 10),
+
+              // #8
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Other Images",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Color.fromARGB(255, 15, 84, 20),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: TextFormField(
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        border: InputBorder.none, // removes the bottom line
+                        enabledBorder:
+                            InputBorder.none, // also removes when not focused
+                        focusedBorder: InputBorder.none,
+                        hintText: imageCount == 0
+                            ? "Upload package images"
+                            : "${imageCount} images selected",
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      FilePickerResult? result = await FilePicker.platform
+                          .pickFiles(
+                            allowMultiple: true,
+                            type: FileType.custom,
+                            allowedExtensions: ['jpg', 'jpeg', 'png', 'heif'],
+                          );
+
+                      if (result != null) {
+                        List<File> files = result.paths
+                            .map((path) => File(path!))
+                            .toList();
+                        print(widget.data.images);
+                        // set file count as hintText
+                        setState(() {
+                          widget.data.images = files;
+                          imageCount = widget.data.images.length;
+                        });
+                      }
+                    },
+                    child: Text(
+                      "Select",
+                      style: TextStyle(color: Color.fromARGB(255, 15, 84, 20)),
                     ),
                   ),
                 ],

@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import '../../appConfig.dart';
-import '../../services/location_service.dart';
 import '../../components/weather/weather_screen.dart';
 import 'guide gallery/guide_gallery.dart';
 import 'guide packages/guide_package.dart';
@@ -103,32 +100,10 @@ class _GuideDashboardState extends State<GuideDashboard> {
     );
   }
 
-  Future<void> getCurrentCity() async {
-    try {
-      // Get current position
-      Position position = await LocationService.getCurrentPosition();
-
-      // Convert coordinates to placemark
-      List<Placemark> placemark = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      // Extract city/town name
-      Placemark place = placemark[0];
-      setState(() {
-        currentLocation = place.locality!;
-      });
-    } catch (e) {
-      print("Error: $e");
-    }
-  }
-
   @override
   void initState() {
     super.initState();
     getUserData();
-    getCurrentCity();
   }
 
   @override
@@ -181,10 +156,18 @@ class _GuideDashboardState extends State<GuideDashboard> {
           child: Column(
             children: [
               SizedBox(height: 10),
+
               // current status
               Container(
                 padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(53, 0, 0, 0),
+                      blurRadius: 30,
+                      spreadRadius: 1,
+                    ),
+                  ],
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
                 ),
@@ -198,6 +181,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
                           "CURRENT STATUS",
                           style: TextStyle(
                             color: const Color.fromARGB(255, 100, 116, 139),
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
