@@ -51,7 +51,9 @@ class _GuidePackageState extends State<GuidePackage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
         title: Text(
           "Your Packages",
           style: TextStyle(fontWeight: FontWeight.w700),
@@ -62,34 +64,26 @@ class _GuidePackageState extends State<GuidePackage> {
           },
           icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 71, 85, 105)),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              getGuidePackages();
-            },
-            icon: Container(
-              padding: EdgeInsets.only(right: 16),
-              child: Row(children: [Icon(Icons.refresh)]),
-            ),
-          ),
-        ],
       ),
       body: Container(
         width: double.infinity,
         padding: EdgeInsets.only(top: 20),
-        child: ListView(
-          children: [
-            // check condition that package array empty or not
-            if (packages.isEmpty)
-              SizedBox(
-                width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.8,
-                child: Center(child: Text("No Packages to Show")),
-              )
-            else
-              for (int i = 0; i < packages.length; i++)
-                GuidePackageCard(packages[i]),
-          ],
+        child: RefreshIndicator(
+          onRefresh: getGuidePackages,
+          child: ListView(
+            children: [
+              // check condition that package array empty or not
+              if (packages.isEmpty)
+                SizedBox(
+                  width: double.infinity,
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  child: Center(child: Text("No Packages to Show")),
+                )
+              else
+                for (int i = 0; i < packages.length; i++)
+                  GuidePackageCard(packages[i]),
+            ],
+          ),
         ),
       ),
       floatingActionButton: IconButton(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'settings_screen.dart';
 import '../screens/guide/guide_dashboard.dart';
 import '../screens/guide/guide_msg_screen.dart';
@@ -18,40 +17,6 @@ class MainTabView extends StatefulWidget {
 }
 
 class _MainTabViewState extends State<MainTabView> {
-  bool isHomeSelected = true;
-  bool isMsgSelected = false;
-  bool isNotificationSelected = false;
-  bool isSettingsSelected = false;
-
-  void tabSelection(String tab) {
-    setState(() {
-      if (tab == 'home') {
-        isHomeSelected = true;
-        isMsgSelected = false;
-        isNotificationSelected = false;
-        isSettingsSelected = false;
-      }
-      if (tab == 'msg') {
-        isHomeSelected = false;
-        isMsgSelected = true;
-        isNotificationSelected = false;
-        isSettingsSelected = false;
-      }
-      if (tab == 'notification') {
-        isHomeSelected = false;
-        isMsgSelected = false;
-        isNotificationSelected = true;
-        isSettingsSelected = false;
-      }
-      if (tab == 'settings') {
-        isHomeSelected = false;
-        isMsgSelected = false;
-        isNotificationSelected = false;
-        isSettingsSelected = true;
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
