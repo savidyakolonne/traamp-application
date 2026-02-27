@@ -44,9 +44,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-android/local.properties
+/android/local.properties
 
-
+# Flutter generated files
+android/.gradle/
+macos/Flutter/GeneratedPluginRegistrant.swift
+ios/Flutter/GeneratedPluginRegistrant.swift
 
 # ======================
 # Backend (Node / Firebase)
