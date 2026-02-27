@@ -119,6 +119,31 @@ packageRouter.post(
   },
 );
 
+packageRouter.get("/get-all-packages", async (_, res) => {
+  try {
+    const snapshot = await db.collection("guide_packages").get();
+    const allPackages = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Shuffle and take up to 50
+    const shuffled = allPackages.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 50);
+
+    console.log(selected);
+    res.status(200).json({
+      msg: "Successfully retrieved data",
+      packages: selected,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: error,
+    });
+  }
+});
+
 packageRouter.post("/get-package-by-user-id", async (req, res) => {
   try {
     const { uid } = req.body;

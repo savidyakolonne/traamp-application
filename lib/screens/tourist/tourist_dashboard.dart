@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
-import 'package:traamp_frontend/services/location_service.dart';
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 import '../places/places_list_screen.dart';
 import '../activities/activities_list_screen.dart';
 import '../../appConfig.dart';
 import '../../components/weather/weather_screen.dart';
+import 'deatailed_package_view_tourist.dart';
+import 'package_list.dart';
 
 class TouristDashboard extends StatefulWidget {
   @override
@@ -18,6 +18,7 @@ class TouristDashboard extends StatefulWidget {
 class _TouristDashboardState extends State<TouristDashboard> {
   String currentLocation = "Unknown location";
   String profilePicture = "";
+  List<dynamic> packages = [];
   late Map<String, dynamic> userData = {};
 
   // get user data from DB
@@ -57,33 +58,37 @@ class _TouristDashboardState extends State<TouristDashboard> {
     }
   }
 
-  // get current location via GPS
-  Future<void> getCurrentCity() async {
+  Future<void> getPackages() async {
     try {
-      // Get current position
-      final position = await LocationService.getCurrentPosition();
-
-      final placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
+      final response = await http.get(
+        Uri.parse("${AppConfig.SERVER_URL}/api/guidePackage/get-all-packages"),
+        headers: {"Content-Type": "application/json"},
       );
-
-      final place = placemarks.isNotEmpty ? placemarks.first : null;
-
-      setState(() {
-        currentLocation = (place?.locality?.isNotEmpty == true
-            ? place!.locality!
-            : "Unknown");
-      });
+      final data = await jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        setState(() {
+          packages = data['packages'];
+          print('-----------------------------------------------------');
+          print(packages);
+          print('package count: ${packages.length}');
+        });
+      } else {
+        print(data['msg']);
+        print('Error while fetching packages');
+      }
     } catch (e) {
-      print("Error: $e");
-      setState(() {
-        currentLocation = "Location unavailable";
-      });
+      print(e.toString());
+      print("error while connecting to server when retrieving packages");
     }
   }
 
-  Widget suggestionScrollableView() {
+  Widget suggestionScrollableView(
+    String url,
+    String title,
+    String location,
+    String price,
+    Map<String, dynamic> packageData,
+  ) {
     return Container(
       width: 250,
       decoration: BoxDecoration(
@@ -93,8 +98,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
           BoxShadow(
             color: const Color.fromARGB(47, 0, 0, 0),
             spreadRadius: 1,
-            blurRadius: 1,
-            offset: Offset(0, 0),
+            blurRadius: 5,
           ),
         ],
       ),
@@ -108,9 +112,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               image: DecorationImage(
                 fit: BoxFit.fill,
-                image: NetworkImage(
-                  "https://media.gettyimages.com/id/2210026760/photo/sri-lanka-central-province-polonnaruwa-district-sigiriya-ancient-city-and-fortress-of.jpg?s=2048x2048&w=gi&k=20&c=VKN5d3SgPZSiV7Yq46VNXPo2143B4M-ibuZeO-Tienw=",
-                ),
+                image: NetworkImage(url),
               ),
             ),
           ),
@@ -123,7 +125,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
               children: [
                 // package title
                 Text(
-                  "Sigiriya Rock Fortress",
+                  title,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -140,7 +142,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
                       color: const Color.fromARGB(255, 100, 116, 139),
                     ),
                     Text(
-                      "Matale district",
+                      location,
                       style: TextStyle(
                         color: const Color.fromARGB(255, 100, 116, 139),
                       ),
@@ -155,9 +157,9 @@ class _TouristDashboardState extends State<TouristDashboard> {
                     Row(
                       children: [
                         Text(
-                          "LKR 3000",
+                          "LKR $price",
                           style: TextStyle(
-                            color: const Color.fromARGB(255, 153, 204, 102),
+                            color: Colors.green,
                             fontWeight: FontWeight.w500,
                             fontSize: 16,
                           ),
@@ -172,10 +174,18 @@ class _TouristDashboardState extends State<TouristDashboard> {
                       ],
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return DetailedPackageViewTourist(packageData);
+                            },
+                          ),
+                        );
+                      },
                       icon: Container(
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 153, 204, 102),
+                          color: Colors.green,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         padding: EdgeInsets.symmetric(
@@ -248,7 +258,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
   initState() {
     super.initState();
     getUserData();
-    getCurrentCity();
+    getPackages();
   }
 
   @override
@@ -299,266 +309,290 @@ class _TouristDashboardState extends State<TouristDashboard> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(10),
-          child: Column(
-            children: [
-              SizedBox(height: 10),
-              // cover image section
-              Container(
-                padding: EdgeInsets.all(10),
-                width: double.infinity,
-                height: 200,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: AssetImage(
-                      'assets/images/tourist_wallpaper_darked.png',
-                    ),
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Explore the Pearl of the Indian\nOcean",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+      body: RefreshIndicator(
+        onRefresh: getPackages,
+        child: SingleChildScrollView(
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(10),
+            child: Column(
+              children: [
+                SizedBox(height: 10),
+                // cover image section
+                Container(
+                  padding: EdgeInsets.all(10),
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: AssetImage(
+                        'assets/images/tourist_wallpaper_darked.png',
                       ),
                     ),
-                    Text(
-                      "Discover hidden gems in Sri Lanka",
-                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Explore the Pearl of the Indian\nOcean",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "Discover hidden gems in Sri Lanka",
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
+                // icon section
+                Column(
+                  children: [
+                    // first row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        // find guides
+                        detailIcons(
+                          const Color.fromARGB(255, 240, 253, 244),
+                          Icon(
+                            Icons.hail,
+                            size: 30,
+                            color: const Color.fromARGB(255, 153, 204, 102),
+                          ),
+                          "Find guides",
+                          () {},
+                        ),
+
+                        // places
+                        detailIcons(
+                          const Color.fromARGB(255, 239, 246, 255),
+                          Icon(
+                            Icons.landscape,
+                            size: 30,
+                            color: const Color.fromARGB(255, 59, 130, 246),
+                          ),
+                          "Places",
+                          () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return PlacesListScreen();
+                                },
+                              ),
+                            );
+                          },
+                        ),
+
+                        // activities
+                        detailIcons(
+                          const Color.fromARGB(255, 255, 247, 237),
+                          Icon(
+                            Icons.surfing,
+                            size: 30,
+                            color: const Color.fromARGB(255, 249, 115, 22),
+                          ),
+                          "Activities",
+                          () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return ActivitiesListScreen();
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    // second row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        // map
+                        detailIcons(
+                          const Color.fromARGB(255, 238, 242, 255),
+                          Icon(
+                            Icons.map,
+                            size: 30,
+                            color: const Color.fromARGB(255, 99, 102, 241),
+                          ),
+                          "Map",
+                          () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return MapScreen();
+                                },
+                              ),
+                            );
+                          },
+                        ),
+
+                        // weather
+                        detailIcons(
+                          const Color.fromARGB(255, 240, 249, 255),
+                          Icon(
+                            Icons.wb_sunny,
+                            size: 30,
+                            color: const Color.fromARGB(255, 56, 189, 248),
+                          ),
+                          "Weather",
+                          () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return WeatherScreen();
+                                },
+                              ),
+                            );
+                          },
+                        ),
+
+                        // emergency
+                        detailIcons(
+                          const Color.fromARGB(255, 254, 242, 242),
+                          Icon(
+                            Icons.sos,
+                            size: 30,
+                            color: const Color.fromARGB(255, 239, 68, 68),
+                          ),
+                          "Emergency",
+                          () {},
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ),
-              SizedBox(height: 20),
-              // icon section
-              Column(
-                children: [
-                  // first row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      // find guides
-                      detailIcons(
-                        const Color.fromARGB(255, 240, 253, 244),
-                        Icon(
-                          Icons.hail,
-                          size: 30,
-                          color: const Color.fromARGB(255, 153, 204, 102),
+                SizedBox(height: 20),
+                // recommendation section
+                Column(
+                  children: [
+                    // heading
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Recommendations for you",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        "Find guides",
-                        () {},
-                      ),
-
-                      // places
-                      detailIcons(
-                        const Color.fromARGB(255, 239, 246, 255),
-                        Icon(
-                          Icons.landscape,
-                          size: 30,
-                          color: const Color.fromARGB(255, 59, 130, 246),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return PackageList(packages);
+                                },
+                              ),
+                            );
+                          },
+                          icon: Text(
+                            "See more",
+                            style: TextStyle(color: Colors.green),
+                          ),
                         ),
-                        "Places",
-                        () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return PlacesListScreen();
-                              },
-                            ),
-                          );
-                        },
-                      ),
-
-                      // activities
-                      detailIcons(
-                        const Color.fromARGB(255, 255, 247, 237),
-                        Icon(
-                          Icons.surfing,
-                          size: 30,
-                          color: const Color.fromARGB(255, 249, 115, 22),
+                      ],
+                    ),
+                    if (packages.isEmpty)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 150,
+                        child: Center(
+                          child: Text("No recommendations to show"),
                         ),
-                        "Activities",
-                        () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return ActivitiesListScreen();
-                              },
-                            ),
-                          );
-                        },
                       ),
-                    ],
+                    if (packages.isNotEmpty)
+                      SizedBox(
+                        width: double.infinity,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            spacing: 20,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              for (int i = 0; i < packages.length; i++)
+                                suggestionScrollableView(
+                                  packages[i]['coverImage'],
+                                  packages[i]['packageTitle'],
+                                  packages[i]['location'],
+                                  '${packages[i]['price']}',
+                                  packages[i],
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                SizedBox(height: 30),
+                // AI guide
+                Container(
+                  padding: EdgeInsets.all(10),
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color.fromARGB(255, 15, 23, 42),
+                        const Color.fromARGB(255, 42, 58, 53),
+                      ],
+                      begin: Alignment.topLeft, // start point
+                      end: Alignment.bottomRight, // end point
+                    ),
                   ),
-                  SizedBox(height: 10),
-                  // second row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      // map
-                      detailIcons(
-                        const Color.fromARGB(255, 238, 242, 255),
-                        Icon(
-                          Icons.map,
-                          size: 30,
-                          color: const Color.fromARGB(255, 99, 102, 241),
-                        ),
-                        "Map",
-                        () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return MapScreen();
-                              },
-                            ),
-                          );
-                        },
-                      ),
-
-                      // weather
-                      detailIcons(
-                        const Color.fromARGB(255, 240, 249, 255),
-                        Icon(
-                          Icons.wb_sunny,
-                          size: 30,
-                          color: const Color.fromARGB(255, 56, 189, 248),
-                        ),
-                        "Weather",
-                        () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return WeatherScreen();
-                              },
-                            ),
-                          );
-                        },
-                      ),
-
-                      // emergency
-                      detailIcons(
-                        const Color.fromARGB(255, 254, 242, 242),
-                        Icon(
-                          Icons.sos,
-                          size: 30,
-                          color: const Color.fromARGB(255, 239, 68, 68),
-                        ),
-                        "Emergency",
-                        () {},
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              // recommendation section
-              Column(
-                children: [
-                  // heading
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 15,
                     children: [
                       Text(
-                        "Recommendations for you",
+                        "Need a customized\ntour plan?",
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       IconButton(
                         onPressed: () {},
-                        icon: Text(
-                          "See more",
-                          style: TextStyle(color: Colors.green),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        spacing: 20,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          suggestionScrollableView(),
-                          suggestionScrollableView(),
-                          suggestionScrollableView(),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 30),
-              // AI guide
-              Container(
-                padding: EdgeInsets.all(10),
-                width: double.infinity,
-                height: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  gradient: LinearGradient(
-                    colors: [
-                      const Color.fromARGB(255, 15, 23, 42),
-                      const Color.fromARGB(255, 42, 58, 53),
-                    ],
-                    begin: Alignment.topLeft, // start point
-                    end: Alignment.bottomRight, // end point
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 15,
-                  children: [
-                    Text(
-                      "Need a customized\ntour plan?",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        width: 150,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Ask AI Guide",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
+                        icon: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          width: 150,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Ask AI Guide",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-            ],
+              ],
+            ),
           ),
         ),
       ),
