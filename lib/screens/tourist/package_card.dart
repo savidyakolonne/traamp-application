@@ -96,7 +96,7 @@ class _PackageCardState extends State<PackageCard> {
 
             // content section
             Container(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(10),
               width: double.infinity,
               child: Column(
                 children: [
