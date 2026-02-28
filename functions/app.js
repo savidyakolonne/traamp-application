@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
 import placesRouter from "./routes/places.routes.js";
-import userRouter from "./routes/users.mjs";
-import placeRouter from "./routes/place.routes.js";
 import activityRouter from "./routes/activity.routes.js";
+import userRouter from "./routes/users.mjs";
 import packageRouter from "./routes/guide_package.mjs";
+import galleryRouter from "./routes/gallery.mjs";
 
 const app = express();
 
@@ -16,8 +16,8 @@ app.get("/", (_, res) => res.send("Server is running..."));
 
 app.use("/api/places", placesRouter);
 app.use("/api/users", userRouter);
-app.use("/api/place", placeRouter);
 app.use("/api/activity", activityRouter);
 app.use("/api/guidePackage", packageRouter);
+app.use("/api/gallery", galleryRouter);
 
 export default app;
