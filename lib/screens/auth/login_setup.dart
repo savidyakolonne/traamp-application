@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../main_tab_view.dart';
+import '../../app_config.dart';
+import '../../components/main_tab_view.dart';
 import 'signup.dart';
 
 class LoginSetup extends StatefulWidget {
@@ -20,6 +21,7 @@ class _LoginSetupState extends State<LoginSetup> {
   bool _obscureState = true;
   late Map<String, dynamic> userData;
 
+  // function to hide and visible password
   Widget showAndHidePasswordIcon() {
     return IconButton(
       icon: Icon(
@@ -35,6 +37,7 @@ class _LoginSetupState extends State<LoginSetup> {
     );
   }
 
+  // function to login with email and password
   Future<void> loginEmail() async {
     String email = emailCtrl.text.trim().toLowerCase();
     String password = passCtrl.text;
@@ -45,7 +48,7 @@ class _LoginSetupState extends State<LoginSetup> {
 
       final idToken = await userCredential.user!.getIdToken();
       final response = await http.post(
-        Uri.parse("http://localhost:3000/api/users/loginWithEmail"),
+        Uri.parse("${AppConfig.SERVER_URL}/api/users/loginWithEmail"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"idToken": idToken}),
       );
@@ -100,7 +103,7 @@ class _LoginSetupState extends State<LoginSetup> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Something wrong...'),
+              content: Text('User type is invalid...'),
               backgroundColor: Colors.red,
             ),
           );
@@ -110,7 +113,7 @@ class _LoginSetupState extends State<LoginSetup> {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error while connecting to server...'),
+          content: Text('Incorrect username or password.'),
           backgroundColor: Colors.red,
         ),
       );

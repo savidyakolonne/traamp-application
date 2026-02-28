@@ -1,15 +1,11 @@
 import 'dart:convert';
-import 'package:clickable_widget/clickable_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:text_gradiate/text_gradiate.dart';
-import '../../services/location_service.dart';
+import '../../app_config.dart';
 import '../../components/weather/weather_screen.dart';
-import 'guide_gallery.dart';
-import 'guide_package.dart';
+import 'guide gallery/guide_gallery.dart';
+import 'guide packages/guide_package.dart';
 
 class GuideDashboard extends StatefulWidget {
   @override
@@ -18,6 +14,7 @@ class GuideDashboard extends StatefulWidget {
 
 class _GuideDashboardState extends State<GuideDashboard> {
   String currentLocation = "Unknown location";
+  String profilePicture = "";
   late String? idToken = "";
   bool availability = false;
   late String dropdownValue;
@@ -31,7 +28,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
         idToken = await user.getIdToken(true);
         if (idToken != null) {
           final response = await http.post(
-            Uri.parse("http://10.0.2.2:3000/api/users/get-user-data"),
+            Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({"idToken": idToken}),
           );
@@ -42,6 +39,9 @@ class _GuideDashboardState extends State<GuideDashboard> {
             setState(() {
               userData = data['data'];
               availability = userData['availability'];
+              if (userData['profilePicture'] != null) {
+                profilePicture = userData['profilePicture'];
+              }
             });
             print(data['msg']);
           } else if (response.statusCode == 401) {
@@ -58,137 +58,52 @@ class _GuideDashboardState extends State<GuideDashboard> {
     }
   }
 
-  String getAvailability(List<String> list) {
-    if (availability == true) {
-      return list[1];
-    } else if (availability == false) {
-      return list[0];
-    } else {
-      return "";
-    }
-  }
-
-  Widget availabilityStatusDropMenu() {
-    List<String> list = ["I'm not available", "I'm currently available"];
-    String dropdownValue = getAvailability(list);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+  Widget detailIcons(
+    Color backgroundColor,
+    Widget icon,
+    String name,
+    Function() function,
+  ) {
+    return Column(
       children: [
-        DropdownButton<String>(
-          value: dropdownValue,
-          borderRadius: BorderRadius.circular(16),
-          icon: const Icon(Icons.keyboard_arrow_down_rounded),
-          elevation: 16,
-          style: TextStyle(color: availability ? Colors.green : Colors.red),
-          onChanged: (String? value) async {
-            setState(() {
-              // update dropdown value
-              dropdownValue = value!;
-              availability = (dropdownValue == list[1]);
-            });
-            // update database
-            try {
-              final currentUser = FirebaseAuth.instance.currentUser;
-              if (currentUser != null && idToken != null) {
-                final response = await http.put(
-                  Uri.parse(
-                    "http://10.0.2.2:3000/api/users/update-guide-availability",
-                  ),
-                  headers: {"Content-Type": "application/json"},
-                  body: jsonEncode({
-                    "idToken": idToken,
-                    "availability": availability,
-                  }),
-                );
-                final data = jsonDecode(response.body);
-                if (response.statusCode == 200) {
-                  print('${data['msg']}');
-                }
-                if (response.statusCode == 404) {
-                  print('${data['msg']}');
-                }
-                if (response.statusCode == 400) {
-                  print('${data['msg']}');
-                }
-              } else {
-                print(
-                  "Something wrong during creating instance from firebase or idToken",
-                );
-              }
-            } catch (e) {
-              print(e.toString());
-            }
-          },
-          items: list.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(value: value, child: Text(value));
-          }).toList(),
+        IconButton(
+          onPressed: function,
+          icon: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: const Color.fromARGB(47, 0, 0, 0),
+                  spreadRadius: 1,
+                  blurRadius: 8,
+                  offset: Offset(0, 1),
+                ),
+              ],
+
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: icon,
+          ),
+        ),
+        Text(
+          name,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: name == "Emergency"
+                ? const Color.fromARGB(255, 239, 68, 68)
+                : Colors.black,
+          ),
         ),
       ],
     );
-  }
-
-  Widget cardElement(String imageURL, String cardTitle, bool toGuidePackage) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: ClickableCard(
-        color: Colors.white,
-        child: Row(
-          children: [
-            Image.asset(imageURL),
-            SizedBox(width: 8),
-            TextGradiate(
-              text: Text(
-                cardTitle,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
-              ),
-              colors: [
-                const Color.fromARGB(255, 61, 141, 64),
-                const Color.fromARGB(255, 0, 64, 36),
-              ],
-              gradientType: GradientType.linear,
-            ),
-            SizedBox(width: 8),
-          ],
-        ),
-        // if toGuidePackage = true go to guide package screen else go to gallery screen
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>
-                  toGuidePackage ? GuidePackage() : GuideGallery(),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Future<void> getCurrentCity() async {
-    try {
-      // Get current position
-      Position position = await LocationService.getCurrentPosition();
-
-      // Convert coordinates to placemark
-      List<Placemark> placemark = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      // Extract city/town name
-      Placemark place = placemark[0];
-      setState(() {
-        currentLocation = place.locality!;
-      });
-    } catch (e) {
-      print("Error: $e");
-    }
   }
 
   @override
   void initState() {
     super.initState();
     getUserData();
-    getCurrentCity();
   }
 
   @override
@@ -196,179 +111,326 @@ class _GuideDashboardState extends State<GuideDashboard> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.white, Colors.green],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
         title: Row(
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              fit: BoxFit.contain,
-              height: 60,
+            CircleAvatar(
+              backgroundImage: (profilePicture.isNotEmpty)
+                  ? NetworkImage(profilePicture)
+                  : (userData['gender'] == "Female"
+                        ? AssetImage('assets/images/avatar-female.avif')
+                        : AssetImage('assets/images/avatar-male.avif')),
             ),
             SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ShaderMask(
-                  shaderCallback: (bounds) => LinearGradient(
-                    colors: [Colors.black, Colors.green],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ).createShader(bounds),
-                  child: Text(
-                    "Traamp",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
                 Text(
-                  "Hi ${userData['firstName']}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20.0,
-                    color: Colors.amber[900],
-                  ),
+                  "Hi, ${userData['firstName']}",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+                ),
+                Row(
+                  spacing: 8,
+                  children: [
+                    Icon(
+                      Icons.star,
+                      size: 16,
+                      color: const Color.fromARGB(255, 234, 210, 0),
+                    ),
+                    Text(
+                      "4.9",
+                      style: TextStyle(
+                        color: const Color.fromARGB(255, 100, 116, 139),
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ],
         ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(30.0),
-          child: Container(),
-        ),
-        actions: [
-          Padding(
-            padding: EdgeInsetsGeometry.only(right: 8),
-            child: Row(
-              children: [
-                Icon(Icons.star, size: 20.0, color: Colors.yellow[700]),
-                Text('${userData['rating']}'),
-              ],
-            ),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.only(
-            top: 20.0,
-            left: 18.0,
-            right: 18.0,
-            bottom: 20,
-          ),
+          padding: EdgeInsets.all(16),
           child: Column(
-            spacing: 8,
             children: [
-              Text(
-                "Welcome to your\nDashboard",
-                style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      getCurrentCity();
-                    },
-                    icon: Icon(Icons.location_on_outlined),
-                  ),
-                  Text(currentLocation),
-                ],
-              ),
-              availabilityStatusDropMenu(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 8,
-                children: [
-                  cardElement(
-                    "assets/images/jeep.png",
-                    "Your Packages  ",
-                    true,
-                  ),
-                  cardElement(
-                    "assets/images/wild.png",
-                    "Your Gallery       ",
-                    false,
-                  ),
-                ],
-              ),
-              SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // #1
-                  Column(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          border: BoxBorder.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: IconButton(
-                          onPressed: () {},
-                          icon: Image.asset("assets/images/news.png"),
-                        ),
-                      ),
-                      Text("News"),
-                    ],
-                  ),
+              SizedBox(height: 10),
 
-                  // #2
-                  Column(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          border: BoxBorder.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(16),
+              // current status
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(53, 0, 0, 0),
+                      blurRadius: 30,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "CURRENT STATUS",
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 100, 116, 139),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        child: IconButton(
-                          onPressed: () {
+                        Text(
+                          "Available for Tours",
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 139, 195, 74),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Switch(
+                      value: availability,
+                      trackColor: availability
+                          ? WidgetStatePropertyAll<Color>(
+                              const Color.fromARGB(255, 139, 195, 74),
+                            )
+                          : WidgetStatePropertyAll<Color>(
+                              const Color.fromARGB(255, 200, 200, 200),
+                            ),
+                      thumbColor: const WidgetStatePropertyAll<Color>(
+                        Colors.white,
+                      ),
+                      onChanged: (bool value) async {
+                        setState(() {
+                          if (availability) {
+                            availability = false;
+                          } else {
+                            availability = true;
+                          }
+                        });
+                        // update database
+                        try {
+                          final currentUser = FirebaseAuth.instance.currentUser;
+                          if (currentUser != null && idToken != null) {
+                            final response = await http.put(
+                              Uri.parse(
+                                "${AppConfig.SERVER_URL}/api/users/update-guide-availability",
+                              ),
+                              headers: {"Content-Type": "application/json"},
+                              body: jsonEncode({
+                                "idToken": idToken,
+                                "availability": availability,
+                              }),
+                            );
+                            final data = jsonDecode(response.body);
+                            if (response.statusCode == 200) {
+                              print('${data['msg']}');
+                            }
+                            if (response.statusCode == 404) {
+                              print('${data['msg']}');
+                            }
+                            if (response.statusCode == 400) {
+                              print('${data['msg']}');
+                            }
+                          } else {
+                            print(
+                              "Something wrong during creating instance from firebase or idToken",
+                            );
+                          }
+                        } catch (e) {
+                          print(e.toString());
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+              // packages
+              Container(
+                padding: EdgeInsets.all(20),
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  image: DecorationImage(
+                    fit: BoxFit.fill,
+                    image: AssetImage("assets/images/mountain.png"),
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Your Packages",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return GuidePackage(userData['uid']);
+                            },
+                          ),
+                        );
+                      },
+                      icon: Row(
+                        spacing: 10,
+                        children: [
+                          Text(
+                            "Manage",
+                            style: TextStyle(
+                              color: const Color.fromARGB(255, 179, 255, 93),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward,
+                            color: const Color.fromARGB(255, 179, 255, 93),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+              // gallery
+              Container(
+                padding: EdgeInsets.all(20),
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  image: DecorationImage(
+                    fit: BoxFit.fill,
+                    image: AssetImage("assets/images/beach.png"),
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Photo Gallery",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return GuideGallery(userData['uid']);
+                            },
+                          ),
+                        );
+                      },
+                      icon: Row(
+                        spacing: 10,
+                        children: [
+                          Text(
+                            "View More",
+                            style: TextStyle(
+                              color: const Color.fromARGB(255, 179, 255, 93),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward,
+                            color: const Color.fromARGB(255, 179, 255, 93),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // utility section
+              Container(
+                padding: EdgeInsets.all(10),
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Utilities",
+                      style: TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    // icons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        // news
+                        detailIcons(
+                          const Color.fromARGB(255, 255, 237, 213),
+                          Icon(
+                            Icons.newspaper,
+                            size: 30,
+                            color: const Color.fromARGB(255, 249, 115, 22),
+                          ),
+                          "News",
+                          () {},
+                        ),
+
+                        // weather
+                        detailIcons(
+                          const Color.fromARGB(255, 219, 234, 254),
+                          Icon(
+                            Icons.wb_sunny,
+                            size: 30,
+                            color: const Color.fromARGB(255, 59, 130, 246),
+                          ),
+                          "Weather",
+                          () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) {
-                                  return WeatherScreen(false);
+                                  return WeatherScreen();
                                 },
                               ),
                             );
                           },
-                          icon: Image.asset("assets/images/weather.png"),
                         ),
-                      ),
-                      Text("Weather"),
-                    ],
-                  ),
 
-                  // #3
-                  Column(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          border: BoxBorder.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(16),
+                        // emergency
+                        detailIcons(
+                          const Color.fromARGB(255, 254, 226, 226),
+                          Icon(
+                            Icons.sos,
+                            size: 30,
+                            color: const Color.fromARGB(255, 239, 68, 68),
+                          ),
+                          "Emergency",
+                          () {},
                         ),
-                        child: IconButton(
-                          onPressed: () {},
-                          icon: Image.asset("assets/images/sos.png"),
-                        ),
-                      ),
-                      Text("Emergency\ncontacts", textAlign: TextAlign.center),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
