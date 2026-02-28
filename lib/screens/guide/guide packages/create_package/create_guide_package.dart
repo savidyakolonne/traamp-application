@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../../../appConfig.dart';
+import '../../../../app_config.dart';
 import '../guide_package.dart';
 import 'guide_package_data.dart';
 import 'info_tab.dart';

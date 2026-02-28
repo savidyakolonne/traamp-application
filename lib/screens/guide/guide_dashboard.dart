@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../appConfig.dart';
+import '../../app_config.dart';
 import '../../components/weather/weather_screen.dart';
 import 'guide gallery/guide_gallery.dart';
 import 'guide packages/guide_package.dart';

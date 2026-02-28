@@ -15,8 +15,25 @@ This repository contains:
 ```text
 TRAAMP-MOBILE-FRONTEND/
 ├── lib/                      # Flutter frontend source code
+|   |   components/
+|   |   |   packages/
+|   |   |   |── guide_package_card.dart
+|   |   |   weather/
+|   |   |   |── weather_card_element.dart
+|   |   |   |── weather_forecast.dart
+|   |   |   |── weather_screen.dart 
+|   |   |   main_tab_view.dart
+|   |   |   settings_screen.dart
+|   |   models/
+|   |   |   |── activity_model.dart
+|   |   |   |── char_message.dart
+|   |   |   |── place_model.dart
 │   ├── screens/              # UI screens and layouts
 │   │   ├── auth/             # Login and Registration screens
+|   |   |── activities/
+|   |   |── assistant/
+|   |   |── emergency/
+|   |   |── places/
 │   │   ├── guide/            # Guide dashboard and specific features
 │   │   ├── tourist/          # Tourist dashboard and specific features
 │   │   └── map/
@@ -24,14 +41,19 @@ TRAAMP-MOBILE-FRONTEND/
 │   ├── services/
 │   │   └── position.dart     # GPS logic and location permission handling
 │   └── main.dart             # Application entry point
-├── functions/                # Node.js (Firebase Functions) backend
+├── functions/
+|    # Node.js (Firebase Functions) backend
 │   ├── routes/
 │   │   └── places.routes.js  # Nearby places API endpoints
+|   |   |   activity.routes.js # activity listing route .
+|   |   |   guide_package.mjs #
+|   |   |   users.mjs         #
 │   ├── firebaseAdmin.js      # Firebase Admin SDK initialization
 │   ├── app.js                # Express.js application configuration
 │   ├── index.js              # Backend entry point
 │   ├── package.json          # Node.js dependencies
 │   └── package-lock.json
+|   |   serviceAccountKey.json # service account uris and other related stuff
 ├── assets/                   # Images, icons, and static assets
 ├── web/                      # Flutter web platform configuration
 ├── android/                  # Android native platform files
@@ -70,9 +92,15 @@ flutter doctor
 
 ▶️ Running Order (IMPORTANT)
 
+dependecies check-
+
+
 Start Backend - 
 cd functions
 node index.js
 
 Start Flutter App - 
 flutter run 
+
+if using a web browser:
+flutter run -d chrome --dart-define=GEMINI_API_KEY=YOUR_KEY  for the running on the chrome .(to check the traamp assistant)

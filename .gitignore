@@ -56,6 +56,8 @@ app.*.map.json
 /android/app/release
 /android/local.properties
 android/.gradle/
+/android/local.properties
+android/.gradle/
 
 # ======================
 # Backend (Node / Firebase)
@@ -63,6 +65,10 @@ android/.gradle/
 functions/node_modules/
 functions/serviceAccountKey.json
 functions/.env
+
+# ADDED (Firebase local & debug)
+.firebase/
+firebase-debug.log
 
 # ADDED (Firebase local & debug)
 .firebase/

@@ -3,12 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/screens/map/map_screen.dart';
+import '../../app_config.dart';
 import '../places/places_list_screen.dart';
 import '../activities/activities_list_screen.dart';
-import '../../appConfig.dart';
 import '../../components/weather/weather_screen.dart';
 import 'deatailed_package_view_tourist.dart';
 import 'package_list.dart';
+import 'package:traamp_frontend/screens/tourist/tourist_find_guide.dart';
+import 'package:traamp_frontend/screens/assistant/assistant_home.dart';
 
 class TouristDashboard extends StatefulWidget {
   @override
@@ -368,7 +370,14 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             color: const Color.fromARGB(255, 153, 204, 102),
                           ),
                           "Find guides",
-                          () {},
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const FindGuidesScreen(),
+                              ),
+                            );
+                          },
                         ),
 
                         // places
@@ -566,7 +575,14 @@ class _TouristDashboardState extends State<TouristDashboard> {
                         ),
                       ),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AssistantHome(),
+                            ),
+                          );
+                        },
                         icon: Container(
                           padding: EdgeInsets.symmetric(
                             horizontal: 20,
