@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:weather/weather.dart';
+import '../../screens/guide/guide_dashboard.dart';
 import '../../services/location_service.dart';
 import '../../services/weather_service.dart';
 import 'weather_card_element.dart';
 import 'weather_forecast.dart';
 
 class WeatherScreen extends StatefulWidget {
-  final bool isTourist;
-  WeatherScreen(this.isTourist);
+  const WeatherScreen({super.key});
 
   @override
   State<WeatherScreen> createState() => _WeatherScreenState();
@@ -171,237 +171,328 @@ class _WeatherScreenState extends State<WeatherScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueAccent,
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
-        title: Text(
-          "Weather",
-          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 30),
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context, GuideDashboard());
+          },
+          icon: Icon(Icons.arrow_back),
         ),
-        backgroundColor: Colors.blueAccent,
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(50),
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.white),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            width: double.infinity,
-            height: 40,
-            child: Center(
-              child: TextField(
-                keyboardType: TextInputType.text,
-                controller: _textController,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Search any location in Sri Lanka",
-                  hintStyle: TextStyle(
-                    color: const Color.fromARGB(140, 255, 255, 255),
-                  ),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      getCurrentWeatherByName(city);
-                    },
-                    icon: Icon(Icons.location_on_outlined, color: Colors.white),
-                  ),
-                ),
-                onChanged: (text) {
-                  setState(() {
-                    String formattedText =
-                        text[0].toUpperCase() + text.substring(1).toLowerCase();
-                    city = formattedText.trim();
-                  });
-                },
-              ),
-            ),
-          ),
+        title: Text(
+          "Stay Prepared",
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 22),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          width: double.infinity,
+      body: RefreshIndicator(
+        onRefresh: getCurrentCityAndWeather,
+        child: SingleChildScrollView(
           child: Container(
-            margin: EdgeInsets.all(16.0),
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(81, 255, 255, 255),
-              borderRadius: BorderRadius.circular(24.0),
-            ),
-            padding: EdgeInsets.all(8.0),
+            padding: EdgeInsets.only(top: 16),
             child: Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.50,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: currentWeather.isEmpty
-                            ? Text("Last Update: --")
-                            : Text("Last Update: ${currentWeather['time']}"),
+                // search bar section
+                Container(
+                  margin: EdgeInsets.all(16),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color.fromARGB(61, 0, 0, 0),
+                        blurRadius: 10,
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        getCurrentCityAndWeather();
-                        _textController.text = "";
-                      },
-                      icon: Row(
-                        children: [
-                          Icon(Icons.refresh_outlined, color: Colors.white),
-                          SizedBox(width: 8),
-                          Text(
-                            "Refresh",
-                            style: TextStyle(color: Colors.white),
+                    ],
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  width: double.infinity,
+                  height: 60,
+                  child: Center(
+                    child: TextField(
+                      keyboardType: TextInputType.text,
+                      controller: _textController,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: "Search any location in Sri Lanka",
+                        hintStyle: TextStyle(
+                          color: const Color.fromARGB(255, 100, 116, 139),
+                        ),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            getCurrentWeatherByName(city);
+                          },
+                          icon: Icon(
+                            Icons.location_on_outlined,
+                            color: const Color.fromARGB(255, 100, 116, 139),
+                            size: 28,
                           ),
-                        ],
+                        ),
                       ),
+                      onChanged: (text) {
+                        setState(() {
+                          String formattedText =
+                              text[0].toUpperCase() +
+                              text.substring(1).toLowerCase();
+                          city = formattedText.trim();
+                        });
+                      },
                     ),
-                  ],
+                  ),
                 ),
 
-                SizedBox(
+                // Weather info section
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(16.0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Column(
+                      // last update
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            "${currentLocation}",
-                            style: TextStyle(
-                              fontSize: 30.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.50,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: currentWeather.isEmpty
+                                  ? Text("Last Update: --")
+                                  : Text(
+                                      "Last Update: ${currentWeather['time']}",
+                                    ),
                             ),
-                          ),
-                          Text(
-                            "${formattedDate}",
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
 
-                      Column(
-                        children: [
-                          weatherImage,
-                          Text(
-                            currentWeather.isEmpty
-                                ? "--\u00B0C"
-                                : "${currentWeather['temp']}\u00B0C",
-                            style: TextStyle(
-                              fontSize: 50.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            currentWeather.isEmpty
-                                ? "--"
-                                : "${currentWeather['weather']}",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          Text(
-                            currentWeather.isEmpty
-                                ? "H: --\u00B0 L: --\u00B0"
-                                : "H: ${currentWeather['temp-high']}\u00B0 L: ${currentWeather['temp-low']}\u00B0",
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                        ],
+                      SizedBox(height: 30),
+
+                      // image
+                      Container(
+                        width: 128,
+                        height: 128,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          color: Color.fromARGB(255, 125, 212, 33),
+                        ),
+                        child: Center(child: weatherImage),
                       ),
-                      Column(
-                        children: [
-                          // first row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              // wind card
-                              WeatherCardElement.card(
-                                context,
-                                Icons.air,
-                                "Wind",
-                                currentWeather.isEmpty
-                                    ? "--"
-                                    : currentWeather['wind'],
-                                "km/h",
-                              ),
-                              // Humidity card
-                              WeatherCardElement.card(
-                                context,
-                                Icons.water_drop_outlined,
-                                "Humidity",
-                                currentWeather.isEmpty
-                                    ? "--"
-                                    : currentWeather['humidity'],
-                                "%",
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16.0),
-                          // second row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              // Wind direction card
-                              WeatherCardElement.card(
-                                context,
-                                Icons.explore_outlined,
-                                "Wind Direction",
-                                currentWeather.isEmpty
-                                    ? "--"
-                                    : currentWeather['wind-direction'],
-                                "\u00B0",
-                              ),
-                              // Pressure card
-                              WeatherCardElement.card(
-                                context,
-                                Icons.speed_outlined,
-                                "Pressure",
-                                currentWeather.isEmpty
-                                    ? "--"
-                                    : currentWeather['pressure'],
-                                "hPa",
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Weather Forecast",
-                                style: TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white,
+
+                      SizedBox(height: 20),
+
+                      SizedBox(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            // location
+                            Column(
+                              children: [
+                                Text(
+                                  currentLocation,
+                                  style: TextStyle(
+                                    fontSize: 25.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                textAlign: TextAlign.start,
+                              ],
+                            ),
+
+                            // condition
+                            Text(
+                              currentWeather.isEmpty
+                                  ? "--"
+                                  : "${currentWeather['weather']}",
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                color: const Color.fromARGB(255, 100, 116, 139),
+                                fontWeight: FontWeight.bold,
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 10),
-                          forecast.isNotEmpty
-                              ? WeatherForecast(forecast)
-                              : Center(
-                                  child: CircularProgressIndicator.adaptive(),
+                            ),
+
+                            // temperature
+                            Column(
+                              children: [
+                                Text(
+                                  currentWeather.isEmpty
+                                      ? "--\u00B0C"
+                                      : "${currentWeather['temp']}\u00B0C",
+                                  style: TextStyle(
+                                    fontSize: 72.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
 
-                          SizedBox(height: 10),
-                        ],
+                                // high - low temperature
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  spacing: 16,
+                                  children: [
+                                    // high
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.arrow_upward,
+                                          size: 20,
+                                          color: const Color.fromARGB(
+                                            255,
+                                            100,
+                                            116,
+                                            139,
+                                          ),
+                                        ),
+                                        Text(
+                                          currentWeather.isEmpty
+                                              ? "H: --\u00B0"
+                                              : "H: ${currentWeather['temp-high']}\u00B0",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16.0,
+                                            color: const Color.fromARGB(
+                                              255,
+                                              100,
+                                              116,
+                                              139,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    // low
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.arrow_downward,
+                                          size: 20,
+                                          color: const Color.fromARGB(
+                                            255,
+                                            100,
+                                            116,
+                                            139,
+                                          ),
+                                        ),
+                                        Text(
+                                          currentWeather.isEmpty
+                                              ? "L: --\u00B0"
+                                              : "L: ${currentWeather['temp-low']}\u00B0",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16.0,
+                                            color: const Color.fromARGB(
+                                              255,
+                                              100,
+                                              116,
+                                              139,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 30),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                // first row
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // wind card
+                                    WeatherCardElement.card(
+                                      context,
+                                      Icons.air,
+                                      "Wind",
+                                      currentWeather.isEmpty
+                                          ? "--"
+                                          : currentWeather['wind'],
+                                      "km/h",
+                                    ),
+                                    // Humidity card
+                                    WeatherCardElement.card(
+                                      context,
+                                      Icons.water_drop_outlined,
+                                      "Humidity",
+                                      currentWeather.isEmpty
+                                          ? "--"
+                                          : currentWeather['humidity'],
+                                      "%",
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 16.0),
+                                // second row
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // Wind direction card
+                                    WeatherCardElement.card(
+                                      context,
+                                      Icons.explore_outlined,
+                                      "Direction",
+                                      currentWeather.isEmpty
+                                          ? "--"
+                                          : currentWeather['wind-direction'],
+                                      "\u00B0",
+                                    ),
+                                    // Pressure card
+                                    WeatherCardElement.card(
+                                      context,
+                                      Icons.speed_outlined,
+                                      "Pressure",
+                                      currentWeather.isEmpty
+                                          ? "--"
+                                          : currentWeather['pressure'],
+                                      "hPa",
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 30),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Weather Forecast",
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.start,
+                                    ),
+                                    Text(
+                                      "Next 7 Days",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color.fromARGB(
+                                          255,
+                                          125,
+                                          212,
+                                          33,
+                                        ),
+                                      ),
+                                      textAlign: TextAlign.start,
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 20),
+                                forecast.isNotEmpty
+                                    ? WeatherForecast(forecast)
+                                    : Center(
+                                        child:
+                                            CircularProgressIndicator.adaptive(),
+                                      ),
+
+                                SizedBox(height: 10),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
