@@ -54,6 +54,8 @@ TRAAMP-MOBILE-FRONTEND/
 │   ├── package.json          # Node.js dependencies
 │   └── package-lock.json
 |   |   serviceAccountKey.json # service account uris and other related stuff
+|
+|── .env
 ├── assets/                   # Images, icons, and static assets
 ├── web/                      # Flutter web platform configuration
 ├── android/                  # Android native platform files
@@ -93,7 +95,11 @@ flutter doctor
 ▶️ Running Order (IMPORTANT)
 
 dependecies check-
-
+Front end
+  flutter clean
+  flutter pub get
+backend 
+  npm i
 
 Start Backend - 
 cd functions
