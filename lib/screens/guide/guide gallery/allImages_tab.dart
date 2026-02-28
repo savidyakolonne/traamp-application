@@ -24,7 +24,13 @@ class _AllImagesState extends State<AllImages> {
     if (widget.galleryImages.isEmpty && widget.packageImages.isEmpty) {
       return RefreshIndicator(
         onRefresh: widget.onRefresh,
-        child: Center(child: Text("No images to show")),
+        child: SingleChildScrollView(
+          child: SizedBox(
+            width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.8,
+            child: Center(child: Text("No images to show")),
+          ),
+        ),
       );
     } else {
       return RefreshIndicator(

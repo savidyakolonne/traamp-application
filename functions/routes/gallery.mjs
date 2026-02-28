@@ -90,11 +90,11 @@ galleryRouter.post(
   },
 );
 
+// Delete each image from Firebase Storage
 galleryRouter.delete("/delete-gallery", async (req, res) => {
   const { galleryId, image } = req.body;
 
   try {
-    // Delete each image from Firebase Storage
     try {
       const withoutQuery = image.split("?")[0];
       let storagePath;
@@ -119,7 +119,22 @@ galleryRouter.delete("/delete-gallery", async (req, res) => {
       images: FieldValue.arrayRemove(image),
     });
 
+    // check the document has no images
+    const doc = await docRef.get();
+    if (!doc.exists) {
+      console.log("No such document!");
+    } else {
+      const data = doc.data();
+      console.log("Document data:", data);
+      const imageLength = data["images"].length;
+      console.log("Image length:", imageLength);
+      if (imageLength === 0) {
+        await docRef.delete();
+        console.log("Empty document deleted successfully.");
+      }
+    }
     console.log("Successfully removed image from gallery.");
+
     res.status(200).json({
       msg: "Successfully removed image from gallery.",
     });
