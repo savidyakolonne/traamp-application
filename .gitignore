@@ -11,7 +11,6 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-pubspec.lock
 
 # IntelliJ related
 *.iml
@@ -33,6 +32,16 @@ pubspec.lock
 .pub/
 /build/
 /coverage/
+.env
+
+# ADDED (missing Flutter generated files)
+.flutter-plugins
+.packages
+ios/Flutter/ephemeral/
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+web/flutter_bootstrap.js
 
 # Symbolication related
 app.*.symbols
@@ -44,8 +53,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-
+/android/local.properties
+android/.gradle/
 
 # ======================
 # Backend (Node / Firebase)
@@ -53,6 +62,10 @@ app.*.map.json
 functions/node_modules/
 functions/serviceAccountKey.json
 functions/.env
+
+# ADDED (Firebase local & debug)
+.firebase/
+firebase-debug.log
 
 # Safety net (any nested node project)
 **/node_modules/
