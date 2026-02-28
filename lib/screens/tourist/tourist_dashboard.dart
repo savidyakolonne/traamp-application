@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 import '../../app_config.dart';
+import '../emergency_services/emergency_services.dart';
 import '../places/places_list_screen.dart';
 import '../activities/activities_list_screen.dart';
 import '../../components/weather/weather_screen.dart';
@@ -475,7 +476,11 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             color: const Color.fromARGB(255, 239, 68, 68),
                           ),
                           "Emergency",
-                          () {},
+                          () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context){
+                              return EmergencyServices();
+                            }));
+                          },
                         ),
                       ],
                     ),
