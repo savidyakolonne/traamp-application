@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:traamp_frontend/appConfig.dart';
 import 'package:traamp_frontend/screens/guide/guide_dashboard.dart';
+import '../../../app_config.dart';
 import '../../../components/packages/guide_package_card.dart';
 import 'create_package/create_guide_package.dart';
 

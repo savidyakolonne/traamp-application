@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:traamp_frontend/appConfig.dart';
+import '../../../app_config.dart';
 import 'guide_package.dart';
 
 // ignore: must_be_immutable
