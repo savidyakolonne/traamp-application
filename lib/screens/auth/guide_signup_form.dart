@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../AppConfig.dart';
+import '../../app_config.dart';
 import '../../list-data.dart';
 import '../../services/guide.dart';
 import 'login_setup.dart';
