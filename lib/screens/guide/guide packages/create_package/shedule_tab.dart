@@ -12,8 +12,8 @@ class ScheduleTab extends StatefulWidget {
 }
 
 class _ScheduleTabTabState extends State<ScheduleTab> {
-  List<String> _units = ["Hours", "Days"];
-  List<String> _season = ["All Year", "Summer", "Winter", "Monsoon"];
+  final List<String> _units = ["Hours", "Days"];
+  final List<String> _season = ["All Year", "Summer", "Winter", "Monsoon"];
   List<String> durationArray = ["", ""];
 
   Set<String> _availableDays = {};
@@ -66,13 +66,20 @@ class _ScheduleTabTabState extends State<ScheduleTab> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Duration Value*", style: TextStyle(fontSize: 18)),
+                    Text(
+                      "Duration Value*",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: const Color.fromARGB(255, 15, 84, 20),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     SizedBox(height: 4),
                     Container(
                       width: 150,
                       height: 60,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1.0),
+                        border: Border.all(color: Colors.black, width: 1.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
@@ -108,7 +115,14 @@ class _ScheduleTabTabState extends State<ScheduleTab> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Unit *", style: TextStyle(fontSize: 18)),
+                    Text(
+                      "Unit *",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: const Color.fromARGB(255, 15, 84, 20),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     SizedBox(height: 5),
                     Container(
                       width: 100,
@@ -150,7 +164,14 @@ class _ScheduleTabTabState extends State<ScheduleTab> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Available Days", style: TextStyle(fontSize: 18)),
+                Text(
+                  "Available Days",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: const Color.fromARGB(255, 15, 84, 20),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Column(
@@ -188,7 +209,14 @@ class _ScheduleTabTabState extends State<ScheduleTab> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Season *", style: TextStyle(fontSize: 18)),
+                Text(
+                  "Season *",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: const Color.fromARGB(255, 15, 84, 20),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 SizedBox(height: 5),
                 Container(
                   child: DropdownButtonFormField<String>(

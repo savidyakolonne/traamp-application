@@ -1,8 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import '../../AppConfig.dart';
-import '../../screens/guide/guide packages/create_package/detailed_guide_package.dart';
+import '../../screens/guide/guide packages/detailed_guide_package.dart';
 
 // ignore: must_be_immutable
 class GuidePackageCard extends StatefulWidget {
@@ -15,268 +12,193 @@ class GuidePackageCard extends StatefulWidget {
 }
 
 class _GuidePackageCardState extends State<GuidePackageCard> {
-  bool delete = false; // to check if long tapped or not
-
-  Future<void> deletePackage() async {
-    try {
-      final response = await http.delete(
-        Uri.parse("${AppConfig.SERVER_URL}/api/guidePackage/delete-package"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({'packageId': widget.packageData['packageId']}),
-      );
-      final data = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${data['msg']}'),
-            backgroundColor: const Color.fromARGB(180, 244, 67, 54),
-          ),
-        );
-      } else {
-        print('${data['msg']}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error while deleting the package.'),
-            backgroundColor: const Color.fromARGB(180, 244, 67, 54),
-          ),
-        );
-      }
-    } catch (error) {
-      print(error.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error while connecting to server'),
-          backgroundColor: const Color.fromARGB(180, 244, 67, 54),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        IconButton(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) {
-                  return DetailedGuidePackage(widget.packageData);
-                },
-              ),
-            );
-          },
-          onLongPress: () {
-            setState(() {
-              if (delete) {
-                delete = false;
-              } else {
-                delete = true;
-              }
-            });
-          },
-          icon: Container(
-            padding: EdgeInsets.all(8),
-            margin: EdgeInsets.all(8),
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromARGB(141, 0, 0, 0),
+            blurRadius: 10,
+            spreadRadius: 1,
+          ),
+        ],
+        borderRadius: BorderRadius.circular(24),
+        color: Colors.white,
+      ),
+      margin: EdgeInsets.all(16),
+      width: double.infinity,
+      child: Column(
+        children: [
+          // Cover image section
+          Container(
+            padding: EdgeInsets.all(10),
             width: double.infinity,
+            height: 210,
             decoration: BoxDecoration(
-              border: Border.all(
-                width: 2,
-                color: const Color.fromARGB(255, 0, 151, 68),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
               ),
-              borderRadius: BorderRadius.circular(16),
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: NetworkImage(widget.packageData['coverImage']),
+              ),
             ),
-            child: Column(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               spacing: 10,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                //first element
+                // duration
                 Container(
-                  width: 130,
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 157, 253, 160),
-                    border: BoxBorder.all(
-                      color: const Color.fromARGB(255, 115, 194, 117),
-                    ),
-                    borderRadius: BorderRadius.circular(50),
+                    color: const Color.fromARGB(172, 0, 0, 0),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   padding: EdgeInsets.all(8),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     spacing: 8,
                     children: [
-                      Icon(
-                        Icons.widgets_outlined,
-                        color: const Color.fromARGB(255, 51, 119, 54),
-                      ),
+                      Icon(Icons.access_time, size: 20, color: Colors.white),
                       Text(
-                        "${widget.packageData['category']}",
-                        style: TextStyle(
-                          color: const Color.fromARGB(255, 51, 119, 54),
-                          fontWeight: FontWeight.w500,
-                        ),
+                        "${widget.packageData['duration']}",
+                        style: TextStyle(color: Colors.white, fontSize: 15),
                       ),
                     ],
                   ),
                 ),
 
-                // 2nd element
-                Text(
-                  "${widget.packageData['packageTitle']}",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                ),
-
-                // 3rd element
-                Text(
-                  "${widget.packageData['shortDescription']}",
-                  style: TextStyle(fontSize: 15),
-                ),
-
-                // 4th element
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  spacing: 10,
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      color: Colors.green,
-                      size: 28,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Duration",
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: const Color.fromARGB(255, 120, 120, 120),
-                          ),
-                        ),
-                        Text(
-                          "${widget.packageData['duration']}",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-
-                // 5th element
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      spacing: 10,
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          color: Colors.green,
-                          size: 28,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Location",
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                color: const Color.fromARGB(255, 120, 120, 120),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 180,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Text(
-                                  "${widget.packageData['location']}",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    // price
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      spacing: 10,
-                      children: [
-                        Icon(
-                          Icons.attach_money_outlined,
-                          color: Colors.green,
-                          size: 28,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Price",
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                color: const Color.fromARGB(255, 120, 120, 120),
-                              ),
-                            ),
-                            Text(
-                              "LKR ${widget.packageData['price']}",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                // location
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(172, 0, 0, 0),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    spacing: 8,
+                    children: [
+                      Icon(Icons.location_on, size: 20, color: Colors.white),
+                      Text(
+                        "${widget.packageData['location']}",
+                        style: TextStyle(color: Colors.white, fontSize: 15),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-        // delete button
-        if (delete)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    width: 1,
-                    color: const Color.fromARGB(255, 183, 13, 1),
-                  ),
-                  //color: const Color.fromARGB(75, 158, 158, 158),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                margin: EdgeInsets.only(right: 16, bottom: 10),
-                padding: EdgeInsets.only(right: 1),
-                child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      deletePackage();
-                    });
-                  },
-                  icon: Row(
-                    children: [
-                      Icon(
-                        Icons.delete_outline_rounded,
-                        color: const Color.fromARGB(255, 183, 13, 1),
-                      ),
-                      Text(
-                        "Delete Package",
-                        style: TextStyle(
-                          color: const Color.fromARGB(255, 183, 13, 1),
-                          fontSize: 16,
+
+          // content section
+          Container(
+            padding: EdgeInsets.all(10),
+            width: double.infinity,
+            child: Column(
+              children: [
+                // heading and price
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 230,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Text(
+                          widget.packageData['packageTitle'],
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ],
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          'LKR ${widget.packageData['price']}',
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 125, 212, 33),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        Text(
+                          "PER PERSON",
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 148, 163, 184),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                // short description
+                Container(
+                  padding: EdgeInsets.only(top: 8),
+                  width: double.infinity,
+                  child: Text(
+                    textAlign: TextAlign.justify,
+                    widget.packageData['shortDescription'],
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: const Color.fromARGB(255, 100, 116, 139),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 10),
+                // manage button
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return DetailedGuidePackage(widget.packageData);
+                        },
+                      ),
+                    );
+                  },
+                  icon: Container(
+                    padding: EdgeInsets.all(10),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color.fromARGB(141, 0, 0, 0),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                      color: const Color.fromARGB(255, 125, 212, 33),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      spacing: 8,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.settings_outlined, size: 22),
+                        Text(
+                          "Manage",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }

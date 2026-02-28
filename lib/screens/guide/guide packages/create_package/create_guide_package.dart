@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../../../AppConfig.dart';
+import '../../../../app_config.dart';
 import '../guide_package.dart';
 import 'guide_package_data.dart';
 import 'info_tab.dart';
@@ -47,39 +47,57 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
   }
 
   Future<void> submitAll() async {
-    Map<String, dynamic> packageData = {};
-    setState(() {
-      packageData = {
-        "uid": widget.uid,
-        "packageTitle": guidePackageData.packageTitle,
-        "category": guidePackageData.category,
-        "shortDescription": guidePackageData.shortDescription,
-        "description": guidePackageData.description,
-        "location": guidePackageData.location,
-        "languages": guidePackageData.languages,
-        "duration": guidePackageData.duration,
-        "availableDays": guidePackageData.availableDays,
-        "season": guidePackageData.season,
-        "price": guidePackageData.price,
-        "minGuests": guidePackageData.minGuests,
-        "maxGuests": guidePackageData.maxGuests,
-        "havePrivateTourOption": guidePackageData.havePrivateTourOption,
-        "haveGroupDiscounts": guidePackageData.haveGroupDiscounts,
-        "startLocation": guidePackageData.startLocation,
-        "endLocation": guidePackageData.endLocation,
-        "stops": guidePackageData.stops,
-        "packageInclude": guidePackageData.packageInclude,
-        "packageExclude": guidePackageData.packageExclude,
-      };
-      print(packageData);
-    });
-
     try {
-      final response = await http.post(
-        Uri.parse("${AppConfig.SERVER_URL}/api/guidePackage/add-package"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(packageData),
+      var uri = Uri.parse(
+        "${AppConfig.SERVER_URL}/api/guidePackage/add-package",
       );
+      var request = http.MultipartRequest('POST', uri);
+
+      // Add text fields
+      request.fields['uid'] = widget.uid;
+      request.fields['packageTitle'] = guidePackageData.packageTitle;
+      request.fields['category'] = guidePackageData.category;
+      request.fields['shortDescription'] = guidePackageData.shortDescription;
+      request.fields['description'] = guidePackageData.description;
+      request.fields['location'] = guidePackageData.location;
+      request.fields['languages'] = jsonEncode(guidePackageData.languages);
+      request.fields['duration'] = guidePackageData.duration;
+      request.fields['availableDays'] = jsonEncode(
+        guidePackageData.availableDays,
+      );
+      request.fields['season'] = guidePackageData.season;
+      request.fields['price'] = guidePackageData.price.toString();
+      request.fields['minGuests'] = guidePackageData.minGuests.toString();
+      request.fields['maxGuests'] = guidePackageData.maxGuests.toString();
+      request.fields['havePrivateTourOption'] = guidePackageData
+          .havePrivateTourOption
+          .toString();
+      request.fields['haveGroupDiscounts'] = guidePackageData.haveGroupDiscounts
+          .toString();
+      request.fields['startLocation'] = guidePackageData.startLocation;
+      request.fields['endLocation'] = guidePackageData.endLocation;
+      request.fields['stops'] = jsonEncode(guidePackageData.stops);
+      request.fields['packageInclude'] = jsonEncode(
+        guidePackageData.packageInclude,
+      );
+      request.fields['packageExclude'] = jsonEncode(
+        guidePackageData.packageExclude,
+      );
+
+      // Add cover image
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'coverImage',
+          guidePackageData.coverImage.path,
+        ),
+      );
+
+      // Add multiple images
+      for (var img in guidePackageData.images) {
+        request.files.add(
+          await http.MultipartFile.fromPath('images', img.path),
+        );
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -94,17 +112,27 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
         ),
       );
 
-      final data = jsonDecode(response.body);
+      // Send request
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+      var data = jsonDecode(responseBody);
       print(data);
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${data['msg']}'),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 10,
+              children: [
+                Text('${data['msg']}'),
+                CircularProgressIndicator.adaptive(),
+              ],
+            ),
             backgroundColor: const Color.fromARGB(180, 76, 175, 79),
           ),
         );
-        Navigator.pop(context, GuidePackage);
+        Navigator.pop(context, GuidePackage(widget.uid));
       } else {
         print(data['msg']);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -113,7 +141,6 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
             backgroundColor: const Color.fromARGB(180, 244, 67, 54),
           ),
         );
-        //Navigator.pop(context, GuidePackage);
       }
     } catch (error) {
       print(error.toString());
@@ -165,12 +192,19 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
         title: Text(
-          "Create Guide Package",
-          style: TextStyle(fontWeight: FontWeight.w500),
+          "Create Your Packages",
+          style: TextStyle(fontWeight: FontWeight.w700),
         ),
-        backgroundColor: Colors.green,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context, GuidePackage(widget.uid));
+          },
+          icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 71, 85, 105)),
+        ),
       ),
       body: Stepper(
         type: StepperType.vertical,

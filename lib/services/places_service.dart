@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../AppConfig.dart';
+import '../app_config.dart';
 import '../models/place_model.dart';
 
 class PlacesService {
