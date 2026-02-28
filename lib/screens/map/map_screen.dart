@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import '../places/place_detail_screen.dart'; // ✅ adjust path if needed
 
-import '../../AppConfig.dart';
+import '../../app_config.dart';
 
 class MapScreen extends StatefulWidget {
   final String? focusPlaceId;

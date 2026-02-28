@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'settings_screen.dart';
 import '../screens/guide/guide_dashboard.dart';
 import '../screens/guide/guide_msg_screen.dart';
@@ -34,31 +33,16 @@ class _MainTabViewState extends State<MainTabView> {
           ],
         ),
         bottomNavigationBar: BottomAppBar(
-          color: Colors.green,
           child: const TabBar(
-            dividerColor: Colors.green,
-            indicatorColor: Colors.black,
+            dividerColor: Colors.transparent,
+            indicatorColor: Colors.transparent,
+            labelColor: Colors.green,
+            unselectedLabelColor: Color.fromARGB(255, 148, 163, 184),
             tabs: [
-              Tab(
-                icon: Icon(Icons.home_outlined, size: 30, color: Colors.black),
-              ),
-              Tab(
-                icon: Icon(Icons.email_outlined, size: 30, color: Colors.black),
-              ),
-              Tab(
-                icon: Icon(
-                  Icons.notifications_active_outlined,
-                  size: 30,
-                  color: Colors.black,
-                ),
-              ),
-              Tab(
-                icon: Icon(
-                  Icons.settings_outlined,
-                  size: 30,
-                  color: Colors.black,
-                ),
-              ),
+              Tab(icon: Icon(Icons.home, size: 30)),
+              Tab(icon: Icon(Icons.email, size: 30)),
+              Tab(icon: Icon(Icons.notifications_active, size: 30)),
+              Tab(icon: Icon(Icons.person, size: 30)),
             ],
           ),
         ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 class GuidePackageData {
   String uid = "";
   String packageTitle = "";
@@ -6,6 +8,8 @@ class GuidePackageData {
   String description = "";
   String location = "";
   List<String> languages = [];
+  late File coverImage;
+  List<File> images = [];
   String duration = "";
   List<String> availableDays = [];
   String season = "";
