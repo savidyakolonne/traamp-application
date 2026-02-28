@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/services/tourist.dart';
+import '../../app_config.dart';
 import '../../list-data.dart';
 import 'login_setup.dart';
 
@@ -300,7 +301,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                         try {
                           final response = await http.post(
                             Uri.parse(
-                              "http://localhost:3000/api/users/register-tourist",
+                              "${AppConfig.SERVER_URL}/api/users/register-tourist",
                             ),
                             headers: {
                               "Content-Type": "application/json",
@@ -316,7 +317,12 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                                   CircularProgressIndicator.adaptive(),
                                 ],
                               ),
-                              backgroundColor: Colors.green,
+                              backgroundColor: const Color.fromARGB(
+                                180,
+                                76,
+                                175,
+                                79,
+                              ),
                             ),
                           );
                           final data = jsonDecode(response.body);
@@ -326,7 +332,12 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('${data['msg']}'),
-                                backgroundColor: Colors.green,
+                                backgroundColor: const Color.fromARGB(
+                                  180,
+                                  76,
+                                  175,
+                                  79,
+                                ),
                               ),
                             );
                           } else {
@@ -335,7 +346,12 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                                 content: Text(
                                   '${data['msg']} : status code = ${response.statusCode}',
                                 ),
-                                backgroundColor: Colors.red,
+                                backgroundColor: const Color.fromARGB(
+                                  180,
+                                  244,
+                                  67,
+                                  54,
+                                ),
                               ),
                             );
                           }
@@ -346,7 +362,12 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                               content: Text(
                                 'Error while connecting to server...',
                               ),
-                              backgroundColor: Colors.red,
+                              backgroundColor: const Color.fromARGB(
+                                180,
+                                244,
+                                67,
+                                54,
+                              ),
                             ),
                           );
                         }
