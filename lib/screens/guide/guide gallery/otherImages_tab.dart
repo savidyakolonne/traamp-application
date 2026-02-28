@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'image_card_other.dart';
 
 // ignore: must_be_immutable
@@ -18,7 +17,13 @@ class _OtherImagesState extends State<OtherImages> {
     if (widget.galleryImages.isEmpty) {
       return RefreshIndicator(
         onRefresh: widget.onRefresh,
-        child: Center(child: Text("No images to show")),
+        child: SingleChildScrollView(
+          child: SizedBox(
+            width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.8,
+            child: Center(child: Text("No images to show")),
+          ),
+        ),
       );
     } else {
       return RefreshIndicator(
