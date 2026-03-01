@@ -33,6 +33,16 @@ migrate_working_dir/
 /build/
 /coverage/
 .env
+pubspec.lock
+
+# ADDED (missing Flutter generated files)
+.flutter-plugins
+.packages
+ios/Flutter/ephemeral/
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+web/flutter_bootstrap.js
 
 # Symbolication related
 app.*.symbols
@@ -45,11 +55,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /android/local.properties
-
-# Flutter generated files
 android/.gradle/
-macos/Flutter/GeneratedPluginRegistrant.swift
-ios/Flutter/GeneratedPluginRegistrant.swift
+/android/local.properties
+android/.gradle/
 
 # ======================
 # Backend (Node / Firebase)
@@ -57,6 +65,14 @@ ios/Flutter/GeneratedPluginRegistrant.swift
 functions/node_modules/
 functions/serviceAccountKey.json
 functions/.env
+
+# ADDED (Firebase local & debug)
+.firebase/
+firebase-debug.log
+
+# ADDED (Firebase local & debug)
+.firebase/
+firebase-debug.log
 
 # Safety net (any nested node project)
 **/node_modules/
