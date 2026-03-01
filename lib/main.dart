@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
-import 'screens/auth/login_screen.dart';
+//import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'screens/auth/login_screen.dart';
 import 'screens/map/map_screen.dart';
-import 'screens/profile/guide_profile_screen.dart';
-import 'screens/profile/tourist_profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // if (!kIsWeb) {
+  //   await dotenv.load(fileName: ".env");
+  // }
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
@@ -32,7 +36,7 @@ class TraampApp extends StatelessWidget {
 
       routes: {'/map': (context) => const MapScreen()},
 
-      home: GuideProfileScreen(),
+      home: LoginScreen(),
     );
   }
 }
