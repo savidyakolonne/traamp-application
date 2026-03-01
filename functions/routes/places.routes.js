@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import db from "../firebaseAdmin.js";
 import Router from "express";
 import { geohashQueryBounds, distanceBetween } from "geofire-common";
@@ -7,6 +8,47 @@ const router = Router();
 /**
  * GET /api/places/nearby?lat=..&lng=..&radius=5000
  */
+=======
+import express from "express";
+//import { db } from "../firebaseAdmin.js";
+import firebaseAdmin from "../firebaseAdmin.js";
+import { geohashQueryBounds, distanceBetween } from "geofire-common";
+
+const router = express.Router();
+const { db } = firebaseAdmin;
+
+router.get("/", async (req, res) => {
+  try {
+    const snapshot = await db.collection("places").get();
+
+    const places = snapshot.docs.map(doc => ({
+      id: doc.id,
+      name: doc.data().name || "",
+      category: doc.data().category || "",
+      district: doc.data().district || "",
+      province: doc.data().province || "",
+      coverImage: doc.data().coverImage,
+      images: doc.data().images || [],
+      description: doc.data().description || "",
+      location: doc.data().location || {},
+      keywords: doc.data().search?.keywords || [],
+      bestTime: doc.data().bestTime || {},
+      activities: doc.data().activities || {},        // map of activityName: description
+      bestTimeToVisit: doc.data().bestTimeToVisit || {}, // map with seasonNote & timeOfDayNote
+      visitingHours: doc.data().visitingHours || {},
+      shortDesc: doc.data().shortDesc || "",
+    }));
+
+    res.json(places);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "server_error" });
+  }
+});
+
+//routers for map feature - savidyakolonne 
+
+>>>>>>> main
 router.get("/nearby", async (req, res) => {
   try {
     const lat = Number(req.query.lat);
@@ -20,6 +62,7 @@ router.get("/nearby", async (req, res) => {
     const center = [lat, lng];
     const radiusKm = radiusInM / 1000;
 
+<<<<<<< HEAD
     // geohash bounds
     const bounds = geohashQueryBounds(center, radiusInM);
     const promises = [];
@@ -35,6 +78,19 @@ router.get("/nearby", async (req, res) => {
     }
 
     const snapshots = await Promise.all(promises);
+=======
+    const bounds = geohashQueryBounds(center, radiusInM);
+
+    const snapshots = await Promise.all(
+      bounds.map((b) =>
+        db.collection("places")
+          .orderBy("geohash")
+          .startAt(b[0])
+          .endAt(b[1])
+          .get()
+      )
+    );
+>>>>>>> main
 
     const results = [];
     const seen = new Set();
@@ -46,6 +102,12 @@ router.get("/nearby", async (req, res) => {
 
         const data = doc.data();
 
+<<<<<<< HEAD
+=======
+        // ✅ only hidden gems
+        if (data.isHidden !== true) continue;
+
+>>>>>>> main
         const placeLat = data.location?.lat;
         const placeLng = data.location?.lng;
 
@@ -59,6 +121,10 @@ router.get("/nearby", async (req, res) => {
             shortDesc: data.shortDesc ?? "",
             location: data.location,
             images: data.images ?? [],
+<<<<<<< HEAD
+=======
+            coverImage: data.coverImage ?? "",
+>>>>>>> main
             popularityScore: data.popularityScore ?? 999,
             distanceKm: Number(dKm.toFixed(2)),
           });
@@ -66,8 +132,13 @@ router.get("/nearby", async (req, res) => {
       }
     }
 
+<<<<<<< HEAD
     // lesser-known first
     results.sort((a, b) => a.popularityScore - b.popularityScore);
+=======
+    // ✅ lesser-known first
+    results.sort((a, b) => (a.popularityScore ?? 999) - (b.popularityScore ?? 999));
+>>>>>>> main
 
     res.json(results.slice(0, 30));
   } catch (err) {
@@ -76,4 +147,30 @@ router.get("/nearby", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 export default router;
+=======
+//-----------------------------------------------------------------------------------------------
+
+router.get("/:id", async (req, res) => {
+  try {
+    const docRef = db.collection("places").doc(req.params.id);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      return res.status(404).json({ error: "place_not_found" });
+    }
+
+    res.json({
+      id: docSnap.id,
+      ...docSnap.data(),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "server_error" });
+  }
+});
+
+
+export default router;
+>>>>>>> main
