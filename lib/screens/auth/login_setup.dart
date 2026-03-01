@@ -1,7 +1,10 @@
+import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../services/auth_service.dart';
+import 'package:http/http.dart' as http;
+import '../../app_config.dart';
+import '../../components/main_tab_view.dart';
 import 'signup.dart';
-import 'role_router.dart';
 
 class LoginSetup extends StatefulWidget {
   const LoginSetup({super.key});
@@ -15,34 +18,105 @@ class _LoginSetupState extends State<LoginSetup> {
   final passCtrl = TextEditingController();
   bool loading = false;
 
-  Future<void> loginEmail() async {
-    try {
-      setState(() => loading = true);
-      await AuthService.loginEmail(
-        email: emailCtrl.text,
-        password: passCtrl.text,
-      );
-      await RoleRouter.goToDashboard(context);
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      if (mounted) setState(() => loading = false);
-    }
+  bool _obscureState = true;
+  late Map<String, dynamic> userData;
+
+  // function to hide and visible password
+  Widget showAndHidePasswordIcon() {
+    return IconButton(
+      icon: Icon(
+        _obscureState
+            ? Icons.visibility_off_outlined
+            : Icons.visibility_outlined,
+      ),
+      onPressed: () {
+        setState(() {
+          _obscureState = !_obscureState;
+        });
+      },
+    );
   }
 
-  Future<void> loginGoogle() async {
+  // function to login with email and password
+  Future<void> loginEmail() async {
+    String email = emailCtrl.text.trim().toLowerCase();
+    String password = passCtrl.text;
+
     try {
-      setState(() => loading = true);
-      await AuthService.loginGoogle();
-      await RoleRouter.goToDashboard(context);
+      final userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      final idToken = await userCredential.user!.getIdToken();
+      final response = await http.post(
+        Uri.parse("${AppConfig.SERVER_URL}/api/users/loginWithEmail"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"idToken": idToken}),
+      );
+
+      final data = await jsonDecode(response.body);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Connecting... ", style: TextStyle(color: Colors.white)),
+              CircularProgressIndicator.adaptive(backgroundColor: Colors.green),
+            ],
+          ),
+          backgroundColor: const Color.fromARGB(123, 0, 0, 0),
+        ),
+      );
+
+      if (response.statusCode == 404 || response.statusCode == 401) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${data['msg']}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else if (response.statusCode == 200) {
+        userData = data['profile'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${data['msg']}'),
+            backgroundColor: const Color.fromARGB(125, 76, 175, 79),
+          ),
+        );
+        // routing
+        if (userData['type'] == "tourist") {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) {
+                return MainTabView(true);
+              },
+            ),
+          );
+        } else if (userData['type'] == "guide") {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) {
+                return MainTabView(false);
+              },
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('User type is invalid...'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      if (mounted) setState(() => loading = false);
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Incorrect username or password.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -57,8 +131,8 @@ class _LoginSetupState extends State<LoginSetup> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(top: 100, left: 24, right: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -91,6 +165,7 @@ class _LoginSetupState extends State<LoginSetup> {
 
               TextField(
                 controller: emailCtrl,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: "Email",
                   border: OutlineInputBorder(
@@ -103,10 +178,10 @@ class _LoginSetupState extends State<LoginSetup> {
 
               TextField(
                 controller: passCtrl,
-                obscureText: true,
+                obscureText: _obscureState,
                 decoration: InputDecoration(
                   hintText: "Password",
-                  suffixIcon: const Icon(Icons.visibility_off),
+                  suffixIcon: showAndHidePasswordIcon(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -119,7 +194,9 @@ class _LoginSetupState extends State<LoginSetup> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: loading ? null : loginEmail,
+                  onPressed: () {
+                    loginEmail();
+                  },
                   child: loading
                       ? const SizedBox(
                           height: 18,
@@ -136,7 +213,7 @@ class _LoginSetupState extends State<LoginSetup> {
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton(
-                  onPressed: loading ? null : loginGoogle,
+                  onPressed: () {},
                   child: const Text("Continue with Google"),
                 ),
               ),

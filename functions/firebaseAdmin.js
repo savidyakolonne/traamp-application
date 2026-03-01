@@ -1,26 +1,19 @@
 import admin from "firebase-admin";
 import { readFileSync } from "fs";
 
-let auth, db;
+const serviceAccount = JSON.parse(
+  readFileSync("./serviceAccountKey.json", "utf8"),
+);
 
-try {
-  const serviceAccount = JSON.parse(
-    readFileSync("./serviceAccountKey.json", "utf8")
-  );
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: "traamp-app.firebasestorage.app",
+});
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+admin.firestore().settings({ ignoreUndefinedProperties: true });
 
-  auth = admin.auth();
-  db = admin.firestore();
+const auth = admin.auth();
+const db = admin.firestore();
+const bucket = admin.storage().bucket();
 
-  console.log("✅ Firebase Admin initialized");
-} catch (error) {
-  console.warn("⚠️ Firebase Admin init failed:", error.message);
-  console.warn("   Continuing with mock auth...");
-  auth = null;
-  db = null;
-}
-
-export default { auth, db };
+export default { auth, db, bucket };
