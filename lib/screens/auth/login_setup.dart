@@ -1,11 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../services/auth_service.dart';
-import '../guide/guide_dashboard.dart';
-import '../tourist/tourist_dashboard.dart';
+import 'package:http/http.dart' as http;
+import '../../app_config.dart';
+import '../../components/main_tab_view.dart';
 import 'signup.dart';
-import 'role_router.dart';
 
 class LoginSetup extends StatefulWidget {
   const LoginSetup({super.key});
@@ -19,69 +18,105 @@ class _LoginSetupState extends State<LoginSetup> {
   final passCtrl = TextEditingController();
   bool loading = false;
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _obscureState = true;
+  late Map<String, dynamic> userData;
 
-  String email = "";
-  String password = "";
-  String type = "";
-  bool _obsecureState = true;
-
-  Future<void> loginEmail() async {
-    try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: emailCtrl.text.trim().toLowerCase(),
-        password: passCtrl.text,
-      );
-
-      final user = userCredential.user;
-      if (user == null) return;
-
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      if (doc.exists) {
-        type = doc['type'] as String;
-      }
-
-      if (type == "tourist") {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => TouristDashboard()),
-        );
-      } else if (type == "guide") {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => GuideDashboard()),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      String message;
-      if (e.code == 'user-not-found') {
-        message = 'No user found for that email.';
-      } else if (e.code == 'wrong-password') {
-        message = 'Wrong password provided.';
-      } else {
-        message = 'Login failed: ${e.message}';
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
-      );
-    }
+  // function to hide and visible password
+  Widget showAndHidePasswordIcon() {
+    return IconButton(
+      icon: Icon(
+        _obscureState
+            ? Icons.visibility_off_outlined
+            : Icons.visibility_outlined,
+      ),
+      onPressed: () {
+        setState(() {
+          _obscureState = !_obscureState;
+        });
+      },
+    );
   }
 
-  Future<void> loginGoogle() async {
+  // function to login with email and password
+  Future<void> loginEmail() async {
+    String email = emailCtrl.text.trim().toLowerCase();
+    String password = passCtrl.text;
+
     try {
-      setState(() => loading = true);
-      await AuthService.loginGoogle();
-      await RoleRouter.goToDashboard(context);
+      final userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      final idToken = await userCredential.user!.getIdToken();
+      final response = await http.post(
+        Uri.parse("${AppConfig.SERVER_URL}/api/users/loginWithEmail"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"idToken": idToken}),
+      );
+
+      final data = await jsonDecode(response.body);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Connecting... ", style: TextStyle(color: Colors.white)),
+              CircularProgressIndicator.adaptive(backgroundColor: Colors.green),
+            ],
+          ),
+          backgroundColor: const Color.fromARGB(123, 0, 0, 0),
+        ),
+      );
+
+      if (response.statusCode == 404 || response.statusCode == 401) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${data['msg']}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else if (response.statusCode == 200) {
+        userData = data['profile'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${data['msg']}'),
+            backgroundColor: const Color.fromARGB(125, 76, 175, 79),
+          ),
+        );
+        // routing
+        if (userData['type'] == "tourist") {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) {
+                return MainTabView(true);
+              },
+            ),
+          );
+        } else if (userData['type'] == "guide") {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) {
+                return MainTabView(false);
+              },
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('User type is invalid...'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      if (mounted) setState(() => loading = false);
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Incorrect username or password.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -143,21 +178,10 @@ class _LoginSetupState extends State<LoginSetup> {
 
               TextField(
                 controller: passCtrl,
-                obscureText: _obsecureState,
+                obscureText: _obscureState,
                 decoration: InputDecoration(
                   hintText: "Password",
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        if (_obsecureState == true) {
-                          _obsecureState = false;
-                        } else if (_obsecureState == false) {
-                          _obsecureState = true;
-                        }
-                      });
-                    },
-                    icon: Icon(Icons.visibility_off_outlined),
-                  ),
+                  suffixIcon: showAndHidePasswordIcon(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -189,7 +213,7 @@ class _LoginSetupState extends State<LoginSetup> {
                 width: double.infinity,
                 height: 50,
                 child: OutlinedButton(
-                  onPressed: loading ? null : loginGoogle,
+                  onPressed: () {},
                   child: const Text("Continue with Google"),
                 ),
               ),
