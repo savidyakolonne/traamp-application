@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../AppConfig.dart';
 import '../screens/auth/login_screen.dart';
+import '../screens/tourist/tourist_edit_profile.dart';
 
 class Settings extends StatefulWidget {
   final bool isTourist;
@@ -22,9 +24,7 @@ class _SettingsState extends State<Settings> {
         String? idToken = await user.getIdToken(true);
         if (idToken != null) {
           final response = await http.post(
-            Uri.parse(
-              "http://localhost:3000/api/users/user-logout",
-            ), // http;//address:port/   => for testing - savidyakolonne
+            Uri.parse("${AppConfig.SERVER_URL}/api/users/user-logout"),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({"idToken": idToken}),
           );

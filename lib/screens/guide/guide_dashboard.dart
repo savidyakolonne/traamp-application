@@ -6,10 +6,11 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:text_gradiate/text_gradiate.dart';
+import '../../AppConfig.dart';
 import '../../services/location_service.dart';
 import '../../components/weather/weather_screen.dart';
-import 'guide_gallery.dart';
-import 'guide_package.dart';
+import 'guide gallery/guide_gallery.dart';
+import 'guide packages/guide_package.dart';
 
 class GuideDashboard extends StatefulWidget {
   @override
@@ -31,7 +32,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
         idToken = await user.getIdToken(true);
         if (idToken != null) {
           final response = await http.post(
-            Uri.parse("http://localhost:3000/api/users/get-user-data"),
+            Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode({"idToken": idToken}),
           );
@@ -92,7 +93,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
               if (currentUser != null && idToken != null) {
                 final response = await http.put(
                   Uri.parse(
-                    "http://localhost:3000/api/users/update-guide-availability",
+                    "${AppConfig.SERVER_URL}/api/users/update-guide-availability",
                   ),
                   headers: {"Content-Type": "application/json"},
                   body: jsonEncode({
@@ -154,8 +155,9 @@ class _GuideDashboardState extends State<GuideDashboard> {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) =>
-                  toGuidePackage ? GuidePackage() : GuideGallery(),
+              builder: (context) => toGuidePackage
+                  ? GuidePackage(idToken!, userData['uid'])
+                  : GuideGallery(idToken!, userData['uid']),
             ),
           );
         },
