@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class GuideGallery extends StatefulWidget {
-  const GuideGallery({super.key});
+  String idToken;
+  String uid;
+  GuideGallery(this.idToken, this.uid, {super.key});
 
   @override
   State<GuideGallery> createState() => _GuideGalleryState();
