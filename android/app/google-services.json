@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "279123730825",
+    "project_id": "traamp-app",
+    "storage_bucket": "traamp-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:279123730825:android:cf2de4f30ac34386a94158",
+        "android_client_info": {
+          "package_name": "com.example.traamp_frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrqy8KIR-u8lxn89RVs5EqwR5H_AOKVp4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
