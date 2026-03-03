@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-import db from "../firebaseAdmin.js";
-import Router from "express";
-import { geohashQueryBounds, distanceBetween } from "geofire-common";
-
-const router = Router();
-
-/**
- * GET /api/places/nearby?lat=..&lng=..&radius=5000
- */
-=======
 import express from "express";
 //import { db } from "../firebaseAdmin.js";
 import firebaseAdmin from "../firebaseAdmin.js";
@@ -48,7 +37,6 @@ router.get("/", async (req, res) => {
 
 //routers for map feature - savidyakolonne 
 
->>>>>>> main
 router.get("/nearby", async (req, res) => {
   try {
     const lat = Number(req.query.lat);
@@ -62,23 +50,6 @@ router.get("/nearby", async (req, res) => {
     const center = [lat, lng];
     const radiusKm = radiusInM / 1000;
 
-<<<<<<< HEAD
-    // geohash bounds
-    const bounds = geohashQueryBounds(center, radiusInM);
-    const promises = [];
-
-    for (const b of bounds) {
-      const q = db
-        .collection("places")
-        .orderBy("geohash")
-        .startAt(b[0])
-        .endAt(b[1]);
-
-      promises.push(q.get());
-    }
-
-    const snapshots = await Promise.all(promises);
-=======
     const bounds = geohashQueryBounds(center, radiusInM);
 
     const snapshots = await Promise.all(
@@ -90,7 +61,6 @@ router.get("/nearby", async (req, res) => {
           .get()
       )
     );
->>>>>>> main
 
     const results = [];
     const seen = new Set();
@@ -102,12 +72,9 @@ router.get("/nearby", async (req, res) => {
 
         const data = doc.data();
 
-<<<<<<< HEAD
-=======
         // ✅ only hidden gems
         if (data.isHidden !== true) continue;
 
->>>>>>> main
         const placeLat = data.location?.lat;
         const placeLng = data.location?.lng;
 
@@ -121,10 +88,7 @@ router.get("/nearby", async (req, res) => {
             shortDesc: data.shortDesc ?? "",
             location: data.location,
             images: data.images ?? [],
-<<<<<<< HEAD
-=======
             coverImage: data.coverImage ?? "",
->>>>>>> main
             popularityScore: data.popularityScore ?? 999,
             distanceKm: Number(dKm.toFixed(2)),
           });
@@ -132,13 +96,8 @@ router.get("/nearby", async (req, res) => {
       }
     }
 
-<<<<<<< HEAD
-    // lesser-known first
-    results.sort((a, b) => a.popularityScore - b.popularityScore);
-=======
     // ✅ lesser-known first
     results.sort((a, b) => (a.popularityScore ?? 999) - (b.popularityScore ?? 999));
->>>>>>> main
 
     res.json(results.slice(0, 30));
   } catch (err) {
@@ -147,9 +106,6 @@ router.get("/nearby", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-export default router;
-=======
 //-----------------------------------------------------------------------------------------------
 
 router.get("/:id", async (req, res) => {
@@ -173,4 +129,3 @@ router.get("/:id", async (req, res) => {
 
 
 export default router;
->>>>>>> main

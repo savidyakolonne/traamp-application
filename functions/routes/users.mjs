@@ -1,17 +1,10 @@
 import { Router } from "express";
-<<<<<<< HEAD
-import firebaseAdmin from "../firebaseAdmin.js";
-
-const userRouter = Router();
-const { auth, db } = firebaseAdmin;
-=======
 import multer from "multer";
 import firebaseAdmin from "../firebaseAdmin.js";
 
 const userRouter = Router();
 const { auth, db, bucket } = firebaseAdmin;
 const upload = multer({ storage: multer.memoryStorage() });
->>>>>>> main
 
 // tourist register router
 userRouter.post("/register-tourist", async (req, res) => {
@@ -48,64 +41,6 @@ userRouter.post("/register-tourist", async (req, res) => {
 });
 
 // guide register router
-<<<<<<< HEAD
-userRouter.post("/register-guide", async (req, res) => {
-  try {
-    const createdAt = new Date(req.body.createdAt);
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      gender,
-      dob,
-      type,
-      phoneNumber,
-      guideCertificateType,
-      certificateNumber,
-      nic,
-      location,
-      address,
-      country,
-      rating,
-      availability,
-    } = req.body;
-    // create user with firebase auth
-    const userRecord = await auth.createUser({
-      email,
-      password,
-    });
-    // save to database
-    await db.collection("users").doc(userRecord.uid).set({
-      uid: userRecord.uid,
-      firstName,
-      lastName,
-      email,
-      gender,
-      dob,
-      type,
-      createdAt,
-      phoneNumber,
-      guideCertificateType,
-      certificateNumber,
-      nic,
-      location,
-      address,
-      country,
-      rating,
-      availability,
-    });
-    // return response
-    res.status(201).json({
-      msg: "Guide registered successfully",
-    });
-  } catch (error) {
-    res.status(400).json({
-      msg: error.message,
-    });
-  }
-});
-=======
 userRouter.post(
   "/register-guide",
   upload.single("certificate"),
@@ -183,7 +118,6 @@ userRouter.post(
     }
   },
 );
->>>>>>> main
 
 // Login with email & password router
 userRouter.post("/loginWithEmail", async (req, res) => {
@@ -263,8 +197,4 @@ userRouter.post("/user-logout", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 export default userRouter;
-=======
-export default userRouter;
->>>>>>> main
