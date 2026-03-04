@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -81,8 +83,7 @@ class _SettingsState extends State<Settings> {
                 color: bgColor,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon,
-                  color: iconColor, size: 28),
+              child: Icon(icon, color: iconColor, size: 28),
             ),
             const SizedBox(width: 18),
             Expanded(
@@ -100,21 +101,125 @@ class _SettingsState extends State<Settings> {
                   const SizedBox(height: 5),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios,
-                size: 18, color: Colors.grey),
+            const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
           ],
         ),
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F6FA),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: ListView(
+            children: [
+              const SizedBox(height: 20),
+
+              const Text(
+                "Settings",
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 30),
+
+              // Profile
+              buildSettingsTile(
+                icon: Icons.person_outline,
+                iconColor: Colors.green,
+                bgColor: Colors.green.withOpacity(0.15),
+                title: "Profile",
+                subtitle: "View your profile",
+                onTap: () {},
+              ),
+
+              // Theme
+              buildSettingsTile(
+                icon: Icons.nightlight_round,
+                iconColor: Colors.blue,
+                bgColor: Colors.blue.withOpacity(0.15),
+                title: "Theme",
+                subtitle: "Change your theme",
+                onTap: () {},
+              ),
+
+              // Privacy
+              buildSettingsTile(
+                icon: Icons.lock_outline,
+                iconColor: Colors.orange,
+                bgColor: Colors.orange.withOpacity(0.15),
+                title: "Privacy",
+                subtitle: "Secure your account with privacy",
+                onTap: () {},
+              ),
+
+              // Help & Support
+              buildSettingsTile(
+                icon: Icons.favorite_border,
+                iconColor: Colors.purple,
+                bgColor: Colors.purple.withOpacity(0.15),
+                title: "Help and Support",
+                subtitle: "Get help from our team",
+                onTap: () {},
+              ),
+
+              // About
+              buildSettingsTile(
+                icon: Icons.info_outline,
+                iconColor: Colors.teal,
+                bgColor: Colors.teal.withOpacity(0.15),
+                title: "About",
+                subtitle: "Version info, terms & conditions, privacy policy",
+                onTap: () {},
+              ),
+
+              // Logout
+              buildSettingsTile(
+                icon: Icons.logout,
+                iconColor: Colors.red,
+                bgColor: Colors.red.withOpacity(0.15),
+                title: "Logout",
+                subtitle: "End your current session",
+                isLogout: true,
+                onTap: () async {
+                  await signOutUser();
+                  if (loggedOut) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Logged out successfully."),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Error while logging out"),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+              ),
+
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
   // @override
   // Widget build(BuildContext context) {
@@ -186,4 +291,4 @@ class _SettingsState extends State<Settings> {
   //     ),
   //   );
   // }
-}
+
