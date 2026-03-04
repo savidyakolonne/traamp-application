@@ -106,7 +106,6 @@ class _SettingsState extends State<Settings> {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
           ],
         ),
       ),
