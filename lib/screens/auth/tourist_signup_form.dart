@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:traamp_frontend/services/tourist.dart';
+import 'package:traamp_frontend/models/tourist.dart';
 import '../../app_config.dart';
 import '../../list-data.dart';
 import 'login_setup.dart';

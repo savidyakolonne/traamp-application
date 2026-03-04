@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../models/guide.dart';
+import '../../services/guide_service.dart';
 
 class FindGuidesScreen extends StatefulWidget {
   const FindGuidesScreen({super.key});
@@ -146,7 +148,6 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                           onPressed: () {
                             tempLocation = null;
                             tempLanguages.clear();
-                            // update the sheet UI
                             (context as Element).markNeedsBuild();
                           },
                           style: OutlinedButton.styleFrom(
@@ -224,15 +225,9 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                   pinned: true,
                   elevation: 0,
                   titleSpacing: 16,
-                  title: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Find a Guide",
-                        style: TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                      SizedBox(height: 2),
-                    ],
+                  title: const Text(
+                    "Find a Guide",
+                    style: TextStyle(fontWeight: FontWeight.w800),
                   ),
                   bottom: PreferredSize(
                     preferredSize: const Size.fromHeight(132),
@@ -240,14 +235,13 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
                       child: Column(
                         children: [
-                          // Search + filter
                           Row(
                             children: [
                               Expanded(
                                 child: TextField(
                                   controller: _search,
                                   decoration: InputDecoration(
-                                    hintText: "Search guides or posts…",
+                                    hintText: "Search guides…",
                                     prefixIcon: const Icon(Icons.search),
                                     filled: true,
                                     fillColor: const Color(0xFFF5F6F8),
@@ -276,7 +270,6 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                             ],
                           ),
 
-                          // Active filter chips
                           if (chips.isNotEmpty) ...[
                             const SizedBox(height: 10),
                             SizedBox(
@@ -299,7 +292,6 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                           const SizedBox(height: 8),
                           const TabBar(
                             isScrollable: true,
-                            tabAlignment: TabAlignment.start,
                             tabs: [
                               Tab(text: "All"),
                               Tab(text: "Guides"),
@@ -339,7 +331,95 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
   }
 }
 
-/* ------------------ Demo tabs (replace with your Firestore data) ------------------ */
+/* ------------------ Dynamic Guides Tab ------------------ */
+
+class _GuidesTab extends StatefulWidget {
+  final String search;
+  final String? location;
+  final Set<String> languages;
+
+  const _GuidesTab({
+    required this.search,
+    required this.location,
+    required this.languages,
+  });
+
+  @override
+  State<_GuidesTab> createState() => _GuidesTabState();
+}
+
+class _GuidesTabState extends State<_GuidesTab> {
+  late Future<List<Guide>> _guidesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchGuides();
+  }
+
+  void _fetchGuides() {
+    _guidesFuture = GuideService().fetchGuides(
+      location: widget.location,
+      languages: widget.languages.toList(),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _GuidesTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.search != widget.search ||
+        oldWidget.location != widget.location ||
+        oldWidget.languages != widget.languages) {
+      _fetchGuides();
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Guide>>(
+      future: _guidesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text("No guides found"));
+        }
+
+        final searchLower = widget.search.toLowerCase();
+        final filteredGuides = snapshot.data!
+            .where(
+              (g) =>
+                  g.firstName.toLowerCase().contains(searchLower) ||
+                  g.lastName.toLowerCase().contains(searchLower),
+            )
+            .toList();
+
+        return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          itemCount: filteredGuides.length,
+          itemBuilder: (context, index) {
+            final g = filteredGuides[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _GuideCard(
+                name: "${g.firstName} ${g.lastName}",
+                location: g.location,
+                languages: [], // optionally map g.languages here
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/* ------------------ Demo AllTab + PostsTab ------------------ */
 
 class _AllTab extends StatelessWidget {
   final String search;
@@ -356,63 +436,14 @@ class _AllTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      children: [
-        _GuideCard(
-          name: "Nuwan Silva",
-          location: "Hikkaduwa",
-          languages: const ["English", "Sinhala"],
-        ),
-        const SizedBox(height: 12),
-        _PostCard(title: "Hidden Gems of the South", guideName: "Nuwan Silva"),
-        const SizedBox(height: 12),
-        _GuideCard(
-          name: "Sanath Perera",
-          location: "Galle",
-          languages: const ["English"],
-        ),
-        const SizedBox(height: 12),
-        _PostCard(
-          title: "Sunset spots near the beach",
-          guideName: "Sanath Perera",
-        ),
-      ],
-    );
-  }
-}
-
-class _GuidesTab extends StatelessWidget {
-  final String search;
-  final String? location;
-  final Set<String> languages;
-
-  const _GuidesTab({
-    required this.search,
-    required this.location,
-    required this.languages,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       children: const [
         _GuideCard(
-          name: "Nuwan Silva",
+          name: "Demo Guide",
           location: "Hikkaduwa",
-          languages: ["English", "Sinhala"],
+          languages: ["English"],
         ),
         SizedBox(height: 12),
-        _GuideCard(
-          name: "Kasun Jayasuriya",
-          location: "Ella",
-          languages: ["English", "Italian"],
-        ),
-        SizedBox(height: 12),
-        _GuideCard(
-          name: "Dilani Perera",
-          location: "Kandy",
-          languages: ["English", "Russian"],
-        ),
+        _PostCard(title: "Hidden Gems of the South", guideName: "Demo Guide"),
       ],
     );
   }
@@ -434,15 +465,7 @@ class _PostsTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       children: const [
-        _PostCard(
-          title: "Best 1-day plan in Galle",
-          guideName: "Sanath Perera",
-        ),
-        SizedBox(height: 12),
-        _PostCard(
-          title: "Secret waterfalls near Ella",
-          guideName: "Kasun Jayasuriya",
-        ),
+        _PostCard(title: "Best 1-day plan in Galle", guideName: "Demo Guide"),
       ],
     );
   }
@@ -533,7 +556,6 @@ class _PostCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // image placeholder
           Container(
             height: 160,
             width: double.infinity,

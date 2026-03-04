@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../app_config.dart';
 import '../../list-data.dart';
-import '../../services/guide.dart';
+import '../../models/guide.dart';
 import 'login_setup.dart';
 import 'package:file_picker/file_picker.dart';
 
