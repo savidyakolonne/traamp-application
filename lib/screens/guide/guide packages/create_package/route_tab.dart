@@ -52,7 +52,7 @@ class _RouteTabState extends State<RouteTab> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Checkbox(
-          activeColor: Colors.green,
+          activeColor: const Color.fromARGB(255, 15, 84, 20),
           value: checkValues[index],
           onChanged: (bool? value) {
             setState(() {
@@ -77,7 +77,7 @@ class _RouteTabState extends State<RouteTab> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Checkbox(
-          activeColor: Colors.green,
+          activeColor: const Color.fromARGB(255, 15, 84, 20),
           value: checkValues[index],
           onChanged: (bool? value) {
             setState(() {
@@ -101,7 +101,14 @@ class _RouteTabState extends State<RouteTab> {
       spacing: 10,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Tour Stops", style: TextStyle(fontSize: 18)),
+        Text(
+          "Tour Stops",
+          style: TextStyle(
+            fontSize: 18,
+            color: const Color.fromARGB(255, 15, 84, 20),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         // Dynamic Stop Fields
         ListView.builder(
           shrinkWrap: true,
@@ -156,10 +163,17 @@ class _RouteTabState extends State<RouteTab> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Start Location *", style: TextStyle(fontSize: 18)),
+                Text(
+                  "Start Location *",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: const Color.fromARGB(255, 15, 84, 20),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black, width: 1.0),
+                    border: Border.all(color: Colors.black, width: 1.5),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   padding: EdgeInsets.symmetric(horizontal: 8),
@@ -193,10 +207,17 @@ class _RouteTabState extends State<RouteTab> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("End Location *", style: TextStyle(fontSize: 18)),
+                Text(
+                  "End Location *",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: const Color.fromARGB(255, 15, 84, 20),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black, width: 1.0),
+                    border: Border.all(color: Colors.black, width: 1.5),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   padding: EdgeInsets.symmetric(horizontal: 8),
@@ -233,7 +254,10 @@ class _RouteTabState extends State<RouteTab> {
               onPressed: () => addStop(),
               icon: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.green, width: 1.0),
+                  border: Border.all(
+                    color: const Color.fromARGB(255, 15, 84, 20),
+                    width: 1.5,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -242,11 +266,17 @@ class _RouteTabState extends State<RouteTab> {
                   children: [
                     Text(
                       "+",
-                      style: TextStyle(fontSize: 20, color: Colors.green),
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: const Color.fromARGB(255, 15, 84, 20),
+                      ),
                     ),
                     Text(
                       "Add Stop",
-                      style: TextStyle(fontSize: 18, color: Colors.green),
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: const Color.fromARGB(255, 15, 84, 20),
+                      ),
                     ),
                   ],
                 ),
@@ -259,7 +289,13 @@ class _RouteTabState extends State<RouteTab> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("What's Included", style: TextStyle(fontSize: 18)),
+                Text(
+                  "What's Included",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: const Color.fromARGB(255, 15, 84, 20),
+                  ),
+                ),
                 SizedBox(height: 10),
                 checkWidgetForPackageIncludes(0, "Transportation"),
                 checkWidgetForPackageIncludes(1, "Tour Guide"),
@@ -277,7 +313,14 @@ class _RouteTabState extends State<RouteTab> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("What's Not Included", style: TextStyle(fontSize: 18)),
+                Text(
+                  "What's Not Included",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: const Color.fromARGB(255, 15, 84, 20),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 SizedBox(height: 10),
                 checkWidgetForPackageNotIncludes(7, "Personal Expenses"),
                 checkWidgetForPackageNotIncludes(8, "Alcoholic Beverages"),

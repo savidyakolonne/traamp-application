@@ -32,11 +32,15 @@ class _PricingTabState extends State<PricingTab> {
               children: [
                 Text(
                   "Price Per Person (LKR) *",
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: const Color.fromARGB(255, 15, 84, 20),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black, width: 1.0),
+                    border: Border.all(color: Colors.black, width: 1.5),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   padding: EdgeInsets.symmetric(horizontal: 8),
@@ -79,11 +83,18 @@ class _PricingTabState extends State<PricingTab> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Min Guests *", style: TextStyle(fontSize: 18)),
+                    Text(
+                      "Min Guests *",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: const Color.fromARGB(255, 15, 84, 20),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     Container(
                       width: 130,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1.0),
+                        border: Border.all(color: Colors.black, width: 1.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 8),
@@ -120,11 +131,18 @@ class _PricingTabState extends State<PricingTab> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Max Guests *", style: TextStyle(fontSize: 18)),
+                    Text(
+                      "Max Guests *",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: const Color.fromARGB(255, 15, 84, 20),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     Container(
                       width: 130,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1.0),
+                        border: Border.all(color: Colors.black, width: 1.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 8),
@@ -164,7 +182,11 @@ class _PricingTabState extends State<PricingTab> {
             ListTile(
               title: Text(
                 "Private Tour Option",
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: const Color.fromARGB(255, 15, 84, 20),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               subtitle: Text(
                 "Allow booking entire tour privately",
@@ -186,7 +208,14 @@ class _PricingTabState extends State<PricingTab> {
             SizedBox(height: 10),
 
             ListTile(
-              title: Text("Group Discount", style: TextStyle(fontSize: 18)),
+              title: Text(
+                "Group Discount",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: const Color.fromARGB(255, 15, 84, 20),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               subtitle: Text(
                 "Offer discounts for larger groups",
                 style: TextStyle(fontSize: 15),
