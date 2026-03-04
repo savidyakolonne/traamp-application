@@ -47,6 +47,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
           final Place place = snapshot.data!;
 
+          final double lat = (place.location['lat'] as num).toDouble();
+          final double lng = (place.location['lng'] as num).toDouble();
+
           return ListView(
             padding: EdgeInsets.zero,
             children: [
@@ -176,7 +179,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
               ),
 
               const SizedBox(height: 14),
-              //map navigate button ------------------------------------------------------------------------
+
+              // ================= MAP BUTTON =================
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: SizedBox(
@@ -193,9 +197,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                       ),
                     ),
                     onPressed: () {
-                      final lat = (place.location['lat'] as num).toDouble();
-                      final lng = (place.location['lng'] as num).toDouble();
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -209,7 +210,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
                   ),
                 ),
               ),
-              //------------------------------------------------------------------------------------------
+
               const SizedBox(height: 22),
 
               // ================= QUICK INFO =================
@@ -229,7 +230,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
                       const SizedBox(height: 14),
 
-                      // VISITING HOURS (FULL ROW)
                       if (place.visitingHours != null)
                         _fullWidthInfoCard(
                           icon: Icons.access_time,
@@ -244,7 +244,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
                       const SizedBox(height: 14),
 
-                      // BEST TIME (FULL ROW)
                       if (place.bestTimeToVisit != null)
                         _fullWidthInfoCard(
                           icon: Icons.wb_sunny,

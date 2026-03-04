@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../AppConfig.dart';
+import '../app_config.dart';
 import '../models/place_model.dart';
 
 class PlacesService {
-  static const String baseUrl = "${AppConfig.SERVER_URL}/api/place";
+  static const String baseUrl = "${AppConfig.SERVER_URL}/api/places";
 
   static Future<List<Place>> getPlaces() async {
     final res = await http.get(Uri.parse(baseUrl));

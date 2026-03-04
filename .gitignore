@@ -33,7 +33,7 @@ migrate_working_dir/
 /build/
 /coverage/
 .env
-pubspec.lock
+# pubspec.lock
 
 # ADDED (missing Flutter generated files)
 .flutter-plugins

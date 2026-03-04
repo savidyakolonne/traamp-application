@@ -45,6 +45,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   DateTime? _selectedDate;
   bool _isLoading = true;
   File? _pickedImage;
+  List<String> _selectedLanguages = [];
 
   @override
   void initState() {
@@ -94,6 +95,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
             _selectedLocation = data['location'];
             _selectedGender = data['gender'];
             _profileImageUrl = data['profilePicture'];
+            _selectedLanguages = List<String>.from(data['languages'] ?? []);
 
             // Read-only fields
             _nicController.text = data['nic'] ?? "";
@@ -161,6 +163,86 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     }
   }
 
+  void _showPasswordChangeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text(
+          "Change Password",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _dialogInputField(
+              "Current Password",
+              _currentPasswordController,
+              true,
+            ),
+            _dialogInputField("New Password", _newPasswordController, true),
+            const SizedBox(height: 10),
+            _dialogInputField(
+              "Confirm Password",
+              _confirmPasswordController,
+              true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.lightGreen),
+            onPressed: () {
+              Navigator.pop(context);
+              _updatePasswordLogic();
+            },
+            child: const Text("Change", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _updatePasswordLogic() async {
+    final newPass = _newPasswordController.text.trim();
+    final confirmPass = _confirmPasswordController.text.trim();
+    final currentPass = _currentPasswordController.text.trim();
+
+    if (newPass.isEmpty || confirmPass.isEmpty || currentPass.isEmpty) {
+      _showSnackBar("All password fields are required", Colors.red);
+      return;
+    }
+
+    if (newPass != confirmPass) {
+      _showSnackBar("Passwords do not match!", Colors.red);
+      return;
+    }
+
+    try {
+      final user = _auth.currentUser!;
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPass,
+      );
+
+      await user.reauthenticateWithCredential(credential);
+
+      await user.updatePassword(newPass);
+
+      _currentPasswordController.clear();
+      _newPasswordController.clear();
+      _confirmPasswordController.clear();
+
+      _showSnackBar("Password updated successfully!", Colors.green);
+    } catch (e) {
+      _showSnackBar("Current password is incorrect", Colors.red);
+    }
+  }
+
   Future<void> _saveAllChanges() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
@@ -180,7 +262,16 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
 
       // Save data to Firestore
       await _db.collection('users').doc(user.uid).update({
+        'firstName': _firstNameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
+        'email': _emailController.text.trim(),
+        'phoneNumber': _phoneController.text.trim(),
+        'address': _addressController.text.trim(),
+        'location': _selectedLocation,
+        'gender': _selectedGender,
+        'dob': _selectedDate?.toIso8601String(),
         'profilePicture': imageUrl,
+        'languages': _selectedLanguages,
       });
 
       if (mounted) {
@@ -192,6 +283,41 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showLanguageDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Select Language"),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(
+              shrinkWrap: true,
+              children: ListData.languages.map((language) {
+                final isSelected = _selectedLanguages.contains(language);
+
+                return CheckboxListTile(
+                  title: Text(language),
+                  value: isSelected,
+                  onChanged: (val) {
+                    setState(() {
+                      if (val == true) {
+                        _selectedLanguages.add(language);
+                      } else {
+                        _selectedLanguages.remove(language);
+                      }
+                    });
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showSnackBar(String message, Color color) {
@@ -277,10 +403,307 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                   ],
                 ),
               ),
+
+              const Text(
+                "Personal Information",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 15),
+              _buildLabel("First Name"),
+              TextFormField(
+                controller: _firstNameController,
+                decoration: _inputDecoration("First Name"),
+              ),
+              const SizedBox(height: 15),
+              _buildLabel("Last Name"),
+              TextFormField(
+                controller: _lastNameController,
+                decoration: _inputDecoration("Last Name"),
+              ),
+
+              const SizedBox(height: 15),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildLabel("Birthday"),
+                        TextFormField(
+                          controller: _dobController,
+                          readOnly: true,
+                          decoration: _inputDecoration("Birthday").copyWith(
+                            suffixIcon: const Icon(Icons.calendar_month),
+                          ),
+                          onTap: () async {
+                            DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: _selectedDate ?? DateTime(2000),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            );
+
+                            if (picked != null) {
+                              setState(() {
+                                _selectedDate = picked;
+                                _dobController.text =
+                                    "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildLabel("Gender"),
+                        DropdownButtonFormField<String>(
+                          value: _selectedGender,
+                          items: ListData.gender
+                              .map(
+                                (g) =>
+                                    DropdownMenuItem(value: g, child: Text(g)),
+                              )
+                              .toList(),
+                          onChanged: (val) =>
+                              setState(() => _selectedGender = val),
+                          decoration: _inputDecoration("Gender"),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Location"),
+              DropdownButtonFormField<String>(
+                value: _selectedLocation,
+                items: ListData.districts
+                    .map((d) => DropdownMenuItem(value: d, child: Text(d)))
+                    .toList(), //
+                onChanged: (val) => setState(() => _selectedLocation = val),
+                decoration: _inputDecoration("Select Location"),
+              ),
+
+              // Languages Section
+              const SizedBox(height: 20),
+              _buildLabel("Languages"),
+              const SizedBox(height: 10),
+
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  ..._selectedLanguages.map((language) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDCE9C8), // soft green background
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            language,
+                            style: const TextStyle(
+                              color: Color(0xFF2E7D32), // dark green text
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedLanguages.remove(language);
+                              });
+                            },
+                            child: const Icon(
+                              Icons.close,
+                              size: 18,
+                              color: Color(0xFF2E7D32),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+
+                  // Add Language Button
+                  GestureDetector(
+                    onTap: _showLanguageDialog,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(
+                          color: Colors.grey.shade400,
+                          style: BorderStyle.solid,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.add, color: Colors.grey),
+                          const SizedBox(width: 6),
+                          Text(
+                            "Add Language",
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Address"),
+              TextFormField(
+                controller: _addressController,
+                maxLines: 2,
+                decoration: _inputDecoration("Address"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Phone Number"),
+              TextFormField(
+                controller: _phoneController,
+                decoration: _inputDecoration("Phone Number"),
+              ),
+
+              const SizedBox(height: 30),
+              const Text(
+                "Account & Security",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 15),
+              _buildLabel("Email Address"),
+              TextFormField(
+                controller: _emailController,
+                decoration: _inputDecoration("Email"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Password"),
+              TextFormField(
+                obscureText: true,
+                readOnly: true,
+                initialValue: "••••••••",
+                decoration: _inputDecoration("").copyWith(
+                  suffixIcon: TextButton(
+                    onPressed: _showPasswordChangeDialog,
+                    child: const Text(
+                      "Change",
+                      style: TextStyle(
+                        color: Colors.lightGreen,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+              Row(
+                children: const [
+                  Text(
+                    "Professional Credentials",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(width: 10),
+                  Icon(Icons.lock_outline, size: 18, color: Colors.grey),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("National Identity Card (NIC)"),
+              TextFormField(
+                controller: _nicController,
+                readOnly: true,
+                decoration: _inputDecoration("NIC"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Type Of Certificate"),
+              TextFormField(
+                controller: _certTypeController,
+                readOnly: true,
+                decoration: _inputDecoration("Certificate Type"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Certificate Number"),
+              TextFormField(
+                controller: _certNumController,
+                readOnly: true,
+                decoration: _inputDecoration("Certificate Number"),
+              ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget _dialogInputField(
+    String label,
+    TextEditingController ctrl,
+    bool obscure,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        const SizedBox(height: 5),
+        TextField(
+          controller: ctrl,
+          obscureText: obscure,
+          decoration: _inputDecoration(label),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLabel(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: const TextStyle(
+        color: Colors.lightGreen,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
+
+  InputDecoration _inputDecoration(String hint) => InputDecoration(
+    hintText: hint,
+    filled: true,
+    fillColor: Colors.white,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+  );
 }
