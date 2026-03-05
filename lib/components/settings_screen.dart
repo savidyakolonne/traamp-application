@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../app_config.dart';
 import '../screens/auth/login_screen.dart';
+import '../screens/profile/guide_profile_screen.dart';
+import '../screens/profile/tourist_profile_screen.dart';
 
 class Settings extends StatefulWidget {
   final bool isTourist;
@@ -59,7 +61,19 @@ class _SettingsState extends State<Settings> {
             title: Text("Profile"),
             subtitle: Text("View your profile"),
             trailing: Icon(Icons.menu),
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    if (widget.isTourist) {
+                      return TouristProfileScreen();
+                    } else {
+                      return GuideProfileScreen();
+                    }
+                  },
+                ),
+              );
+            },
           ),
           Divider(),
           ListTile(
