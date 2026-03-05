@@ -1,11 +1,12 @@
-//import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../list_data.dart';
+import 'package:http/http.dart' as http;
+import '../../app_config.dart';
+import '../../list-data.dart';
 import '../../services/guide.dart';
 import 'login_setup.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 
 class GuideSignupForm extends StatefulWidget {
   const GuideSignupForm({super.key});
@@ -14,21 +15,16 @@ class GuideSignupForm extends StatefulWidget {
 }
 
 class _GuideSignupFormState extends State<GuideSignupForm> {
-  // instance of firebase - firestore
-  final db = FirebaseFirestore.instance;
   // global key object for Form
   final GlobalKey<FormState> _formKeyGuide = GlobalKey<FormState>();
   // DOB text editing controller
   final TextEditingController _dobController = TextEditingController();
-  // creating object for fireStore users collection
-  late final users = db.collection("users");
 
   final List<String> _genders = ListData.gender;
   final List<String> _certificateType = ListData.guideCertificates;
   final List<String> _districts = ListData.districts;
 
   // global variables to store data coming from form
-  late final userId = users.doc().id;
   String firstName = "";
   String lastName = "";
   String email = "";
@@ -37,14 +33,16 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   String gender = "";
   String dob = "";
   String phoneNumber = "";
-  String? guideCertifateType;
+  String? guideCertificateType;
   String? certificateNumber;
+  File? uploadedCertificatePath;
   String nic = "";
   String location = "";
   String address = "";
   String country = "Sri Lanka";
   String type = "guide";
   double rating = 0.0;
+  bool availability = false;
 
   // first name
   Widget firstNameFormField() {
@@ -161,7 +159,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
         }
         return null;
       },
-      onSaved: (cPass) {},
     );
   }
 
@@ -273,11 +270,14 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       }).toList(),
       onChanged: (certificate) {
         setState(() {
-          guideCertifateType = certificate;
+          guideCertificateType = certificate;
         });
       },
       validator: (certificate) {
         return null;
+      },
+      onSaved: (certificate) {
+        guideCertificateType = certificate;
       },
     );
   }
@@ -315,7 +315,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       },
       //save global variable
       onSaved: (number) {
-        if (number == "") {
+        if (number == "" || number == null) {
           certificateNumber = null;
         } else {
           certificateNumber = number;
@@ -345,6 +345,39 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
         }
         return null;
       },
+    );
+  }
+
+  // upload certificate section
+  String hint = "";
+  Widget uploadDocumentField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          readOnly: true,
+          decoration: hint.isEmpty
+              ? InputDecoration(hintText: "Upload your certificate")
+              : InputDecoration(hintText: hint),
+        ),
+        OutlinedButton(
+          onPressed: () async {
+            FilePickerResult? result = await FilePicker.platform.pickFiles(
+              type: FileType.custom,
+              allowedExtensions: ['jpg', 'pdf', 'doc', 'heif', 'png', 'jpeg'],
+            );
+            if (result != null) {
+              PlatformFile platformFile = result.files.single;
+              uploadedCertificatePath = File(platformFile.path!);
+              setState(() {
+                hint = platformFile.name;
+              });
+            }
+          },
+          child: Text("Upload", style: TextStyle(color: Colors.green)),
+          style: ButtonStyle(),
+        ),
+      ],
     );
   }
 
@@ -416,6 +449,9 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                         certificateTypeFormField(),
                         SizedBox(height: 15.0),
                         certificateNumberField(),
+                        SizedBox(height: 15.0),
+                        uploadDocumentField(),
+                        SizedBox(height: 15.0),
                         addressFormField(),
                         SizedBox(height: 15.0),
                         locationFormField(),
@@ -429,61 +465,116 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                       if (_formKeyGuide.currentState!.validate()) {
                         _formKeyGuide.currentState?.save();
                         Guide guide = Guide(
-                          uid: userId,
                           firstName: firstName,
                           lastName: lastName,
                           email: email,
+                          password: password,
                           gender: gender,
                           dob: dob,
                           phoneNumber: phoneNumber,
-                          guideCertifateType: guideCertifateType,
+                          guideCertificateType: guideCertificateType,
                           certificateNumber: certificateNumber,
+                          uploadedCertificatePath: uploadedCertificatePath,
                           nic: nic,
                           location: location,
                           address: address,
                           country: country,
                           type: type,
                           rating: rating,
+                          availability: availability,
                         );
                         // save to database after validation
                         try {
-                          // email and password authentication
-                          final credential = await FirebaseAuth.instance
-                              .createUserWithEmailAndPassword(
-                                email: email,
-                                password: password,
-                              );
-                          // add data to users collection
-                          await users
-                              .doc(credential.user!.uid)
-                              .set(guide.toMap());
+                          var uri = Uri.parse(
+                            "${AppConfig.SERVER_URL}/api/users/register-guide",
+                          );
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Successfully Created.'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                          // return back to signin page
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return LoginSetup();
-                              },
-                            ),
-                          );
-                        } on FirebaseException catch (e) {
-                          debugPrint(
-                            'Firestore error: ${e.code} - ${e.message}',
-                          );
-                          print(e);
+                          var request = http.MultipartRequest("POST", uri);
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Failed to create user. Please try again. Try to use another email.',
+                          // Add JSON fields
+                          guide.toMap().forEach((key, value) {
+                            if (value != null) {
+                              request.fields[key] = value.toString();
+                            }
+                          });
+
+                          // Add file
+                          if (guide.uploadedCertificatePath != null) {
+                            request.files.add(
+                              await http.MultipartFile.fromPath(
+                                "certificate", // field name to backend
+                                guide.uploadedCertificatePath!.path,
                               ),
-                              backgroundColor: Colors.red,
+                            );
+                          }
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("Connecting... "),
+                                  CircularProgressIndicator.adaptive(),
+                                ],
+                              ),
+                              backgroundColor: const Color.fromARGB(
+                                180,
+                                76,
+                                175,
+                                79,
+                              ),
+                            ),
+                          );
+
+                          var response = await request.send();
+                          var resp = await http.Response.fromStream(response);
+                          final data = jsonDecode(resp.body);
+
+                          if (response.statusCode == 201) {
+                            print("Guide registered successfully");
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(data['msg']),
+                                backgroundColor: const Color.fromARGB(
+                                  180,
+                                  76,
+                                  175,
+                                  79,
+                                ),
+                              ),
+                            );
+                            Navigator.pop(context, LoginSetup());
+                          } else {
+                            print("Error: ${data['msg']}");
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "Error: Already registered with this email. Please try a different email.",
+                                ),
+                                backgroundColor: const Color.fromARGB(
+                                  180,
+                                  244,
+                                  67,
+                                  54,
+                                ),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          print(e);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Error while connecting to server...',
+                              ),
+                              backgroundColor: const Color.fromARGB(
+                                180,
+                                244,
+                                67,
+                                54,
+                              ),
                             ),
                           );
                         }
