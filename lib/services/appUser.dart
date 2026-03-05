@@ -1,4 +1,3 @@
-
 class AppUser {
   final String firstName;
   final String lastName;

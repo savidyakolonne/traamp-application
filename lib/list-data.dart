@@ -1,4 +1,3 @@
-
 class ListData {
   // Countries
   static List<String> countryNames = [
