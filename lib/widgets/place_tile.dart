@@ -10,7 +10,16 @@ class PlaceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Image.network(place.coverImage, width: 60, fit: BoxFit.cover),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(10), // rounded corners
+        child: Image.network(
+          place.coverImage,
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+        ),
+      ),
+
       title: Text(place.name, style: TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text("${place.district} • ${place.category}"),
       onTap: () {
