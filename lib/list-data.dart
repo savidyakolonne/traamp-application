@@ -238,4 +238,32 @@ class ListData {
     "Trincomalee",
     "Vavuniya",
   ];
+
+  // languages
+  static const List<String> languages = [
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Italian",
+    "Portuguese",
+    "Russian",
+    "Chinese",
+    "Japanese",
+    "Korean",
+    "Arabic",
+    "Hindi",
+    "Tamil",
+    "Sinhala",
+    "Bengali",
+    "Urdu",
+    "Malay",
+    "Thai",
+    "Vietnamese",
+    "Turkish",
+    "Dutch",
+    "Greek",
+    "Swedish",
+    "Polish",
+  ];
 }
