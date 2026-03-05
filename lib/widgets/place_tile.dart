@@ -11,7 +11,7 @@ class PlaceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Image.network(place.coverImage, width: 60, fit: BoxFit.cover),
-      title: Text(place.name),
+      title: Text(place.name, style: TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text("${place.district} • ${place.category}"),
       onTap: () {
         Navigator.push(
