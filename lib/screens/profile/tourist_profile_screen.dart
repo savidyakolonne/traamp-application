@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:traamp_frontend/app_config.dart';
+import '../tourist/tourist_edit_profile.dart';
 
 class TouristProfileScreen extends StatefulWidget {
   const TouristProfileScreen({Key? key}) : super(key: key);
@@ -13,18 +15,12 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
   bool _isLoading = false;
   Map<String, dynamic>? _profileData;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadProfile();
-  }
-
   Future<void> _loadProfile() async {
     setState(() => _isLoading = true);
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/tourist/profile'),
+        Uri.parse('${AppConfig.SERVER_URL}/api/tourist/profile'),
         headers: {
           'Authorization': 'Bearer MOCK_TOURIST_456',
           'Content-Type': 'application/json',
@@ -46,53 +42,10 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
     }
   }
 
-  Future<void> _updateProfile() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final response = await http.put(
-        Uri.parse('http://10.0.2.2:3000/api/tourist/profile'),
-        headers: {
-          'Authorization': 'Bearer MOCK_TOURIST_456',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'firstName': 'Alex',
-          'lastName': 'Chen',
-          'country': 'United States',
-          'bio': 'Adventure seeker and culture enthusiast',
-          'preferences': ['Wildlife', 'Cultural Tours', 'Hiking'],
-        }),
-      );
-
-      final data = json.decode(response.body);
-
-      if (response.statusCode == 200 && data['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _loadProfile();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['message'] ?? 'Failed to update profile'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
   }
 
   @override
@@ -115,14 +68,6 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
             print('Back button tapped');
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.black),
-            onPressed: () {
-              print('Settings tapped');
-            },
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -175,14 +120,22 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                   ],
                 ),
               ),
-              
+
               // Edit Profile Button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _updateProfile,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return EditTouristProfile();
+                          },
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
@@ -196,8 +149,8 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                         ? const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
+                            child: CircularProgressIndicator.adaptive(
+                              backgroundColor: Colors.white,
                               strokeWidth: 2,
                             ),
                           )
@@ -212,7 +165,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Saved Guides
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -268,7 +221,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Recent Bookings
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -325,7 +278,10 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.green[50],
                               borderRadius: BorderRadius.circular(12),
@@ -370,7 +326,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Emergency Info
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -451,7 +407,8 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                                       ),
                                       const SizedBox(height: 8),
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: const [
                                           Text(
                                             '119',
@@ -461,7 +418,11 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                                             ),
                                           ),
                                           SizedBox(width: 8),
-                                          Icon(Icons.phone, color: Colors.red, size: 20),
+                                          Icon(
+                                            Icons.phone,
+                                            color: Colors.red,
+                                            size: 20,
+                                          ),
                                         ],
                                       ),
                                     ],
@@ -497,7 +458,8 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                                       ),
                                       const SizedBox(height: 8),
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: const [
                                           Text(
                                             '1990',
@@ -507,7 +469,11 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                                             ),
                                           ),
                                           SizedBox(width: 8),
-                                          Icon(Icons.phone, color: Colors.red, size: 20),
+                                          Icon(
+                                            Icons.phone,
+                                            color: Colors.red,
+                                            size: 20,
+                                          ),
                                         ],
                                       ),
                                     ],
@@ -525,7 +491,10 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                           onPressed: () {
                             print('Nearest Hospital Contact tapped');
                           },
-                          icon: const Icon(Icons.local_hospital, color: Colors.red),
+                          icon: const Icon(
+                            Icons.local_hospital,
+                            color: Colors.red,
+                          ),
                           label: const Text(
                             'Nearest Hospital Contact',
                             style: TextStyle(color: Colors.red),
@@ -551,7 +520,13 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
     );
   }
 
-  Widget _buildGuideListTile(String name, String specialty, double rating, int reviews, String imageUrl) {
+  Widget _buildGuideListTile(
+    String name,
+    String specialty,
+    double rating,
+    int reviews,
+    String imageUrl,
+  ) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -588,10 +563,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                     const SizedBox(height: 4),
                     Text(
                       specialty,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -615,10 +587,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                   const SizedBox(height: 4),
                   Text(
                     '$reviews tours',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
               ),
