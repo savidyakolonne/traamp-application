@@ -595,6 +595,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
               const SizedBox(height: 15),
               _buildLabel("Email Address"),
               TextFormField(
+                readOnly: true,
                 controller: _emailController,
                 decoration: _inputDecoration("Email"),
               ),

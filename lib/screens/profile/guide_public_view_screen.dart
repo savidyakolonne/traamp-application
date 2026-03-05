@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../app_config.dart';
+
 class GuidePublicViewScreen extends StatefulWidget {
   final String guideId;
-  
-  const GuidePublicViewScreen({Key? key, required this.guideId}) : super(key: key);
+
+  const GuidePublicViewScreen({Key? key, required this.guideId})
+    : super(key: key);
 
   @override
   State<GuidePublicViewScreen> createState() => _GuidePublicViewScreenState();
@@ -26,10 +29,8 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/guides/${widget.guideId}'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        Uri.parse('${AppConfig.SERVER_URL}/api/guides/${widget.guideId}'),
+        headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {
@@ -113,7 +114,11 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Icon(Icons.star, color: Colors.amber, size: 16),
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 16,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 '${_profileData?['rating'] ?? 4.9}',
@@ -138,7 +143,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                   ],
                 ),
               ),
-              
+
               // Bio Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -154,7 +159,8 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _profileData?['bio'] ?? 'Passionate about sharing the hidden gems of Sri Lanka. Specializing in ancient history and tea plantation tours with a focus on sustainable travel.',
+                      _profileData?['bio'] ??
+                          'Passionate about sharing the hidden gems of Sri Lanka. Specializing in ancient history and tea plantation tours with a focus on sustainable travel.',
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black87,
@@ -165,7 +171,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               // Action Buttons
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -215,7 +221,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Languages Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -252,7 +258,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Skills Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -291,7 +297,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Tour Packages Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -330,7 +336,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Posts Gallery
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -377,16 +383,13 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                     const SizedBox(height: 8),
                     const Text(
                       'Showing highlights from recent adventures in Kandy, Yala & Sigiriya',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Reviews Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -454,15 +457,17 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.black87,
-        ),
+        style: const TextStyle(fontSize: 12, color: Colors.black87),
       ),
     );
   }
 
-  Widget _buildPackageCard(String title, String duration, String price, String description) {
+  Widget _buildPackageCard(
+    String title,
+    String duration,
+    String price,
+    String description,
+  ) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -501,10 +506,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                   const SizedBox(width: 4),
                   Text(
                     duration,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                   ),
                   const SizedBox(width: 16),
                   Icon(Icons.attach_money, size: 14, color: Colors.green[700]),
@@ -534,7 +536,12 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     );
   }
 
-  Widget _buildReviewTile(String initials, String name, String country, String review) {
+  Widget _buildReviewTile(
+    String initials,
+    String name,
+    String country,
+    String review,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
