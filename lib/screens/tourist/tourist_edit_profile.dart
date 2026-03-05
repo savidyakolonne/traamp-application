@@ -413,6 +413,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
 
               _buildLabel("Email Address"),
               TextFormField(
+                readOnly: true,
                 controller: _emailController,
                 decoration: _inputDecoration("Email"),
               ),
