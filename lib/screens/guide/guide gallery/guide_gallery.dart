@@ -125,10 +125,7 @@ class _GuideGalleryState extends State<GuideGallery> {
               content: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 10,
-                children: [
-                  Text('${data['msg']}'),
-                  CircularProgressIndicator.adaptive(),
-                ],
+                children: [Text('${data['msg']}')],
               ),
               backgroundColor: const Color.fromARGB(180, 76, 175, 79),
             ),
