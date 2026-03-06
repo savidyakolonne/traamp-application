@@ -172,7 +172,7 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> {
               const SizedBox(height: 18),
 
               // ================= SHORT DESCRIPTION =================
-              if (activity.shortDesc != null && activity.shortDesc!.isNotEmpty)
+              if (activity.shortDesc.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
@@ -195,7 +195,7 @@ class _ActivityDetailScreenState extends State<ActivityDetailScreen> {
                       ],
                     ),
                     child: Text(
-                      activity.shortDesc!,
+                      activity.shortDesc,
                       style: const TextStyle(fontSize: 15),
                     ),
                   ),

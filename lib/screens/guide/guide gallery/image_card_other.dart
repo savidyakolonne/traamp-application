@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 import '../../../app_config.dart';
 
 // ignore: must_be_immutable
@@ -85,7 +84,10 @@ class _ImageCardOtherState extends State<ImageCardOther> {
                   child: Icon(Icons.delete_outline, color: Colors.red),
                 ),
                 onPressed: () {
-                  deleteImage();
+                  setState(() {
+                    deleteImage();
+                    longPressed = false;
+                  });
                 },
               ),
           ],
