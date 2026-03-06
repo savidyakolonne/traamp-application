@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../app_config.dart';
 import '../screens/auth/login_screen.dart';
+import '../screens/profile/guide_profile_screen.dart';
+import '../screens/profile/tourist_profile_screen.dart';
 
 class Settings extends StatefulWidget {
   final bool isTourist;
-  const Settings(this.isTourist);
+  const Settings(this.isTourist, {super.key});
 
   @override
   State<Settings> createState() => _SettingsState();
@@ -48,6 +50,68 @@ class _SettingsState extends State<Settings> {
     }
   }
 
+  Widget buildSettingsTile({
+    required IconData icon,
+    required Color iconColor,
+    required Color bgColor,
+    required String title,
+    required String subtitle,
+    VoidCallback? onTap,
+    bool isLogout = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.08),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: iconColor, size: 28),
+            ),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isLogout ? Colors.red : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,7 +123,19 @@ class _SettingsState extends State<Settings> {
             title: Text("Profile"),
             subtitle: Text("View your profile"),
             trailing: Icon(Icons.menu),
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    if (widget.isTourist) {
+                      return TouristProfileScreen();
+                    } else {
+                      return GuideProfileScreen();
+                    }
+                  },
+                ),
+              );
+            },
           ),
           Divider(),
           ListTile(
