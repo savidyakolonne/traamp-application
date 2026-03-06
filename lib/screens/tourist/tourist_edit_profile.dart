@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../../list-data.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:traamp_frontend/app_config.dart';
 
 class EditTouristProfile extends StatefulWidget {
   const EditTouristProfile({super.key});
@@ -16,7 +18,6 @@ class EditTouristProfile extends StatefulWidget {
 class _EditTouristProfileState extends State<EditTouristProfile> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
-  final _db = FirebaseFirestore.instance;
   final _storage = FirebaseStorage.instance;
 
   // Controllers
@@ -66,52 +67,61 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
 
   Future<void> _loadUserData() async {
     final user = _auth.currentUser;
-    if (user != null) {
-      try {
-        final doc = await _db.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-          final data = doc.data() as Map<String, dynamic>;
-          setState(() {
-            _firstNameController.text = data['firstName'] ?? "";
-            _lastNameController.text = data['lastName'] ?? "";
-            _emailController.text = data['email'] ?? "";
-            _selectedCountry = data['country'];
-            _selectedGender = data['gender'];
-            _profileImageUrl = data['profilePicture'];
+    if (user == null) return;
 
-            if (data['dob'] != null && data['dob'].toString().isNotEmpty) {
-              final dobString = data['dob'].toString();
+    try {
+      final idToken = await user.getIdToken();
 
-              DateTime? parsedDate;
+      final response = await http.post(
+        Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"idToken": idToken}),
+      );
 
-              // Try ISO format first (yyyy-MM-dd)
-              parsedDate = DateTime.tryParse(dobString);
+      if (response.statusCode == 200) {
+        final resData = jsonDecode(response.body);
+        final data = resData["data"];
 
-              // If ISO fails, try dd/MM/yyyy
-              if (parsedDate == null && dobString.contains('/')) {
-                final parts = dobString.split('/');
-                if (parts.length == 3) {
-                  parsedDate = DateTime(
-                    int.parse(parts[2]), // year
-                    int.parse(parts[1]), // month
-                    int.parse(parts[0]), // day
-                  );
-                }
-              }
+        setState(() {
+          _firstNameController.text = data['firstName'] ?? "";
+          _lastNameController.text = data['lastName'] ?? "";
+          _emailController.text = data['email'] ?? "";
+          _selectedCountry = data['country'];
+          _selectedGender = data['gender'];
+          _profileImageUrl = data['profilePicture'];
 
-              if (parsedDate != null) {
-                _selectedDate = parsedDate;
-                _dobController.text =
-                    "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+          if (data['dob'] != null && data['dob'].toString().isNotEmpty) {
+            final dobString = data['dob'].toString();
+
+            DateTime? parsedDate;
+
+            // Try ISO format first (yyyy-MM-dd)
+            parsedDate = DateTime.tryParse(dobString);
+
+            // If ISO fails, try dd/MM/yyyy
+            if (parsedDate == null && dobString.contains('/')) {
+              final parts = dobString.split('/');
+              if (parts.length == 3) {
+                parsedDate = DateTime(
+                  int.parse(parts[2]), // year
+                  int.parse(parts[1]), // month
+                  int.parse(parts[0]), // day
+                );
               }
             }
-            _isLoading = false;
-          });
-        }
-      } catch (e) {
-        debugPrint("Error loading user data: $e");
-        setState(() => _isLoading = false);
+
+            if (parsedDate != null) {
+              _selectedDate = parsedDate;
+              _dobController.text =
+                  "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+            }
+          }
+          _isLoading = false;
+        });
       }
+    } catch (e) {
+      debugPrint("Error loading user data: $e");
+      setState(() => _isLoading = false);
     }
   }
 
@@ -222,18 +232,24 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
           _profileImageUrl = imageUrl;
         });
       }
-      // Save data to Firestore
-      await _db.collection('users').doc(user.uid).update({
-        'firstName': _firstNameController.text.trim(),
-        'lastName': _lastNameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'country': _selectedCountry,
-        'gender': _selectedGender,
-        'dob': _selectedDate?.toIso8601String(),
-        'profilePicture': imageUrl,
-      });
 
-      if (mounted) {
+      final idToken = await user.getIdToken();
+
+      final response = await http.put(
+        Uri.parse("${AppConfig.SERVER_URL}/api/users/update-tourist-profile"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "idToken": idToken,
+          "firstName": _firstNameController.text.trim(),
+          "lastName": _lastNameController.text.trim(),
+          "country": _selectedCountry,
+          "gender": _selectedGender,
+          "dob": _selectedDate?.toIso8601String(),
+          "profilePicture": imageUrl,
+        }),
+      );
+
+      if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Profile updated Successfully!"),
@@ -241,6 +257,13 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
           ),
         );
         Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Failed to update profile"),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -413,6 +436,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
 
               _buildLabel("Email Address"),
               TextFormField(
+                readOnly: true,
                 controller: _emailController,
                 decoration: _inputDecoration("Email"),
               ),
