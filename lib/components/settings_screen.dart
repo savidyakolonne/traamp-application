@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +9,7 @@ import '../screens/profile/tourist_profile_screen.dart';
 
 class Settings extends StatefulWidget {
   final bool isTourist;
-  const Settings(this.isTourist);
+  const Settings(this.isTourist, {super.key});
 
   @override
   State<Settings> createState() => _SettingsState();
@@ -197,7 +195,7 @@ class _SettingsState extends State<Settings> {
               }
             },
           ),
-        ),
+        ],
       ),
     );
   }
