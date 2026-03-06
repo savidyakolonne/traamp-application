@@ -1,4 +1,4 @@
-import 'appUser.dart';
+import '../services/appUser.dart';
 
 class Tourist extends AppUser {
   final String country;
