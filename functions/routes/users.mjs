@@ -197,4 +197,47 @@ userRouter.post("/user-logout", async (req, res) => {
   }
 });
 
+// update tourist profile
+userRouter.put("/update-tourist-profile", async (req, res) => {
+  try {
+    const {
+      idToken,
+      firstName,
+      lastName,
+      country,
+      gender,
+      dob,
+      profilePicture
+    } = req.body;
+
+    const decoded = await auth.verifyIdToken(idToken);
+    const uid = decoded.uid;
+
+    const userRef = db.collection("users").doc(uid);
+
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    await userRef.update({
+      ...(firstName && { firstName }),
+      ...(lastName && { lastName }),
+      ...(country && { country }),
+      ...(gender && { gender }),
+      ...(dob && { dob }),
+      ...(profilePicture && { profilePicture }),
+    });
+
+    res.status(200).json({
+      msg: "Profile updated successfully",
+    });
+  } catch (e) {
+    console.error(e.message);
+    res.status(400).json({
+      msg: "Failed to update profile",
+    });
+  }
+});
+
 export default userRouter;
