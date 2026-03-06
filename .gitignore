@@ -63,7 +63,7 @@ android/.gradle/
 # Backend (Node / Firebase)
 # ======================
 functions/node_modules/
-functions/serviceAccountKey.json
+functions/src/config/serviceAccountKey.json
 functions/.env
 
 # ADDED (Firebase local & debug)
