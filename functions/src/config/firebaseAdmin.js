@@ -1,8 +1,15 @@
 import admin from "firebase-admin";
 import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
+// Setup __dirname for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load service account JSON
 const serviceAccount = JSON.parse(
-  readFileSync("./serviceAccountKey.json", "utf8"),
+  readFileSync(join(__dirname, "serviceAccountKey.json"), "utf8")
 );
 
 admin.initializeApp({
