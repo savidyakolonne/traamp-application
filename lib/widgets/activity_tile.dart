@@ -10,8 +10,17 @@ class ActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Image.network(activity.coverImage, width: 60, fit: BoxFit.cover),
-      title: Text(activity.name),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(10), // rounded corners
+        child: Image.network(
+          activity.coverImage,
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+        ),
+      ),
+
+      title: Text(activity.name, style: TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text("${activity.district} • ${activity.category}"),
       onTap: () {
         Navigator.push(

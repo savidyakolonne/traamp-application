@@ -32,7 +32,18 @@ class _MainTabViewState extends State<MainTabView> {
             widget.isTourist ? Settings(true) : Settings(false),
           ],
         ),
-        bottomNavigationBar: BottomAppBar(
+        bottomNavigationBar: Container(
+          height: 60,
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 247, 248, 246),
+            boxShadow: [
+              BoxShadow(
+                color: const Color.fromARGB(94, 0, 0, 0),
+                blurRadius: 10,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
           child: const TabBar(
             dividerColor: Colors.transparent,
             indicatorColor: Colors.transparent,
