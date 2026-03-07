@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../../app_config.dart';
+import '../app_config.dart';
 
 // ignore: must_be_immutable
 class ImageCardOther extends StatefulWidget {

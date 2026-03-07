@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:traamp_frontend/screens/guide/guide_dashboard.dart';
 import '../../../app_config.dart';
-import '../../../components/packages/guide_package_card.dart';
+import '../../../widgets/guide_package_card.dart';
 import 'create_package/create_guide_package.dart';
 
 // ignore: must_be_immutable
@@ -18,7 +17,7 @@ class GuidePackage extends StatefulWidget {
 class _GuidePackageState extends State<GuidePackage> {
   List<dynamic> packages = [];
 
-  Future<void> getGuidePackages() async {
+  Future<void> _getGuidePackages() async {
     try {
       final response = await http.post(
         Uri.parse(
@@ -45,7 +44,7 @@ class _GuidePackageState extends State<GuidePackage> {
   @override
   void initState() {
     super.initState();
-    getGuidePackages();
+    _getGuidePackages();
   }
 
   @override
@@ -60,7 +59,7 @@ class _GuidePackageState extends State<GuidePackage> {
         ),
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context, GuideDashboard());
+            Navigator.pop(context);
           },
           icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 71, 85, 105)),
         ),
@@ -69,7 +68,7 @@ class _GuidePackageState extends State<GuidePackage> {
         width: double.infinity,
         padding: EdgeInsets.only(top: 20),
         child: RefreshIndicator(
-          onRefresh: getGuidePackages,
+          onRefresh: _getGuidePackages,
           child: ListView(
             children: [
               // check condition that package array empty or not

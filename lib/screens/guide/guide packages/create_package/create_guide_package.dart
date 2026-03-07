@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../../../app_config.dart';
+import '../../../../models/guide_package_data.dart';
 import '../guide_package.dart';
-import 'guide_package_data.dart';
 import 'info_tab.dart';
 import 'pricing_tab.dart';
 import 'route_tab.dart';
@@ -36,7 +36,7 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
     } else if (currentStep == 2 && formKey3.currentState!.validate()) {
       setState(() => currentStep++);
     } else if (currentStep == 3 && formKey4.currentState!.validate()) {
-      submitAll();
+      _submitAll();
     }
   }
 
@@ -46,7 +46,7 @@ class _CreateGuidePackageState extends State<CreateGuidePackage> {
     }
   }
 
-  Future<void> submitAll() async {
+  Future<void> _submitAll() async {
     try {
       var uri = Uri.parse(
         "${AppConfig.SERVER_URL}/api/guidePackage/add-package",

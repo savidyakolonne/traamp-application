@@ -4,7 +4,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../../app_config.dart';
-import '../guide_dashboard.dart';
 import 'allImages_tab.dart';
 import 'otherImages_tab.dart';
 import 'packageImages_tab.dart';
@@ -27,7 +26,7 @@ class _GuideGalleryState extends State<GuideGallery> {
   String galleryId = '';
 
   // get all gallery collections by uid
-  Future<void> getImageDocuments() async {
+  Future<void> _getImageDocuments() async {
     try {
       final response = await http.post(
         Uri.parse("${AppConfig.SERVER_URL}/api/gallery/get-gallery-by-uid"),
@@ -38,7 +37,7 @@ class _GuideGalleryState extends State<GuideGallery> {
       if (response.statusCode == 200) {
         setState(() {
           galleries = data["data"];
-          setGalleryImages();
+          _setGalleryImages();
         });
       } else {
         print(data["msg"]);
@@ -49,7 +48,7 @@ class _GuideGalleryState extends State<GuideGallery> {
   }
 
   // set all galley images to galleryImage array
-  void setGalleryImages() {
+  void _setGalleryImages() {
     galleryImages = [];
     List<dynamic> images = [];
     if (galleries.isNotEmpty) {
@@ -69,7 +68,7 @@ class _GuideGalleryState extends State<GuideGallery> {
     }
   }
 
-  Future<void> addImagesToDataBase() async {
+  Future<void> _addImagesToDataBase() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
@@ -130,6 +129,9 @@ class _GuideGalleryState extends State<GuideGallery> {
               backgroundColor: const Color.fromARGB(180, 76, 175, 79),
             ),
           );
+          setState(() {
+            _getImageDocuments();
+          });
         } else {
           try {
             var data = jsonDecode(responseBody);
@@ -161,7 +163,7 @@ class _GuideGalleryState extends State<GuideGallery> {
   }
 
   // to get all packages by uid
-  Future<void> getGuidePackages() async {
+  Future<void> _getGuidePackages() async {
     try {
       final response = await http.post(
         Uri.parse(
@@ -175,7 +177,7 @@ class _GuideGalleryState extends State<GuideGallery> {
         print(data["msg"]);
         setState(() {
           packages = data["packages"];
-          setPackageImages();
+          _setPackageImages();
           print(packageImages);
         });
       } else {
@@ -187,7 +189,7 @@ class _GuideGalleryState extends State<GuideGallery> {
   }
 
   // set all package images to packageImage array
-  void setPackageImages() {
+  void _setPackageImages() {
     List<dynamic> images = [];
     if (packages.isNotEmpty) {
       for (int i = 0; i < packages.length; i++) {
@@ -205,8 +207,8 @@ class _GuideGalleryState extends State<GuideGallery> {
   @override
   void initState() {
     super.initState();
-    getGuidePackages();
-    getImageDocuments();
+    _getGuidePackages();
+    _getImageDocuments();
   }
 
   @override
@@ -218,7 +220,7 @@ class _GuideGalleryState extends State<GuideGallery> {
         appBar: AppBar(
           leading: IconButton(
             onPressed: () {
-              Navigator.pop(context, GuideDashboard());
+              Navigator.pop(context);
             },
             icon: Icon(Icons.arrow_back),
           ),
@@ -251,14 +253,14 @@ class _GuideGalleryState extends State<GuideGallery> {
           padding: EdgeInsets.all(16),
           width: double.infinity,
           child: RefreshIndicator(
-            onRefresh: getImageDocuments,
+            onRefresh: _getImageDocuments,
             child: TabBarView(
               children: [
-                AllImages(galleryImages, packageImages, getImageDocuments),
+                AllImages(galleryImages, packageImages, _getImageDocuments),
 
                 PackageImages(packageImages),
 
-                OtherImages(galleryImages, getImageDocuments),
+                OtherImages(galleryImages, _getImageDocuments),
               ],
             ),
           ),
@@ -277,8 +279,7 @@ class _GuideGalleryState extends State<GuideGallery> {
             ),
           ),
           onPressed: () {
-            addImagesToDataBase();
-            getImageDocuments();
+            _addImagesToDataBase();
           },
         ),
       ),
