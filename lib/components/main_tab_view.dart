@@ -8,7 +8,8 @@ import '../screens/tourist/tourist_notification_screen.dart';
 class MainTabView extends StatefulWidget {
   final bool isTourist;
   final String idToken;
-  const MainTabView(this.isTourist, this.idToken, {super.key});
+  final Map<String, dynamic> userData;
+  const MainTabView(this.isTourist, this.idToken, this.userData, {super.key});
 
   @override
   State<MainTabView> createState() => _MainTabViewState();
@@ -23,14 +24,14 @@ class _MainTabViewState extends State<MainTabView> {
         body: TabBarView(
           children: [
             widget.isTourist
-                ? TouristDashboard(widget.idToken)
-                : GuideDashboard(widget.idToken),
+                ? TouristDashboard(widget.idToken, widget.userData)
+                : GuideDashboard(widget.idToken, widget.userData),
             widget.isTourist
                 ? TouristNotificationScreen()
                 : GuideNotificationScreen(),
             widget.isTourist
-                ? Settings(true, widget.idToken)
-                : Settings(false, widget.idToken),
+                ? Settings(true, widget.idToken, widget.userData)
+                : Settings(false, widget.idToken, widget.userData),
           ],
         ),
         bottomNavigationBar: Container(

@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:weather/weather.dart';
 import '../../services/location_service.dart';
 import '../../services/weather_service.dart';
-import 'weather_card_element.dart';
+import '../../widgets/weather_card_element.dart';
 import 'weather_forecast.dart';
 
 class WeatherScreen extends StatefulWidget {
@@ -24,7 +24,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   List<Weather> forecast = [];
 
   // get current location via GPS
-  Future<void> getCurrentCityAndWeather() async {
+  Future<void> _getCurrentCityAndWeather() async {
     try {
       // Get current position
       final position = await LocationService.getCurrentPosition();
@@ -41,7 +41,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
             ? place!.locality!
             : "Unknown");
       });
-      getCurrentWeather(position.latitude, position.longitude);
+      _getCurrentWeather(position.latitude, position.longitude);
     } catch (e) {
       print("Error: $e");
       setState(() {
@@ -51,7 +51,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   }
 
   // get current weather
-  void getCurrentWeather(double lat, double long) async {
+  void _getCurrentWeather(double lat, double long) async {
     try {
       Weather w = await WeatherService.getCurrentWeatherWithCoordinates(
         lat,
@@ -86,7 +86,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
     }
   }
 
-  void getCurrentWeatherByName(String city) async {
+  void _getCurrentWeatherByName(String city) async {
     try {
       Weather w = await WeatherService.getCurrentWeatherWithCityName(city);
       setState(() {
@@ -164,7 +164,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
   @override
   void initState() {
     super.initState();
-    getCurrentCityAndWeather();
+    _getCurrentCityAndWeather();
   }
 
   @override
@@ -185,7 +185,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: getCurrentCityAndWeather,
+        onRefresh: _getCurrentCityAndWeather,
         child: SingleChildScrollView(
           child: Container(
             width: double.infinity,
@@ -220,7 +220,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         ),
                         suffixIcon: IconButton(
                           onPressed: () {
-                            getCurrentWeatherByName(city);
+                            _getCurrentWeatherByName(city);
                           },
                           icon: Icon(
                             Icons.location_on_outlined,
