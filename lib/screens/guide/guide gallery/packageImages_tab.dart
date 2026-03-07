@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traamp_frontend/screens/guide/guide%20gallery/image_card_package.dart';
+import 'package:traamp_frontend/widgets/image_card_package.dart';
 
 // ignore: must_be_immutable
 class PackageImages extends StatefulWidget {

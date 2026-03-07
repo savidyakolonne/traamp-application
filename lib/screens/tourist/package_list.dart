@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traamp_frontend/screens/tourist/package_card.dart';
+import 'package:traamp_frontend/widgets/package_card.dart';
 
 // ignore: must_be_immutable
 class PackageList extends StatefulWidget {

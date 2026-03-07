@@ -7,10 +7,12 @@ import '../screens/auth/login_screen.dart';
 import '../screens/profile/guide_profile_screen.dart';
 import '../screens/profile/tourist_profile_screen.dart';
 
+// ignore: must_be_immutable
 class Settings extends StatefulWidget {
   final bool isTourist;
   final String idToken;
-  const Settings(this.isTourist, this.idToken, {super.key});
+  Map<String, dynamic> userData;
+  Settings(this.isTourist, this.idToken, this.userData, {super.key});
 
   @override
   State<Settings> createState() => _SettingsState();
@@ -19,7 +21,7 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   bool loggedOut = false;
 
-  Future<void> signOutUser() async {
+  Future<void> _signOutUser() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
@@ -123,9 +125,15 @@ class _SettingsState extends State<Settings> {
                 MaterialPageRoute(
                   builder: (context) {
                     if (widget.isTourist) {
-                      return TouristProfileScreen();
+                      return TouristProfileScreen(
+                        widget.idToken,
+                        widget.userData,
+                      );
                     } else {
-                      return GuideProfileScreen();
+                      return GuideProfileScreen(
+                        widget.idToken,
+                        widget.userData,
+                      );
                     }
                   },
                 ),
@@ -169,7 +177,7 @@ class _SettingsState extends State<Settings> {
             leading: Icon(Icons.logout, size: 30),
             title: Text("Logout"),
             onTap: () async {
-              await signOutUser();
+              await _signOutUser();
               if (loggedOut) {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => LoginScreen()),

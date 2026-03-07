@@ -8,10 +8,11 @@ import '../emergency_services/emergency_services.dart';
 import 'guide gallery/guide_gallery.dart';
 import 'guide packages/guide_package.dart';
 
+// ignore: must_be_immutable
 class GuideDashboard extends StatefulWidget {
   final String idToken;
-
-  const GuideDashboard(this.idToken, {super.key});
+  Map<String, dynamic> userData;
+  GuideDashboard(this.idToken, this.userData, {super.key});
 
   @override
   State<GuideDashboard> createState() => _GuideDashboardState();
@@ -22,10 +23,9 @@ class _GuideDashboardState extends State<GuideDashboard> {
   String profilePicture = "";
   bool availability = false;
   late String dropdownValue;
-  late Map<String, dynamic> userData = {};
 
   // get user data from DB
-  Future<void> getUserData() async {
+  Future<void> _getUserData() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
@@ -39,10 +39,10 @@ class _GuideDashboardState extends State<GuideDashboard> {
 
         if (response.statusCode == 200) {
           setState(() {
-            userData = data['data'];
-            availability = userData['availability'];
-            if (userData['profilePicture'] != null) {
-              profilePicture = userData['profilePicture'];
+            widget.userData = data['data'];
+            availability = widget.userData['availability'];
+            if (widget.userData['profilePicture'] != null) {
+              profilePicture = widget.userData['profilePicture'];
             }
           });
           print(data['msg']);
@@ -102,7 +102,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
   @override
   void initState() {
     super.initState();
-    getUserData();
+    _getUserData();
   }
 
   @override
@@ -115,7 +115,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
             CircleAvatar(
               backgroundImage: (profilePicture.isNotEmpty)
                   ? NetworkImage(profilePicture)
-                  : (userData['gender'] == "Female"
+                  : (widget.userData['gender'] == "Female"
                         ? AssetImage('assets/images/avatar-female.avif')
                         : AssetImage('assets/images/avatar-male.avif')),
             ),
@@ -124,7 +124,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Hi, ${userData['firstName']}",
+                  "Hi, ${widget.userData['firstName']}",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
                 ),
                 Row(
@@ -136,7 +136,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
                       color: const Color.fromARGB(255, 234, 210, 0),
                     ),
                     Text(
-                      "${userData['rating']}",
+                      "${widget.userData['rating']}",
                       style: TextStyle(
                         color: const Color.fromARGB(255, 100, 116, 139),
                         fontSize: 16,
@@ -150,7 +150,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: getUserData,
+        onRefresh: _getUserData,
         child: SingleChildScrollView(
           child: Container(
             padding: EdgeInsets.all(16),
@@ -283,7 +283,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) {
-                                return GuidePackage(userData['uid']);
+                                return GuidePackage(widget.userData['uid']);
                               },
                             ),
                           );
@@ -339,7 +339,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) {
-                                return GuideGallery(userData['uid']);
+                                return GuideGallery(widget.userData['uid']);
                               },
                             ),
                           );

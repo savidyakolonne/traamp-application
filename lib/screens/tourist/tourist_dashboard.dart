@@ -13,10 +13,11 @@ import 'package_list.dart';
 import 'package:traamp_frontend/screens/tourist/tourist_find_guide.dart';
 import 'package:traamp_frontend/screens/assistant/assistant_home.dart';
 
+// ignore: must_be_immutable
 class TouristDashboard extends StatefulWidget {
   final String idToken;
-
-  const TouristDashboard(this.idToken, {super.key});
+  Map<String, dynamic> userData = {};
+  TouristDashboard(this.idToken, this.userData, {super.key});
 
   @override
   State<TouristDashboard> createState() => _TouristDashboardState();
@@ -26,10 +27,9 @@ class _TouristDashboardState extends State<TouristDashboard> {
   String currentLocation = "Unknown location";
   String profilePicture = "";
   List<dynamic> packages = [];
-  late Map<String, dynamic> userData = {};
 
   // get user data from DB
-  Future<void> getUserData() async {
+  Future<void> _getUserDataAndPackages() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
@@ -43,9 +43,9 @@ class _TouristDashboardState extends State<TouristDashboard> {
 
         if (response.statusCode == 200) {
           setState(() {
-            userData = data['data'];
-            if (userData['profilePicture'] != null) {
-              profilePicture = userData['profilePicture'];
+            widget.userData = data['data'];
+            if (widget.userData['profilePicture'] != null) {
+              profilePicture = widget.userData['profilePicture'];
             }
           });
           print(data['msg']);
@@ -55,12 +55,14 @@ class _TouristDashboardState extends State<TouristDashboard> {
       } else {
         print("Something wrong during creating instance from firebase");
       }
+      // calling guide packages
+      _getPackages();
     } catch (e) {
       print(e.toString());
     }
   }
 
-  Future<void> getPackages() async {
+  Future<void> _getPackages() async {
     try {
       final response = await http.get(
         Uri.parse("${AppConfig.SERVER_URL}/api/guidePackage/get-all-packages"),
@@ -70,9 +72,6 @@ class _TouristDashboardState extends State<TouristDashboard> {
       if (response.statusCode == 200) {
         setState(() {
           packages = data['packages'];
-          print('-----------------------------------------------------');
-          print(packages);
-          print('package count: ${packages.length}');
         });
       } else {
         print(data['msg']);
@@ -257,10 +256,9 @@ class _TouristDashboardState extends State<TouristDashboard> {
   }
 
   @override
-  initState() {
+  void initState() {
     super.initState();
-    getUserData();
-    getPackages();
+    _getUserDataAndPackages();
   }
 
   @override
@@ -273,7 +271,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
             CircleAvatar(
               backgroundImage: (profilePicture.isNotEmpty)
                   ? NetworkImage(profilePicture)
-                  : (userData['gender'] == "Female"
+                  : (widget.userData['gender'] == "Female"
                         ? AssetImage('assets/images/avatar-female.avif')
                         : AssetImage('assets/images/avatar-male.avif')),
             ),
@@ -290,7 +288,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
                 ),
 
                 Text(
-                  "Ayubowan, ${userData['firstName']}!",
+                  "Ayubowan, ${widget.userData['firstName']}!",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
                 ),
               ],
@@ -312,7 +310,7 @@ class _TouristDashboardState extends State<TouristDashboard> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: getPackages,
+        onRefresh: _getUserDataAndPackages,
         child: SingleChildScrollView(
           child: Container(
             width: double.infinity,
