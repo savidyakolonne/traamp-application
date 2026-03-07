@@ -197,6 +197,10 @@ class _LoginSetupState extends State<LoginSetup> {
                   onPressed: () {
                     loginEmail();
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 247, 250, 247),
+                    foregroundColor: Colors.green,
+                  ),
                   child: loading
                       ? const SizedBox(
                           height: 18,
