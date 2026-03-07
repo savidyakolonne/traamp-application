@@ -1,5 +1,5 @@
 import { Router } from "express";
-import firebaseAdmin from "../firebaseAdmin.js";
+import firebaseAdmin from "../config/firebaseAdmin.js";
 import multer from "multer";
 
 const packageRouter = Router();

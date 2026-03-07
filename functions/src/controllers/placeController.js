@@ -1,12 +1,10 @@
-import express from "express";
-//import { db } from "../firebaseAdmin.js";
-import firebaseAdmin from "../firebaseAdmin.js";
+import firebaseAdmin from "../config/firebaseAdmin.js";
 import { geohashQueryBounds, distanceBetween } from "geofire-common";
 
-const router = express.Router();
 const { db } = firebaseAdmin;
 
-router.get("/", async (req, res) => {
+// GET all places
+export const getAllPlaces = async (req, res) => {
   try {
     const snapshot = await db.collection("places").get();
 
@@ -22,8 +20,8 @@ router.get("/", async (req, res) => {
       location: doc.data().location || {},
       keywords: doc.data().search?.keywords || [],
       bestTime: doc.data().bestTime || {},
-      activities: doc.data().activities || {},        // map of activityName: description
-      bestTimeToVisit: doc.data().bestTimeToVisit || {}, // map with seasonNote & timeOfDayNote
+      activities: doc.data().activities || {},
+      bestTimeToVisit: doc.data().bestTimeToVisit || {},
       visitingHours: doc.data().visitingHours || {},
       shortDesc: doc.data().shortDesc || "",
     }));
@@ -33,11 +31,30 @@ router.get("/", async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "server_error" });
   }
-});
+};
 
-//routers for map feature - savidyakolonne 
+// GET single place by ID
+export const getPlaceById = async (req, res) => {
+  try {
+    const docRef = db.collection("places").doc(req.params.id);
+    const docSnap = await docRef.get();
 
-router.get("/nearby", async (req, res) => {
+    if (!docSnap.exists) {
+      return res.status(404).json({ error: "place_not_found" });
+    }
+
+    res.json({
+      id: docSnap.id,
+      ...docSnap.data(),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "server_error" });
+  }
+};
+
+// GET nearby places
+export const getNearbyPlaces = async (req, res) => {
   try {
     const lat = Number(req.query.lat);
     const lng = Number(req.query.lng);
@@ -72,7 +89,7 @@ router.get("/nearby", async (req, res) => {
 
         const data = doc.data();
 
-        // ✅ only hidden gems
+        // Only hidden gems
         if (data.isHidden !== true) continue;
 
         const placeLat = data.location?.lat;
@@ -96,7 +113,7 @@ router.get("/nearby", async (req, res) => {
       }
     }
 
-    // ✅ lesser-known first
+    // Lesser-known first
     results.sort((a, b) => (a.popularityScore ?? 999) - (b.popularityScore ?? 999));
 
     res.json(results.slice(0, 30));
@@ -104,28 +121,4 @@ router.get("/nearby", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "server_error" });
   }
-});
-
-//-----------------------------------------------------------------------------------------------
-
-router.get("/:id", async (req, res) => {
-  try {
-    const docRef = db.collection("places").doc(req.params.id);
-    const docSnap = await docRef.get();
-
-    if (!docSnap.exists) {
-      return res.status(404).json({ error: "place_not_found" });
-    }
-
-    res.json({
-      id: docSnap.id,
-      ...docSnap.data(),
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "server_error" });
-  }
-});
-
-
-export default router;
+};

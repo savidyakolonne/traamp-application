@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import firebaseAdmin from "../firebaseAdmin.js";
+import firebaseAdmin from "../config/firebaseAdmin.js";
 import { FieldValue } from "firebase-admin/firestore";
 
 const galleryRouter = Router();
