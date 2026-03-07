@@ -184,6 +184,7 @@ class _LoginSetupState extends State<LoginSetup> {
               TextField(
                 controller: passCtrl,
                 obscureText: _obscureState,
+                cursorColor: Colors.green,
                 decoration: InputDecoration(
                   hintText: "Password",
                   suffixIcon: showAndHidePasswordIcon(),
