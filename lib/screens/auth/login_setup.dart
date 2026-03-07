@@ -46,7 +46,7 @@ class _LoginSetupState extends State<LoginSetup> {
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      final idToken = await userCredential.user!.getIdToken();
+      final String? idToken = await userCredential.user!.getIdToken(true);
       final response = await http.post(
         Uri.parse("${AppConfig.SERVER_URL}/api/users/loginWithEmail"),
         headers: {"Content-Type": "application/json"},
@@ -88,7 +88,7 @@ class _LoginSetupState extends State<LoginSetup> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return MainTabView(true);
+                return MainTabView(true, idToken!);
               },
             ),
           );
@@ -96,7 +96,7 @@ class _LoginSetupState extends State<LoginSetup> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return MainTabView(false);
+                return MainTabView(false, idToken!);
               },
             ),
           );

@@ -9,6 +9,10 @@ import 'guide gallery/guide_gallery.dart';
 import 'guide packages/guide_package.dart';
 
 class GuideDashboard extends StatefulWidget {
+  final String idToken;
+
+  const GuideDashboard(this.idToken, {super.key});
+
   @override
   State<GuideDashboard> createState() => _GuideDashboardState();
 }
@@ -16,7 +20,6 @@ class GuideDashboard extends StatefulWidget {
 class _GuideDashboardState extends State<GuideDashboard> {
   String currentLocation = "Unknown location";
   String profilePicture = "";
-  late String? idToken = "";
   bool availability = false;
   late String dropdownValue;
   late Map<String, dynamic> userData = {};
@@ -26,30 +29,25 @@ class _GuideDashboardState extends State<GuideDashboard> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        idToken = await user.getIdToken(true);
-        if (idToken != null) {
-          final response = await http.post(
-            Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({"idToken": idToken}),
-          );
+        final response = await http.post(
+          Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"idToken": widget.idToken}),
+        );
 
-          final data = await jsonDecode(response.body);
+        final data = await jsonDecode(response.body);
 
-          if (response.statusCode == 200) {
-            setState(() {
-              userData = data['data'];
-              availability = userData['availability'];
-              if (userData['profilePicture'] != null) {
-                profilePicture = userData['profilePicture'];
-              }
-            });
-            print(data['msg']);
-          } else if (response.statusCode == 401) {
-            print(data['msg']);
-          }
-        } else {
-          print("idToken is Null");
+        if (response.statusCode == 200) {
+          setState(() {
+            userData = data['data'];
+            availability = userData['availability'];
+            if (userData['profilePicture'] != null) {
+              profilePicture = userData['profilePicture'];
+            }
+          });
+          print(data['msg']);
+        } else if (response.statusCode == 401) {
+          print(data['msg']);
         }
       } else {
         print("Something wrong during creating instance from firebase");
@@ -221,14 +219,14 @@ class _GuideDashboardState extends State<GuideDashboard> {
                           try {
                             final currentUser =
                                 FirebaseAuth.instance.currentUser;
-                            if (currentUser != null && idToken != null) {
+                            if (currentUser != null) {
                               final response = await http.put(
                                 Uri.parse(
                                   "${AppConfig.SERVER_URL}/api/users/update-guide-availability",
                                 ),
                                 headers: {"Content-Type": "application/json"},
                                 body: jsonEncode({
-                                  "idToken": idToken,
+                                  "idToken": widget.idToken,
                                   "availability": availability,
                                 }),
                               );

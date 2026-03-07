@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:traamp_frontend/screens/guide/guide_dashboard.dart';
 import '../../../app_config.dart';
 import '../../../components/packages/guide_package_card.dart';
 import 'create_package/create_guide_package.dart';
@@ -60,7 +59,7 @@ class _GuidePackageState extends State<GuidePackage> {
         ),
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context, GuideDashboard());
+            Navigator.pop(context);
           },
           icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 71, 85, 105)),
         ),
