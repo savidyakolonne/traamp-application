@@ -526,6 +526,8 @@ class _GuideCard extends StatelessWidget {
           ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFE8F5E9),
+              foregroundColor: Colors.green,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
