@@ -41,20 +41,29 @@ TRAAMP-MOBILE-FRONTEND/
 │   ├── services/
 │   │   └── position.dart     # GPS logic and location permission handling
 │   └── main.dart             # Application entry point
-├── functions/
-|    # Node.js (Firebase Functions) backend
-│   ├── routes/
-│   │   └── places.routes.js  # Nearby places API endpoints
-|   |   |   activity.routes.js # activity listing route .
-|   |   |   guide_package.mjs #
-|   |   |   users.mjs         #
-│   ├── firebaseAdmin.js      # Firebase Admin SDK initialization
-│   ├── app.js                # Express.js application configuration
-│   ├── index.js              # Backend entry point
+|   
+├── functions/  # Node.js (Firebase Functions) backend
+|   |── node_modules/
+|   |──src/
+|   |   |──config/
+|   |   |     |──firebaseAdmin.js  # Firebase Admin SDK initialization
+|   |   |     |──serviceAccountKey.json # service account uris and other related stuff
+│   |   |── routes/
+│   │   |     |──placeRoutes.js  # Nearby places API endpoints
+|   |   |     |──activityRoutes.js # activity listing route .
+|   |   |     |──guide_package.mjs #
+|   |   |     |──userRoutes.js         #
+|   |   |     |──guideRoutes.js
+|   |   |──controllers/
+|   |   |     |──activityController.js
+|   |   |     |──guideController.js
+|   |   |     |──placeController.js
+|   |   |     |──userController.js
+│   |   |──app.js  # Express.js application configuration
+│   |   |──index.js # Backend entry point           
 │   ├── package.json          # Node.js dependencies
 │   └── package-lock.json
-|   |   serviceAccountKey.json # service account uris and other related stuff
-|
+| 
 |── .env
 ├── assets/                   # Images, icons, and static assets
 ├── web/                      # Flutter web platform configuration
@@ -103,7 +112,7 @@ backend
 
 Start Backend - 
 cd functions
-node index.js
+npm run dev
 
 Start Flutter App - 
 flutter run 
