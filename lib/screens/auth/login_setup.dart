@@ -171,6 +171,10 @@ class _LoginSetupState extends State<LoginSetup> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  // focusedBorder: OutlineInputBorder(
+                  //   borderRadius: BorderRadius.circular(10),
+                  //   borderSide: const BorderSide(color: Colors.green, width: 2),
+                  // ),
                 ),
               ),
 
@@ -218,6 +222,16 @@ class _LoginSetupState extends State<LoginSetup> {
                 height: 50,
                 child: OutlinedButton(
                   onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(
+                      255,
+                      247,
+                      250,
+                      247,
+                    ), // light green bg
+                    foregroundColor: Colors.green, // text color
+                    side: const BorderSide(color: Colors.green), // border color
+                  ),
                   child: const Text("Continue with Google"),
                 ),
               ),
