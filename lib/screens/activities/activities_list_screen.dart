@@ -63,6 +63,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                   ],
                 ),
                 child: TextField(
+                  cursorColor: Colors.green,
                   decoration: InputDecoration(
                     hintText: "Search by name, location, keyword",
                     hintStyle: const TextStyle(color: Colors.grey),
