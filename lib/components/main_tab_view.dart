@@ -5,10 +5,10 @@ import '../screens/guide/guide_notification_screen.dart';
 import '../screens/tourist/tourist_dashboard.dart';
 import '../screens/tourist/tourist_notification_screen.dart';
 
-// ignore: must_be_immutable
 class MainTabView extends StatefulWidget {
-  bool isTourist;
-  MainTabView(this.isTourist, {super.key});
+  final bool isTourist;
+  final String idToken;
+  const MainTabView(this.isTourist, this.idToken, {super.key});
 
   @override
   State<MainTabView> createState() => _MainTabViewState();
@@ -22,11 +22,15 @@ class _MainTabViewState extends State<MainTabView> {
       child: Scaffold(
         body: TabBarView(
           children: [
-            widget.isTourist ? TouristDashboard() : GuideDashboard(),
+            widget.isTourist
+                ? TouristDashboard(widget.idToken)
+                : GuideDashboard(widget.idToken),
             widget.isTourist
                 ? TouristNotificationScreen()
                 : GuideNotificationScreen(),
-            widget.isTourist ? Settings(true) : Settings(false),
+            widget.isTourist
+                ? Settings(true, widget.idToken)
+                : Settings(false, widget.idToken),
           ],
         ),
         bottomNavigationBar: Container(

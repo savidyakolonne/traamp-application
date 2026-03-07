@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:weather/weather.dart';
-import '../../screens/guide/guide_dashboard.dart';
 import '../../services/location_service.dart';
 import '../../services/weather_service.dart';
 import 'weather_card_element.dart';
@@ -176,7 +175,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         backgroundColor: Color.fromARGB(255, 247, 248, 246),
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context, GuideDashboard());
+            Navigator.pop(context);
           },
           icon: Icon(Icons.arrow_back),
         ),

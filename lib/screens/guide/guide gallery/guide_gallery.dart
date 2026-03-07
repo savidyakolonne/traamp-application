@@ -4,7 +4,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../../app_config.dart';
-import '../guide_dashboard.dart';
 import 'allImages_tab.dart';
 import 'otherImages_tab.dart';
 import 'packageImages_tab.dart';
@@ -218,7 +217,7 @@ class _GuideGalleryState extends State<GuideGallery> {
         appBar: AppBar(
           leading: IconButton(
             onPressed: () {
-              Navigator.pop(context, GuideDashboard());
+              Navigator.pop(context);
             },
             icon: Icon(Icons.arrow_back),
           ),

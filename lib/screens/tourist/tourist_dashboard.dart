@@ -14,6 +14,10 @@ import 'package:traamp_frontend/screens/tourist/tourist_find_guide.dart';
 import 'package:traamp_frontend/screens/assistant/assistant_home.dart';
 
 class TouristDashboard extends StatefulWidget {
+  final String idToken;
+
+  const TouristDashboard(this.idToken, {super.key});
+
   @override
   State<TouristDashboard> createState() => _TouristDashboardState();
 }
@@ -29,29 +33,24 @@ class _TouristDashboardState extends State<TouristDashboard> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        String? idToken = await user.getIdToken(true);
-        if (idToken != null) {
-          final response = await http.post(
-            Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({"idToken": idToken}),
-          );
+        final response = await http.post(
+          Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"idToken": widget.idToken}),
+        );
 
-          final data = await jsonDecode(response.body);
+        final data = await jsonDecode(response.body);
 
-          if (response.statusCode == 200) {
-            setState(() {
-              userData = data['data'];
-              if (userData['profilePicture'] != null) {
-                profilePicture = userData['profilePicture'];
-              }
-            });
-            print(data['msg']);
-          } else if (response.statusCode == 401) {
-            print(data['msg']);
-          }
-        } else {
-          print("idToken is Null");
+        if (response.statusCode == 200) {
+          setState(() {
+            userData = data['data'];
+            if (userData['profilePicture'] != null) {
+              profilePicture = userData['profilePicture'];
+            }
+          });
+          print(data['msg']);
+        } else if (response.statusCode == 401) {
+          print(data['msg']);
         }
       } else {
         print("Something wrong during creating instance from firebase");
@@ -477,9 +476,13 @@ class _TouristDashboardState extends State<TouristDashboard> {
                           ),
                           "Emergency",
                           () {
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context){
-                              return EmergencyServices();
-                            }));
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return EmergencyServices();
+                                },
+                              ),
+                            );
                           },
                         ),
                       ],
