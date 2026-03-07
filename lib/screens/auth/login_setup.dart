@@ -17,7 +17,6 @@ class _LoginSetupState extends State<LoginSetup> {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   bool loading = false;
-
   bool _obscureState = true;
   late Map<String, dynamic> userData;
 
@@ -38,7 +37,7 @@ class _LoginSetupState extends State<LoginSetup> {
   }
 
   // function to login with email and password
-  Future<void> loginEmail() async {
+  Future<void> _loginEmail() async {
     String email = emailCtrl.text.trim().toLowerCase();
     String password = passCtrl.text;
 
@@ -46,7 +45,7 @@ class _LoginSetupState extends State<LoginSetup> {
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      final idToken = await userCredential.user!.getIdToken();
+      final String? idToken = await userCredential.user!.getIdToken(true);
       final response = await http.post(
         Uri.parse("${AppConfig.SERVER_URL}/api/users/loginWithEmail"),
         headers: {"Content-Type": "application/json"},
@@ -76,7 +75,9 @@ class _LoginSetupState extends State<LoginSetup> {
           ),
         );
       } else if (response.statusCode == 200) {
-        userData = data['profile'];
+        setState(() {
+          userData = data['profile'];
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${data['msg']}'),
@@ -88,7 +89,7 @@ class _LoginSetupState extends State<LoginSetup> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return MainTabView(true);
+                return MainTabView(true, idToken!, userData);
               },
             ),
           );
@@ -96,7 +97,7 @@ class _LoginSetupState extends State<LoginSetup> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return MainTabView(false);
+                return MainTabView(false, idToken!, userData);
               },
             ),
           );
@@ -205,7 +206,7 @@ class _LoginSetupState extends State<LoginSetup> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    loginEmail();
+                    _loginEmail();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 247, 250, 247),
