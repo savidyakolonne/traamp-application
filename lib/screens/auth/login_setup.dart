@@ -166,6 +166,7 @@ class _LoginSetupState extends State<LoginSetup> {
               TextField(
                 controller: emailCtrl,
                 keyboardType: TextInputType.emailAddress,
+                cursorColor: Colors.green,
                 decoration: InputDecoration(
                   hintText: "Email",
                   border: OutlineInputBorder(
