@@ -166,10 +166,15 @@ class _LoginSetupState extends State<LoginSetup> {
               TextField(
                 controller: emailCtrl,
                 keyboardType: TextInputType.emailAddress,
+                cursorColor: Colors.green,
                 decoration: InputDecoration(
                   hintText: "Email",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.green, width: 2),
                   ),
                 ),
               ),
@@ -179,11 +184,16 @@ class _LoginSetupState extends State<LoginSetup> {
               TextField(
                 controller: passCtrl,
                 obscureText: _obscureState,
+                cursorColor: Colors.green,
                 decoration: InputDecoration(
                   hintText: "Password",
                   suffixIcon: showAndHidePasswordIcon(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.green, width: 2),
                   ),
                 ),
               ),
@@ -197,6 +207,10 @@ class _LoginSetupState extends State<LoginSetup> {
                   onPressed: () {
                     loginEmail();
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 247, 250, 247),
+                    foregroundColor: Colors.green,
+                  ),
                   child: loading
                       ? const SizedBox(
                           height: 18,
@@ -214,6 +228,16 @@ class _LoginSetupState extends State<LoginSetup> {
                 height: 50,
                 child: OutlinedButton(
                   onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(
+                      255,
+                      247,
+                      250,
+                      247,
+                    ), // light green bg
+                    foregroundColor: Colors.green, // text color
+                    side: const BorderSide(color: Colors.green), // border color
+                  ),
                   child: const Text("Continue with Google"),
                 ),
               ),
