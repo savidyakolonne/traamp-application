@@ -13,7 +13,7 @@ class _PlacesListScreenState extends State<PlacesListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF4F5F7),
+      backgroundColor: Colors.white,
 
       body: SafeArea(
         child: Column(
