@@ -171,10 +171,10 @@ class _LoginSetupState extends State<LoginSetup> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  // focusedBorder: OutlineInputBorder(
-                  //   borderRadius: BorderRadius.circular(10),
-                  //   borderSide: const BorderSide(color: Colors.green, width: 2),
-                  // ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.green, width: 2),
+                  ),
                 ),
               ),
 
