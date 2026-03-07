@@ -317,6 +317,10 @@ class _MapScreenState extends State<MapScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
                     onPressed: (place["id"] != null)
                         ? () {
                             Navigator.pop(context);
