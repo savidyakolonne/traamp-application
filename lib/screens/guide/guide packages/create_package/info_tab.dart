@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:traamp_frontend/screens/guide/guide%20packages/create_package/guide_package_data.dart';
+import '../../../../models/guide_package_data.dart';
 
 class InfoTab extends StatefulWidget {
   final GlobalKey<FormState> _formKey;

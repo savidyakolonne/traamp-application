@@ -6,8 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import '../places/place_detail_screen.dart'; // ✅ adjust path if needed
-
-import '../../app_config.dart';
+//import '../../app_config.dart';
 
 class MapScreen extends StatefulWidget {
   final String? focusPlaceId;
@@ -36,9 +35,17 @@ class _MapScreenState extends State<MapScreen> {
   // radius (meters)
   int _radius = 5000;
 
+  // String get baseUrl {
+  //   if (kIsWeb) return "${AppConfig.SERVER_URL}";
+  //   return "${AppConfig.SERVER_URL}"; // later: real device -> http://YOUR_PC_IP:3000
+  // }
+
   String get baseUrl {
-    if (kIsWeb) return "${AppConfig.SERVER_URL}";
-    return "${AppConfig.SERVER_URL}"; // later: real device -> http://YOUR_PC_IP:3000
+    if (kIsWeb) {
+      return "http://localhost:3000";
+    } else {
+      return "http://10.0.2.2:3000";
+    }
   }
 
   @override
@@ -310,6 +317,10 @@ class _MapScreenState extends State<MapScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
                     onPressed: (place["id"] != null)
                         ? () {
                             Navigator.pop(context);
