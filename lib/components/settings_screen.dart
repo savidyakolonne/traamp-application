@@ -7,9 +7,12 @@ import '../screens/auth/login_screen.dart';
 import '../screens/profile/guide_profile_screen.dart';
 import '../screens/profile/tourist_profile_screen.dart';
 
+// ignore: must_be_immutable
 class Settings extends StatefulWidget {
   final bool isTourist;
-  const Settings(this.isTourist, {super.key});
+  final String idToken;
+  Map<String, dynamic> userData;
+  Settings(this.isTourist, this.idToken, this.userData, {super.key});
 
   @override
   State<Settings> createState() => _SettingsState();
@@ -18,30 +21,24 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   bool loggedOut = false;
 
-  Future<void> signOutUser() async {
+  Future<void> _signOutUser() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        String? idToken = await user.getIdToken(true);
-        if (idToken != null) {
-          final response = await http.post(
-            Uri.parse("${AppConfig.SERVER_URL}/api/users/user-logout"),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({"idToken": idToken}),
-          );
-          final data = jsonDecode(response.body);
-          if (response.statusCode == 400) {
-            print(data['msg']);
-            loggedOut = false;
-          }
-          if (response.statusCode == 200) {
-            print(data['msg']);
-            await FirebaseAuth.instance.signOut();
-            loggedOut = true;
-          }
-        } else {
-          print("Something wrong during creating instance from firebase");
+        final response = await http.post(
+          Uri.parse("${AppConfig.SERVER_URL}/api/users/user-logout"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"idToken": widget.idToken}),
+        );
+        final data = jsonDecode(response.body);
+        if (response.statusCode == 400) {
+          print(data['msg']);
           loggedOut = false;
+        }
+        if (response.statusCode == 200) {
+          print(data['msg']);
+          await FirebaseAuth.instance.signOut();
+          loggedOut = true;
         }
       }
     } catch (e) {
@@ -128,9 +125,15 @@ class _SettingsState extends State<Settings> {
                 MaterialPageRoute(
                   builder: (context) {
                     if (widget.isTourist) {
-                      return TouristProfileScreen();
+                      return TouristProfileScreen(
+                        widget.idToken,
+                        widget.userData,
+                      );
                     } else {
-                      return GuideProfileScreen();
+                      return GuideProfileScreen(
+                        widget.idToken,
+                        widget.userData,
+                      );
                     }
                   },
                 ),
@@ -174,7 +177,7 @@ class _SettingsState extends State<Settings> {
             leading: Icon(Icons.logout, size: 30),
             title: Text("Logout"),
             onTap: () async {
-              await signOutUser();
+              await _signOutUser();
               if (loggedOut) {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => LoginScreen()),

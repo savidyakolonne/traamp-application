@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:traamp_frontend/screens/guide/guide_dashboard.dart';
-import 'package:traamp_frontend/screens/tourist/package_card.dart';
+import 'package:traamp_frontend/widgets/package_card.dart';
 
 // ignore: must_be_immutable
 class PackageList extends StatefulWidget {
@@ -29,7 +28,7 @@ class _PackageListState extends State<PackageList> {
         ),
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context, GuideDashboard());
+            Navigator.pop(context);
           },
           icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 71, 85, 105)),
         ),
