@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'notification/notification_screen.dart';
 import 'settings_screen.dart';
 import '../screens/guide/guide_dashboard.dart';
-import '../screens/guide/guide_notification_screen.dart';
 import '../screens/tourist/tourist_dashboard.dart';
-import '../screens/tourist/tourist_notification_screen.dart';
 
 class MainTabView extends StatefulWidget {
   final bool isTourist;
@@ -23,12 +22,13 @@ class _MainTabViewState extends State<MainTabView> {
       child: Scaffold(
         body: TabBarView(
           children: [
+            // dashboard
             widget.isTourist
                 ? TouristDashboard(widget.idToken, widget.userData)
                 : GuideDashboard(widget.idToken, widget.userData),
-            widget.isTourist
-                ? TouristNotificationScreen()
-                : GuideNotificationScreen(),
+            // notification
+            NotificationScreen(widget.userData["uid"]),
+            // settings
             widget.isTourist
                 ? Settings(true, widget.idToken, widget.userData)
                 : Settings(false, widget.idToken, widget.userData),
