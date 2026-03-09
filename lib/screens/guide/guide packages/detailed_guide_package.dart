@@ -22,7 +22,7 @@ class _DetailedGuidePackageState extends State<DetailedGuidePackage> {
   late List<dynamic> packageExclude = widget.packageData['packageExclude'];
   late List<dynamic> images = widget.packageData['images'];
 
-  Future<void> deletePackage() async {
+  Future<void> _deletePackage() async {
     try {
       final response = await http.delete(
         Uri.parse("${AppConfig.SERVER_URL}/api/guidePackage/delete-package"),
@@ -772,7 +772,7 @@ class _DetailedGuidePackageState extends State<DetailedGuidePackage> {
             // delete button
             IconButton(
               onPressed: () {
-                deletePackage();
+                _deletePackage();
               },
               icon: Container(
                 width: double.infinity,

@@ -7,8 +7,14 @@ import '../../components/weather/weather_screen.dart';
 import '../emergency_services/emergency_services.dart';
 import 'guide gallery/guide_gallery.dart';
 import 'guide packages/guide_package.dart';
+import '../guide/news_screen.dart';
 
+// ignore: must_be_immutable
 class GuideDashboard extends StatefulWidget {
+  final String idToken;
+  Map<String, dynamic> userData;
+  GuideDashboard(this.idToken, this.userData, {super.key});
+
   @override
   State<GuideDashboard> createState() => _GuideDashboardState();
 }
@@ -16,40 +22,33 @@ class GuideDashboard extends StatefulWidget {
 class _GuideDashboardState extends State<GuideDashboard> {
   String currentLocation = "Unknown location";
   String profilePicture = "";
-  late String? idToken = "";
   bool availability = false;
   late String dropdownValue;
-  late Map<String, dynamic> userData = {};
 
   // get user data from DB
-  Future<void> getUserData() async {
+  Future<void> _getUserData() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        idToken = await user.getIdToken(true);
-        if (idToken != null) {
-          final response = await http.post(
-            Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({"idToken": idToken}),
-          );
+        final response = await http.post(
+          Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"idToken": widget.idToken}),
+        );
 
-          final data = await jsonDecode(response.body);
+        final data = await jsonDecode(response.body);
 
-          if (response.statusCode == 200) {
-            setState(() {
-              userData = data['data'];
-              availability = userData['availability'];
-              if (userData['profilePicture'] != null) {
-                profilePicture = userData['profilePicture'];
-              }
-            });
-            print(data['msg']);
-          } else if (response.statusCode == 401) {
-            print(data['msg']);
-          }
-        } else {
-          print("idToken is Null");
+        if (response.statusCode == 200) {
+          setState(() {
+            widget.userData = data['data'];
+            availability = widget.userData['availability'];
+            if (widget.userData['profilePicture'] != null) {
+              profilePicture = widget.userData['profilePicture'];
+            }
+          });
+          print(data['msg']);
+        } else if (response.statusCode == 401) {
+          print(data['msg']);
         }
       } else {
         print("Something wrong during creating instance from firebase");
@@ -104,7 +103,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
   @override
   void initState() {
     super.initState();
-    getUserData();
+    _getUserData();
   }
 
   @override
@@ -117,7 +116,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
             CircleAvatar(
               backgroundImage: (profilePicture.isNotEmpty)
                   ? NetworkImage(profilePicture)
-                  : (userData['gender'] == "Female"
+                  : (widget.userData['gender'] == "Female"
                         ? AssetImage('assets/images/avatar-female.avif')
                         : AssetImage('assets/images/avatar-male.avif')),
             ),
@@ -126,7 +125,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Hi, ${userData['firstName']}",
+                  "Hi, ${widget.userData['firstName']}",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
                 ),
                 Row(
@@ -138,7 +137,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
                       color: const Color.fromARGB(255, 234, 210, 0),
                     ),
                     Text(
-                      "${userData['rating']}",
+                      "${widget.userData['rating']}",
                       style: TextStyle(
                         color: const Color.fromARGB(255, 100, 116, 139),
                         fontSize: 16,
@@ -152,7 +151,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: getUserData,
+        onRefresh: _getUserData,
         child: SingleChildScrollView(
           child: Container(
             padding: EdgeInsets.all(16),
@@ -221,14 +220,14 @@ class _GuideDashboardState extends State<GuideDashboard> {
                           try {
                             final currentUser =
                                 FirebaseAuth.instance.currentUser;
-                            if (currentUser != null && idToken != null) {
+                            if (currentUser != null) {
                               final response = await http.put(
                                 Uri.parse(
                                   "${AppConfig.SERVER_URL}/api/users/update-guide-availability",
                                 ),
                                 headers: {"Content-Type": "application/json"},
                                 body: jsonEncode({
-                                  "idToken": idToken,
+                                  "idToken": widget.idToken,
                                   "availability": availability,
                                 }),
                               );
@@ -285,7 +284,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) {
-                                return GuidePackage(userData['uid']);
+                                return GuidePackage(widget.userData['uid']);
                               },
                             ),
                           );
@@ -341,7 +340,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) {
-                                return GuideGallery(userData['uid']);
+                                return GuideGallery(widget.userData['uid']);
                               },
                             ),
                           );
@@ -397,7 +396,14 @@ class _GuideDashboardState extends State<GuideDashboard> {
                               color: const Color.fromARGB(255, 249, 115, 22),
                             ),
                             "News",
-                            () {},
+                            () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const NewsScreen(),
+                                ),
+                              );
+                            },
                           ),
 
                           // weather

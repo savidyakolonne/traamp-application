@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'image_card_other.dart';
+import '../../../widgets/image_card_other.dart';
 
 // ignore: must_be_immutable
 class OtherImages extends StatefulWidget {
