@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../app_config.dart';
 import '../../services/saved_guides_service.dart';
@@ -20,11 +21,20 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   Map<String, dynamic>? _profileData;
   
   final SavedGuidesService _savedGuidesService = SavedGuidesService();
+  String? _touristUid;
 
   @override
   void initState() {
     super.initState();
+    _initializeUser();
     _loadProfile();
+  }
+
+  void _initializeUser() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _touristUid = user.uid;
+    }
   }
 
   Future<void> _loadProfile() async {
