@@ -213,6 +213,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TechnicalIssues extends StatefulWidget {
   const TechnicalIssues({super.key});
@@ -223,6 +224,17 @@ class TechnicalIssues extends StatefulWidget {
 
 class _TechnicalIssuesState extends State<TechnicalIssues> {
   final TextEditingController issueController = TextEditingController();
+
+  Future<void> _callNumber(String number) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: number);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Could not launch dialer")));
+    }
+  }
 
   Future<void> submitIssue() async {
     if (issueController.text.isEmpty) {
@@ -311,7 +323,9 @@ class _TechnicalIssuesState extends State<TechnicalIssues> {
                     ),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      _callNumber("+94771234567");
+                    },
                     icon: const Icon(Icons.phone),
                     label: const Text("Call Now"),
                     style: ElevatedButton.styleFrom(
