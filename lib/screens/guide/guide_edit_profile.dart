@@ -7,6 +7,8 @@ import '../../list-data.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:traamp_frontend/app_config.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
 
 class EditGuideProfile extends StatefulWidget {
   const EditGuideProfile({super.key});
@@ -46,6 +48,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   DateTime? _selectedDate;
   bool _isLoading = true;
   File? _pickedImage;
+  Uint8List? _webImage;
   List<String> _selectedLanguages = [];
 
   @override
@@ -154,23 +157,39 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      setState(() => _pickedImage = File(image.path));
+      if (kIsWeb) {
+        _webImage = await image.readAsBytes();
+        _pickedImage = null;
+      } else {
+        _pickedImage = File(image.path);
+        _webImage = null;
+      }
+      setState(() {});
     }
   }
 
   Future<String?> _uploadImage(String uid) async {
-    final user = FirebaseAuth.instance.currentUser;
-    debugPrint("CURRENT USER UID: ${user?.uid}");
-    if (_pickedImage == null) return _profileImageUrl;
+    if (_webImage == null && _pickedImage == null) {
+      return _profileImageUrl;
+    }
 
     try {
       Reference ref = _storage.ref().child('profile_pictures').child(uid);
-      UploadTask uploadTask = ref.putFile(_pickedImage!);
+
+      UploadTask uploadTask;
+
+      if (kIsWeb) {
+        uploadTask = ref.putData(_webImage!);
+      } else {
+        uploadTask = ref.putFile(_pickedImage!);
+      }
+
       TaskSnapshot snapshot = await uploadTask;
+
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
       debugPrint("Image Upload Error: $e");
-      return null;
+      return _profileImageUrl;
     }
   }
 
@@ -249,8 +268,16 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
       _confirmPasswordController.clear();
 
       _showSnackBar("Password updated successfully!", Colors.green);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+        _showSnackBar("Current password is incorrect", Colors.red);
+      } else if (e.code == 'weak-password') {
+        _showSnackBar("Password must be at least 6 characters", Colors.red);
+      } else {
+        _showSnackBar(e.message ?? "Password update failed", Colors.red);
+      }
     } catch (e) {
-      _showSnackBar("Current password is incorrect", Colors.red);
+      _showSnackBar("Something went wrong", Colors.red);
     }
   }
 
@@ -395,6 +422,8 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                       backgroundColor: Colors.grey[200],
                       backgroundImage: _pickedImage != null
                           ? FileImage(_pickedImage!)
+                          : _webImage != null
+                          ? MemoryImage(_webImage!)
                           : (_profileImageUrl != null &&
                                 _profileImageUrl!.isNotEmpty)
                           ? NetworkImage(_profileImageUrl!)
@@ -711,13 +740,30 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     filled: true,
     fillColor: Colors.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(color: Colors.grey.shade300),
     ),
+
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: Colors.lightGreen, width: 2),
+    ),
+
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: Colors.red, width: 2),
+    ),
+
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: Colors.red, width: 2),
     ),
   );
 }
