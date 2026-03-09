@@ -195,3 +195,42 @@ export const logoutUser = async (req, res) => {
     res.status(400).json({ msg: e.message });
   }
 };
+
+// update tourist profile
+export const updateTouristProfile = async (req, res) => {
+  try {
+    const {
+      idToken,
+      firstName,
+      lastName,
+      country,
+      gender,
+      dob,
+      profilePicture
+    } = req.body;
+
+    const decoded = await auth.verifyIdToken(idToken);
+    const uid = decoded.uid;
+
+    const userRef = db.collection("users").doc(uid);
+
+    await userRef.update({
+      firstName,
+      lastName,
+      country,
+      gender,
+      dob,
+      profilePicture
+    });
+
+    res.status(200).json({
+      msg: "Profile updated successfully"
+    });
+
+  } catch (error) {
+    res.status(400).json({
+      msg: "Failed to update profile",
+      error: error.message
+    });
+  }
+};

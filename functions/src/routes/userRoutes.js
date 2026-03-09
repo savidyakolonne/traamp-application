@@ -7,7 +7,8 @@ import {
   loginWithEmail,
   getUserData,
   updateGuideAvailability,
-  logoutUser
+  logoutUser,
+  updateTouristProfile
 } from "../controllers/userController.js";
 
 const userRouter = Router();
@@ -25,6 +26,8 @@ userRouter.post(
 userRouter.post("/loginWithEmail", loginWithEmail);
 
 userRouter.post("/get-user-data", getUserData);
+
+userRouter.put("/update-tourist-profile", updateTouristProfile);
 
 userRouter.put("/update-guide-availability", updateGuideAvailability);
 
