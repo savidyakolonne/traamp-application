@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../app_config.dart';
 import '../screens/auth/login_screen.dart';
+import 'settings_about.dart';
 import 'settings_help_support.dart';
 
 class Settings extends StatefulWidget {
@@ -185,7 +186,15 @@ class _SettingsState extends State<Settings> {
                 bgColor: Colors.teal.withOpacity(0.15),
                 title: "About",
                 subtitle: "Version info, terms & conditions, privacy policy",
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return SettingsAbout();
+                                  },
+                                ),
+                              );
+                },
               ),
 
               // Logout
