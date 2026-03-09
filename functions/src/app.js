@@ -8,6 +8,7 @@ import packageRouter from "./routes/guide_package.mjs";
 import galleryRouter from "./routes/gallery.mjs";
 import userRoutes from "./routes/userRoutes.js";
 import newsRoutes from "./routes/newsRoutes.js"; 
+import adminRoutes from "./routes/adminRoutes.js"
 
 const app = express();
 
@@ -26,5 +27,6 @@ app.use("/api/news", newsRoutes);
 
 //guides
 app.use("/api/guides", guideRoutes) ;
+app.use("/api/admin", adminRoutes);
 
 export default app;

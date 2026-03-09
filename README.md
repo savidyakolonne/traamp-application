@@ -102,6 +102,9 @@ TRAAMP-MOBILE-FRONTEND/
 │   ├── package.json          # Node.js dependencies
 │   └── package-lock.json
 | 
+|──traamp-admin/
+|      |──
+|
 |── .env
 ├── assets/                   # Images, icons, and static assets
 ├── web/                      # Flutter web platform configuration
