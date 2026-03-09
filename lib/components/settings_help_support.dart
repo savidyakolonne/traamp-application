@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:traamp_frontend/components/technical_issues.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HelpAndSupport extends StatelessWidget {
   const HelpAndSupport({super.key});
+
+  Future<void> _callNumber(BuildContext context, String number) async {
+  final Uri launchUri = Uri(scheme: 'tel', path: number);
+  if (await canLaunchUrl(launchUri)) {
+    await launchUrl(launchUri);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Could not launch dialer")),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +105,7 @@ class HelpAndSupport extends StatelessWidget {
                   "Email Support",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: const Text("Response within 24 hours"),
+                subtitle: const Text("traamp@gmail.com"),
                 trailing: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade300,
@@ -127,7 +139,9 @@ class HelpAndSupport extends StatelessWidget {
                     backgroundColor: Colors.grey.shade300,
                     foregroundColor: Colors.black,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    _callNumber(context, "+94770870719");
+                  },
                   child: const Text("Call Us"),
                 ),
               ),
