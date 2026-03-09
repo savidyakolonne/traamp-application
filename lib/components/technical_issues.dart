@@ -103,7 +103,7 @@ class _TechnicalIssuesState extends State<TechnicalIssues> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          "+94 77 123 4567",
+                          "+94 77 087 0719",
                           style: TextStyle(color: Colors.grey),
                         ),
                       ],
