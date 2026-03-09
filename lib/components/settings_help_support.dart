@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:traamp_frontend/components/technical_issues.dart';
 
 class HelpAndSupport extends StatelessWidget {
   const HelpAndSupport({super.key});
@@ -53,7 +54,15 @@ class HelpAndSupport extends StatelessWidget {
                 ),
                 subtitle: const Text("App performance and troubleshooting"),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return TechnicalIssues();
+                      },
+                    ),
+                  );
+                },
               ),
             ),
 
@@ -62,9 +71,9 @@ class HelpAndSupport extends StatelessWidget {
             const Text(
               "CONTACT US",
               style: TextStyle(
-              color: Colors.grey,
-              letterSpacing: 2,
-              fontWeight: FontWeight.bold,
+                color: Colors.grey,
+                letterSpacing: 2,
+                fontWeight: FontWeight.bold,
               ),
             ),
 
