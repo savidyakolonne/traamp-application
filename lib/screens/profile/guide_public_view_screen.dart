@@ -23,6 +23,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   final SavedGuidesService _savedGuidesService = SavedGuidesService();
   String? _touristUid;
   bool _isGuideSaved = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -53,6 +54,68 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
       });
     } catch (e) {
       print('Error checking if guide is saved: $e');
+    }
+  }
+
+  Future<void> _toggleSaveGuide() async {
+    if (_touristUid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to save guides'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final success = await _savedGuidesService.toggleSaveGuide(
+        touristUid: _touristUid!,
+        guideUid: widget.guideId,
+      );
+
+      if (success) {
+        setState(() {
+          _isGuideSaved = !_isGuideSaved;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _isGuideSaved
+                  ? 'Guide added to favorites'
+                  : 'Guide removed from favorites',
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to update favorites'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error toggling save guide: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An error occurred'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isSaving = false;
+      });
     }
   }
 
@@ -103,9 +166,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
               _isGuideSaved ? Icons.favorite : Icons.favorite_border,
               color: _isGuideSaved ? Colors.red : Colors.black,
             ),
-            onPressed: () {
-              print('Favorite button tapped');
-            },
+            onPressed: _isSaving ? null : _toggleSaveGuide,
           ),
           IconButton(
             icon: const Icon(Icons.share, color: Colors.black),
