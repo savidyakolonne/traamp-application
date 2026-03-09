@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../app_config.dart';
 import '../screens/auth/login_screen.dart';
+import 'settings_help_support.dart';
 
 class Settings extends StatefulWidget {
   final bool isTourist;
@@ -166,7 +167,15 @@ class _SettingsState extends State<Settings> {
                 bgColor: Colors.purple.withOpacity(0.15),
                 title: "Help and Support",
                 subtitle: "Get help from our team",
-                onTap: () {},
+                onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return HelpAndSupport();
+                                  },
+                                ),
+                              );
+                            },
               ),
 
               // About
