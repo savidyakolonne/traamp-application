@@ -22,18 +22,37 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   
   final SavedGuidesService _savedGuidesService = SavedGuidesService();
   String? _touristUid;
+  bool _isGuideSaved = false;
 
   @override
   void initState() {
     super.initState();
     _initializeUser();
     _loadProfile();
+    _checkIfGuideSaved();
   }
 
   void _initializeUser() {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       _touristUid = user.uid;
+    }
+  }
+
+  Future<void> _checkIfGuideSaved() async {
+    if (_touristUid == null) return;
+
+    try {
+      final isSaved = await _savedGuidesService.isGuideSaved(
+        touristUid: _touristUid!,
+        guideUid: widget.guideId,
+      );
+      
+      setState(() {
+        _isGuideSaved = isSaved;
+      });
+    } catch (e) {
+      print('Error checking if guide is saved: $e');
     }
   }
 
