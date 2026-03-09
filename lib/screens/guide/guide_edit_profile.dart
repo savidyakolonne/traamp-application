@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../../list-data.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:traamp_frontend/app_config.dart';
 
 class EditGuideProfile extends StatefulWidget {
   const EditGuideProfile({super.key});
@@ -16,7 +18,6 @@ class EditGuideProfile extends StatefulWidget {
 class _EditGuideProfileState extends State<EditGuideProfile> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
-  final _db = FirebaseFirestore.instance;
   final _storage = FirebaseStorage.instance;
 
   // Controllers
@@ -81,60 +82,70 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
 
   Future<void> _loadUserData() async {
     final user = _auth.currentUser;
-    if (user != null) {
-      try {
-        final doc = await _db.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-          final data = doc.data() as Map<String, dynamic>;
-          setState(() {
-            _firstNameController.text = data['firstName'] ?? "";
-            _lastNameController.text = data['lastName'] ?? "";
-            _emailController.text = data['email'] ?? "";
-            _phoneController.text = data['phoneNumber'] ?? "";
-            _addressController.text = data['address'] ?? "";
-            _selectedLocation = data['location'];
-            _selectedGender = data['gender'];
-            _profileImageUrl = data['profilePicture'];
-            _selectedLanguages = List<String>.from(data['languages'] ?? []);
+    if (user == null) return;
 
-            // Read-only fields
-            _nicController.text = data['nic'] ?? "";
-            _certTypeController.text = data['certificateType'] ?? "";
-            _certNumController.text = data['certificateNumber'] ?? "";
+    try {
+      final idToken = await user.getIdToken();
 
-            if (data['dob'] != null && data['dob'].toString().isNotEmpty) {
-              final dobString = data['dob'].toString();
+      final response = await http.post(
+        Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"idToken": idToken}),
+      );
 
-              DateTime? parsedDate;
+      if (response.statusCode == 200) {
+        final resData = jsonDecode(response.body);
+        final data = resData["data"];
 
-              // Try ISO format first (yyyy-MM-dd)
-              parsedDate = DateTime.tryParse(dobString);
+        setState(() {
+          _firstNameController.text = data['firstName'] ?? "";
+          _lastNameController.text = data['lastName'] ?? "";
+          _emailController.text = data['email'] ?? "";
+          _phoneController.text = data['phoneNumber'] ?? "";
+          _addressController.text = data['address'] ?? "";
+          _selectedLocation = data['location'];
+          _selectedGender = data['gender'];
+          _profileImageUrl = data['profilePicture'];
+          _selectedLanguages = List<String>.from(data['languages'] ?? []);
 
-              // If ISO fails, try dd/MM/yyyy
-              if (parsedDate == null && dobString.contains('/')) {
-                final parts = dobString.split('/');
-                if (parts.length == 3) {
-                  parsedDate = DateTime(
-                    int.parse(parts[2]), // year
-                    int.parse(parts[1]), // month
-                    int.parse(parts[0]), // day
-                  );
-                }
-              }
+          // Read-only fields
+          _nicController.text = data['nic'] ?? "";
+          _certTypeController.text = data['guideCertificateType'] ?? "";
+          _certNumController.text = data['certificateNumber'] ?? "";
 
-              if (parsedDate != null) {
-                _selectedDate = parsedDate;
-                _dobController.text =
-                    "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+          if (data['dob'] != null && data['dob'].toString().isNotEmpty) {
+            final dobString = data['dob'].toString();
+
+            DateTime? parsedDate;
+
+            // Try ISO format first (yyyy-MM-dd)
+            parsedDate = DateTime.tryParse(dobString);
+
+            // If ISO fails, try dd/MM/yyyy
+            if (parsedDate == null && dobString.contains('/')) {
+              final parts = dobString.split('/');
+              if (parts.length == 3) {
+                parsedDate = DateTime(
+                  int.parse(parts[2]), // year
+                  int.parse(parts[1]), // month
+                  int.parse(parts[0]), // day
+                );
               }
             }
 
-            _isLoading = false;
-          });
-        }
-      } catch (e) {
-        setState(() => _isLoading = false);
+            if (parsedDate != null) {
+              _selectedDate = parsedDate;
+              _dobController.text =
+                  "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+            }
+          }
+
+          _isLoading = false;
+        });
       }
+    } catch (e) {
+      debugPrint("Error loading guide data: $e");
+      setState(() => _isLoading = false);
     }
   }
 
@@ -245,7 +256,9 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
 
   Future<void> _saveAllChanges() async {
     if (!_formKey.currentState!.validate()) return;
+
     setState(() => _isLoading = true);
+
     final user = _auth.currentUser;
     if (user == null) return;
 
@@ -253,30 +266,30 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
       // Upload image
       String? imageUrl = await _uploadImage(user.uid);
 
-      // UPDATE UI immediately
-      if (imageUrl != null) {
-        setState(() {
-          _profileImageUrl = imageUrl;
-        });
-      }
+      final idToken = await user.getIdToken();
 
-      // Save data to Firestore
-      await _db.collection('users').doc(user.uid).update({
-        'firstName': _firstNameController.text.trim(),
-        'lastName': _lastNameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'phoneNumber': _phoneController.text.trim(),
-        'address': _addressController.text.trim(),
-        'location': _selectedLocation,
-        'gender': _selectedGender,
-        'dob': _selectedDate?.toIso8601String(),
-        'profilePicture': imageUrl,
-        'languages': _selectedLanguages,
-      });
+      final response = await http.put(
+        Uri.parse("${AppConfig.SERVER_URL}/api/users/update-guide-profile"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "idToken": idToken,
+          "firstName": _firstNameController.text.trim(),
+          "lastName": _lastNameController.text.trim(),
+          "phoneNumber": _phoneController.text.trim(),
+          "address": _addressController.text.trim(),
+          "location": _selectedLocation,
+          "gender": _selectedGender,
+          "dob": _selectedDate?.toIso8601String(),
+          "languages": _selectedLanguages,
+          "profilePicture": imageUrl,
+        }),
+      );
 
-      if (mounted) {
+      if (response.statusCode == 200) {
         _showSnackBar("Profile updated successfully!", Colors.green);
         Navigator.pop(context);
+      } else {
+        _showSnackBar("Failed to update profile", Colors.red);
       }
     } catch (e) {
       _showSnackBar("Error: $e", Colors.red);
