@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 
 class SettingsAbout extends StatelessWidget {
@@ -29,7 +30,6 @@ class SettingsAbout extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
-
             const SizedBox(height: 30),
 
             /// APP LOGO
@@ -58,15 +58,6 @@ class SettingsAbout extends StatelessWidget {
             ),
 
             const SizedBox(height: 5),
-
-            const Text(
-              "Version 2.4.0",
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
-            ),
-
             const SizedBox(height: 40),
 
             /// WEBSITE CARD
@@ -80,13 +71,12 @@ class SettingsAbout extends StatelessWidget {
                     color: Colors.grey.withOpacity(0.08),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
-                  )
+                  ),
                 ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   Row(
                     children: [
                       Container(
@@ -97,7 +87,7 @@ class SettingsAbout extends StatelessWidget {
                         ),
                         child: const Icon(
                           Icons.language,
-                          color: Colors.deepOrange,
+                          color: Colors.green,
                           size: 28,
                         ),
                       ),
@@ -116,13 +106,10 @@ class SettingsAbout extends StatelessWidget {
                           ),
                           Text(
                             "Discover more online",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 16,
-                            ),
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
                           ),
                         ],
-                      )
+                      ),
                     ],
                   ),
 
@@ -143,7 +130,7 @@ class SettingsAbout extends StatelessWidget {
                   /// WEBSITE BUTTON
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
+                      backgroundColor: Colors.green,
                       minimumSize: const Size(double.infinity, 60),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
@@ -155,21 +142,15 @@ class SettingsAbout extends StatelessWidget {
                       children: const [
                         Text(
                           "www.trammp.com",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
+                          style: TextStyle(fontSize: 18, color: Colors.white),
                         ),
-                        Icon(
-                          Icons.open_in_new,
-                          color: Colors.white,
-                        )
+                        Icon(Icons.open_in_new, color: Colors.white),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
