@@ -68,10 +68,7 @@ class _ActivitiesListScreenState extends State<ActivitiesListScreen> {
                     hintText: "Search by name, location, keyword",
                     hintStyle: const TextStyle(color: Colors.grey),
                     prefixIcon: const Icon(Icons.search),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.tune_rounded),
-                      onPressed: () {},
-                    ),
+
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 18),
                   ),
