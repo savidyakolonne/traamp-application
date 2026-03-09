@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../screens/guide/guide packages/detailed_guide_package.dart';
+import '../screens/guide/guide packages/detailed_guide_package.dart';
 
 // ignore: must_be_immutable
 class GuidePackageCard extends StatefulWidget {

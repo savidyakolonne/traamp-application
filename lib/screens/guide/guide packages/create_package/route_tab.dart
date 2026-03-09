@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'guide_package_data.dart';
+import '../../../../models/guide_package_data.dart';
 
 class RouteTab extends StatefulWidget {
   final GlobalKey<FormState> _formKey;
   final GuidePackageData data;
 
-  RouteTab(this._formKey, this.data, {super.key});
+  const RouteTab(this._formKey, this.data, {super.key});
 
   @override
   State<RouteTab> createState() => _RouteTabState();

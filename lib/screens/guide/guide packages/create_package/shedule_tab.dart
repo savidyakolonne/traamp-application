@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'guide_package_data.dart';
+import '../../../../models/guide_package_data.dart';
 
 class ScheduleTab extends StatefulWidget {
   final GlobalKey<FormState> _formKey;

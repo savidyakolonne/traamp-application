@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'deatailed_package_view_tourist.dart';
+import '../screens/tourist/deatailed_package_view_tourist.dart';
 
 // ignore: must_be_immutable
 class PackageCard extends StatefulWidget {
