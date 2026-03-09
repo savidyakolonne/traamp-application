@@ -19,10 +19,7 @@ class HelpAndSupport extends StatelessWidget {
         centerTitle: true,
         title: const Text(
           "Help & Support",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
       body: Padding(
@@ -40,23 +37,21 @@ class HelpAndSupport extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // Payments Card
+            // Technical Issues
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
               ),
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Colors.green.shade100,
-                  child: const Icon(Icons.payments, color: Colors.green),
+                  backgroundColor: Colors.red.shade100,
+                  child: const Icon(Icons.build, color: Colors.red),
                 ),
                 title: const Text(
-                  "Payments",
+                  "Technical Issues",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: const Text(
-                  "Billing, refunds and subscriptions",
-                ),
+                subtitle: const Text("App performance and troubleshooting"),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {},
               ),
@@ -67,9 +62,9 @@ class HelpAndSupport extends StatelessWidget {
             const Text(
               "CONTACT US",
               style: TextStyle(
-                color: Colors.grey,
-                letterSpacing: 2,
-                fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              letterSpacing: 2,
+              fontWeight: FontWeight.bold,
               ),
             ),
 
@@ -89,9 +84,7 @@ class HelpAndSupport extends StatelessWidget {
                   "Email Support",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: const Text(
-                  "Response within 24 hours",
-                ),
+                subtitle: const Text("Response within 24 hours"),
                 trailing: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade300,
@@ -119,9 +112,7 @@ class HelpAndSupport extends StatelessWidget {
                   "Phone Support",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: const Text(
-                  "Mon-Fri, 9am - 6pm EST",
-                ),
+                subtitle: const Text("Mon-Fri, 9am - 6pm EST"),
                 trailing: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade300,
