@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../../app_config.dart';
+import '../../services/saved_guides_service.dart';
 
 class GuidePublicViewScreen extends StatefulWidget {
   final String guideId;
@@ -17,6 +18,8 @@ class GuidePublicViewScreen extends StatefulWidget {
 class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   bool _isLoading = false;
   Map<String, dynamic>? _profileData;
+  
+  final SavedGuidesService _savedGuidesService = SavedGuidesService();
 
   @override
   void initState() {
