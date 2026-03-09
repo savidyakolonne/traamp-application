@@ -7,6 +7,7 @@ import '../app_config.dart';
 import '../screens/auth/login_screen.dart';
 import 'settings_about.dart';
 import 'settings_help_support.dart';
+import 'settings_privacy.dart';
 
 class Settings extends StatefulWidget {
   final bool isTourist;
@@ -158,7 +159,15 @@ class _SettingsState extends State<Settings> {
                 bgColor: Colors.orange.withOpacity(0.15),
                 title: "Privacy",
                 subtitle: "Secure your account with privacy",
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return SettingsPrivacy();
+                      },
+                    ),
+                  );
+                },
               ),
 
               // Help & Support
@@ -169,14 +178,14 @@ class _SettingsState extends State<Settings> {
                 title: "Help and Support",
                 subtitle: "Get help from our team",
                 onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return HelpAndSupport();
-                                  },
-                                ),
-                              );
-                            },
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return HelpAndSupport();
+                      },
+                    ),
+                  );
+                },
               ),
 
               // About
@@ -188,12 +197,12 @@ class _SettingsState extends State<Settings> {
                 subtitle: "Version info, terms & conditions, privacy policy",
                 onTap: () {
                   Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return SettingsAbout();
-                                  },
-                                ),
-                              );
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return SettingsAbout();
+                      },
+                    ),
+                  );
                 },
               ),
 
