@@ -99,6 +99,15 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
         ),
         actions: [
           IconButton(
+            icon: Icon(
+              _isGuideSaved ? Icons.favorite : Icons.favorite_border,
+              color: _isGuideSaved ? Colors.red : Colors.black,
+            ),
+            onPressed: () {
+              print('Favorite button tapped');
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.share, color: Colors.black),
             onPressed: () {
               print('Share tapped');
