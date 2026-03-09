@@ -7,6 +7,7 @@ import '../../components/weather/weather_screen.dart';
 import '../emergency_services/emergency_services.dart';
 import 'guide gallery/guide_gallery.dart';
 import 'guide packages/guide_package.dart';
+import '../guide/news_screen.dart';
 
 // ignore: must_be_immutable
 class GuideDashboard extends StatefulWidget {
@@ -395,7 +396,14 @@ class _GuideDashboardState extends State<GuideDashboard> {
                               color: const Color.fromARGB(255, 249, 115, 22),
                             ),
                             "News",
-                            () {},
+                            () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const NewsScreen(),
+                                ),
+                              );
+                            },
                           ),
 
                           // weather
