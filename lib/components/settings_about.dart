@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsAbout extends StatelessWidget {
   const SettingsAbout({super.key});
@@ -136,12 +137,17 @@ class SettingsAbout extends StatelessWidget {
                         borderRadius: BorderRadius.circular(18),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () async {
+                      final Uri url = Uri.parse("https://www.traamp.com/");
+                      if (!await launchUrl(url)) {
+                        throw 'Could not launch $url';
+                      }
+                    },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: const [
                         Text(
-                          "www.trammp.com",
+                          "www.traamp.com", 
                           style: TextStyle(fontSize: 18, color: Colors.white),
                         ),
                         Icon(Icons.open_in_new, color: Colors.white),
