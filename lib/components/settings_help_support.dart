@@ -112,7 +112,7 @@ class HelpAndSupport extends StatelessWidget {
                   "Phone Support",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: const Text("Mon-Fri, 9am - 6pm EST"),
+                subtitle: const Text("Available anytime"),
                 trailing: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade300,
