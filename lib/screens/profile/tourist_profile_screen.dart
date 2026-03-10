@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:traamp_frontend/app_config.dart';
 import '../tourist/tourist_edit_profile.dart';
+import '../tourist/saved_guides_screen.dart';
 
 // ignore: must_be_immutable
 class TouristProfileScreen extends StatefulWidget {
@@ -199,7 +200,12 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              print('See All Guides tapped');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SavedGuidesScreen(),
+                                ),
+                              );
                             },
                             child: const Text(
                               'See All',
