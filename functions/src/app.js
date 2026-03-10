@@ -7,6 +7,7 @@ import placeRoutes from "./routes/placeRoutes.js" ;
 import packageRouter from "./routes/guide_package.mjs";
 import galleryRouter from "./routes/gallery.mjs";
 import userRoutes from "./routes/userRoutes.js";
+import savedGuidesRoutes from './routes/savedGuidesRoutes.js';
 
 
 const app = express();
@@ -25,5 +26,6 @@ app.use("/api/gallery", galleryRouter);
 
 //guides
 app.use("/api/guides", guideRoutes) ;
+app.use('/api/saved-guides', savedGuidesRoutes);
 
 export default app;
