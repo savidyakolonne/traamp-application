@@ -1,4 +1,5 @@
 import firebaseAdmin from "../config/firebaseAdmin.js";
+import admin from "firebase-admin";
 
 const { auth, db, bucket } = firebaseAdmin;
 
@@ -26,6 +27,17 @@ export const registerTourist = async (req, res) => {
       createdAt,
     });
 
+    // setup a notification
+    const notificationDocRef = db.collection("notifications").doc();
+    console.log("notificationDocRef: ", notificationDocRef);
+    await notificationDocRef.set({
+      notificationId: notificationDocRef.id,
+      uid: userRecord.uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      isUnread: true,
+      type: "registration",
+    });
+
     res.status(201).json({
       msg: "Tourist registered successfully",
     });
@@ -34,10 +46,10 @@ export const registerTourist = async (req, res) => {
   }
 };
 
-
 // register guide
 export const registerGuide = async (req, res) => {
   try {
+    const createdAt = new Date(req.body.createdAt);
     const {
       firstName,
       lastName,
@@ -99,6 +111,18 @@ export const registerGuide = async (req, res) => {
       rating,
       availability,
       certificate: certificateUrl,
+      createdAt,
+    });
+
+    // setup a notification
+    const notificationDocRef = db.collection("notifications").doc();
+    console.log("notificationDocRef: ", notificationDocRef);
+    await notificationDocRef.set({
+      notificationId: notificationDocRef.id,
+      uid: userRecord.uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      isUnread: true,
+      type: "registration",
     });
 
     res.status(201).json({ msg: "Guide registered successfully" });
@@ -106,7 +130,6 @@ export const registerGuide = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
-
 
 // login
 export const loginWithEmail = async (req, res) => {
@@ -126,12 +149,10 @@ export const loginWithEmail = async (req, res) => {
       msg: "Login successful",
       profile: userDoc.data(),
     });
-
   } catch (e) {
     res.status(401).json({ msg: "Invalid Username or Password" });
   }
 };
-
 
 // get user data
 export const getUserData = async (req, res) => {
@@ -151,12 +172,10 @@ export const getUserData = async (req, res) => {
       msg: "Data successfully retrieved.",
       data: userDoc.data(),
     });
-
   } catch (e) {
     res.status(401).json({ msg: "Invalid idToken" });
   }
 };
-
 
 // update guide availability
 export const updateGuideAvailability = async (req, res) => {
@@ -170,13 +189,38 @@ export const updateGuideAvailability = async (req, res) => {
 
     await userDocRef.update({ availability });
 
-    res.status(200).json({ msg: "Successfully Updated." });
+    // setup a notification
+    let availabilityString;
+    if (availability) {
+      availabilityString = "available";
+    } else {
+      availabilityString = "not available";
+    }
 
+    try {
+      const notificationDocRef = db.collection("notifications").doc();
+      console.log("notificationDocRef: ", notificationDocRef);
+
+      await notificationDocRef.set({
+        notificationId: notificationDocRef.id,
+        uid: id,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        isUnread: true,
+        type: "availability-status",
+        msg: availabilityString,
+      });
+
+      res.status(200).json({ msg: "Successfully created a notification." });
+    } catch (e) {
+      console.error("Error creating notification:", e);
+      res.status(400).json({ msg: "Failed to update field." });
+    }
+
+    res.status(200).json({ msg: "Successfully Updated." });
   } catch (e) {
     res.status(400).json({ msg: "Failed to update field." });
   }
 };
-
 
 // logout
 export const logoutUser = async (req, res) => {
@@ -190,7 +234,6 @@ export const logoutUser = async (req, res) => {
     res.status(200).json({
       msg: "Logged out successfully",
     });
-
   } catch (e) {
     res.status(400).json({ msg: e.message });
   }

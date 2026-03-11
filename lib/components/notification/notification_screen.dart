@@ -3,15 +3,13 @@ import 'notification_all_tab.dart';
 import 'notification_unread_tab.dart';
 
 // TODO
-// set notification for each actions
 // create stream builder
-// get notifications
+// get all notifications filtered by uid
 // sort them from latest to oldest
 // display notifications
 // set isUnread = false if read the notification
 // implement clear button to delete all notifications
 // implement unread tab
-// notification collection must include uid, date, type, isUnread = true, msg (for availability-status, package-removed, package-added)
 // types = registration/ package-added/ package-removed/ user-info-changed/ availability-status/ gallery-added/ gallery-removed
 
 class NotificationScreen extends StatefulWidget {

@@ -1,16 +1,14 @@
-import { Router } from "express";
 import multer from "multer";
 import firebaseAdmin from "../config/firebaseAdmin.js";
+import admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 
-const galleryRouter = Router();
 const { bucket, db } = firebaseAdmin;
 
 // configure multer
 const upload = multer({ storage: multer.memoryStorage() });
 
-// get gallery by uid
-galleryRouter.post("/get-gallery-by-uid", async (req, res) => {
+export const getGalleryByUid = async (req, res) => {
   const { uid } = req.body;
 
   try {
@@ -33,66 +31,71 @@ galleryRouter.post("/get-gallery-by-uid", async (req, res) => {
       msg: error,
     });
   }
-});
+};
 
-// send images t database
-galleryRouter.post(
-  "/add-to-gallery",
-  upload.fields([{ name: "images", maxCount: 50 }]),
-  async (req, res) => {
-    try {
-      const createdAt = new Date();
-      const { uid } = req.body;
+export const addToGallery = async (req, res) => {
+  try {
+    const createdAt = new Date();
+    const { uid } = req.body;
 
-      console.log("Files received:", req.files);
-      console.log("UID:", req.body.uid);
+    console.log("Files received:", req.files);
+    console.log("UID:", req.body.uid);
 
-      // Upload multiple images
-      let imageUrls = [];
-      if (req.files && req.files.images) {
-        for (const file of req.files.images) {
-          const blob = bucket.file(
-            `gallery/image_${Date.now()}_${file.originalname}`,
-          );
-          try {
-            await blob.save(file.buffer, { contentType: file.mimetype });
-          } catch (err) {
-            console.error("Storage upload failed:", err);
-          }
-          const url = await blob.getSignedUrl({
-            action: "read",
-            expires: "03-01-2030",
-          });
-          imageUrls.push(url[0]);
+    // Upload multiple images
+    let imageUrls = [];
+    if (req.files && req.files.images) {
+      for (const file of req.files.images) {
+        const blob = bucket.file(
+          `gallery/image_${Date.now()}_${file.originalname}`,
+        );
+        try {
+          await blob.save(file.buffer, { contentType: file.mimetype });
+        } catch (err) {
+          console.error("Storage upload failed:", err);
         }
+        const url = await blob.getSignedUrl({
+          action: "read",
+          expires: "03-01-2030",
+        });
+        imageUrls.push(url[0]);
       }
-
-      // generate Id for the document
-      const docRef = db.collection("gallery").doc();
-      console.log("Document written:", docRef.id);
-      await docRef.set({
-        galleryId: docRef.id,
-        uid,
-        images: imageUrls,
-        createdAt,
-      });
-
-      res.status(201).json({
-        msg: "Gallery added successfully.",
-        images: imageUrls,
-      });
-    } catch (e) {
-      console.error(e);
-      res.status(400).json({
-        msg: e.message,
-      });
     }
-  },
-);
 
-// Delete each image from Firebase Storage
-galleryRouter.delete("/delete-gallery", async (req, res) => {
-  const { galleryId, image } = req.body;
+    // generate Id for the document
+    const docRef = db.collection("gallery").doc();
+    console.log("Document written:", docRef.id);
+    await docRef.set({
+      galleryId: docRef.id,
+      uid,
+      images: imageUrls,
+      createdAt,
+    });
+
+    // setup a notification
+    const notificationDocRef = db.collection("notifications").doc();
+    console.log("notificationDocRef: ", notificationDocRef);
+    await notificationDocRef.set({
+      notificationId: notificationDocRef.id,
+      uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      isUnread: true,
+      type: "gallery-added",
+    });
+
+    res.status(201).json({
+      msg: "Gallery added successfully.",
+      images: imageUrls,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(400).json({
+      msg: e.message,
+    });
+  }
+};
+
+export const deleteGallery = async (req, res) => {
+  const { galleryId, image, uid } = req.body;
 
   try {
     try {
@@ -135,6 +138,17 @@ galleryRouter.delete("/delete-gallery", async (req, res) => {
     }
     console.log("Successfully removed image from gallery.");
 
+    // setup a notification
+    const notificationDocRef = db.collection("notifications").doc();
+    console.log("notificationDocRef: ", notificationDocRef);
+    await notificationDocRef.set({
+      notificationId: notificationDocRef.id,
+      uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      isUnread: true,
+      type: "gallery-removed",
+    });
+
     res.status(200).json({
       msg: "Successfully removed image from gallery.",
     });
@@ -144,6 +158,4 @@ galleryRouter.delete("/delete-gallery", async (req, res) => {
       msg: error.message,
     });
   }
-});
-
-export default galleryRouter;
+};

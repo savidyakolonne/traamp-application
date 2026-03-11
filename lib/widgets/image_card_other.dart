@@ -23,6 +23,7 @@ class _ImageCardOtherState extends State<ImageCardOther> {
         body: jsonEncode({
           'galleryId': widget.imageData['galleryId'],
           'image': widget.imageData['url'],
+          'uid': widget.imageData['uid'],
         }),
       );
       final data = jsonDecode(response.body);

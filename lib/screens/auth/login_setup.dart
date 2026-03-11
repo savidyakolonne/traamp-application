@@ -45,7 +45,7 @@ class _LoginSetupState extends State<LoginSetup> {
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      final String? idToken = await userCredential.user!.getIdToken(true);
+      String? idToken = await userCredential.user!.getIdToken(true);
       final response = await http.post(
         Uri.parse("${AppConfig.SERVER_URL}/api/users/loginWithEmail"),
         headers: {"Content-Type": "application/json"},
