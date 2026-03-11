@@ -9,7 +9,8 @@ import {
   updateGuideAvailability,
   logoutUser,
   updateTouristProfile,
-  updateGuideProfile
+  updateGuideProfile,
+  updateGuideCertificate
 } from "../controllers/userController.js";
 
 const userRouter = Router();
@@ -22,6 +23,12 @@ userRouter.post(
   "/register-guide",
   upload.single("certificate"),
   registerGuide
+);
+
+userRouter.put(
+  "/update-guide-certificate",
+  upload.single("certificate"),
+  updateGuideCertificate
 );
 
 userRouter.post("/loginWithEmail", loginWithEmail);
