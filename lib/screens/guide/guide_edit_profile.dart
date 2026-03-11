@@ -1,10 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../../list-data.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:traamp_frontend/app_config.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
 
 class EditGuideProfile extends StatefulWidget {
   const EditGuideProfile({super.key});
@@ -16,7 +20,6 @@ class EditGuideProfile extends StatefulWidget {
 class _EditGuideProfileState extends State<EditGuideProfile> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
-  final _db = FirebaseFirestore.instance;
   final _storage = FirebaseStorage.instance;
 
   // Controllers
@@ -45,6 +48,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   DateTime? _selectedDate;
   bool _isLoading = true;
   File? _pickedImage;
+  Uint8List? _webImage;
   List<String> _selectedLanguages = [];
 
   @override
@@ -81,60 +85,70 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
 
   Future<void> _loadUserData() async {
     final user = _auth.currentUser;
-    if (user != null) {
-      try {
-        final doc = await _db.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-          final data = doc.data() as Map<String, dynamic>;
-          setState(() {
-            _firstNameController.text = data['firstName'] ?? "";
-            _lastNameController.text = data['lastName'] ?? "";
-            _emailController.text = data['email'] ?? "";
-            _phoneController.text = data['phoneNumber'] ?? "";
-            _addressController.text = data['address'] ?? "";
-            _selectedLocation = data['location'];
-            _selectedGender = data['gender'];
-            _profileImageUrl = data['profilePicture'];
-            _selectedLanguages = List<String>.from(data['languages'] ?? []);
+    if (user == null) return;
 
-            // Read-only fields
-            _nicController.text = data['nic'] ?? "";
-            _certTypeController.text = data['certificateType'] ?? "";
-            _certNumController.text = data['certificateNumber'] ?? "";
+    try {
+      final idToken = await user.getIdToken();
 
-            if (data['dob'] != null && data['dob'].toString().isNotEmpty) {
-              final dobString = data['dob'].toString();
+      final response = await http.post(
+        Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"idToken": idToken}),
+      );
 
-              DateTime? parsedDate;
+      if (response.statusCode == 200) {
+        final resData = jsonDecode(response.body);
+        final data = resData["data"];
 
-              // Try ISO format first (yyyy-MM-dd)
-              parsedDate = DateTime.tryParse(dobString);
+        setState(() {
+          _firstNameController.text = data['firstName'] ?? "";
+          _lastNameController.text = data['lastName'] ?? "";
+          _emailController.text = data['email'] ?? "";
+          _phoneController.text = data['phoneNumber'] ?? "";
+          _addressController.text = data['address'] ?? "";
+          _selectedLocation = data['location'];
+          _selectedGender = data['gender'];
+          _profileImageUrl = data['profilePicture'];
+          _selectedLanguages = List<String>.from(data['languages'] ?? []);
 
-              // If ISO fails, try dd/MM/yyyy
-              if (parsedDate == null && dobString.contains('/')) {
-                final parts = dobString.split('/');
-                if (parts.length == 3) {
-                  parsedDate = DateTime(
-                    int.parse(parts[2]), // year
-                    int.parse(parts[1]), // month
-                    int.parse(parts[0]), // day
-                  );
-                }
-              }
+          // Read-only fields
+          _nicController.text = data['nic'] ?? "";
+          _certTypeController.text = data['guideCertificateType'] ?? "";
+          _certNumController.text = data['certificateNumber'] ?? "";
 
-              if (parsedDate != null) {
-                _selectedDate = parsedDate;
-                _dobController.text =
-                    "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+          if (data['dob'] != null && data['dob'].toString().isNotEmpty) {
+            final dobString = data['dob'].toString();
+
+            DateTime? parsedDate;
+
+            // Try ISO format first (yyyy-MM-dd)
+            parsedDate = DateTime.tryParse(dobString);
+
+            // If ISO fails, try dd/MM/yyyy
+            if (parsedDate == null && dobString.contains('/')) {
+              final parts = dobString.split('/');
+              if (parts.length == 3) {
+                parsedDate = DateTime(
+                  int.parse(parts[2]), // year
+                  int.parse(parts[1]), // month
+                  int.parse(parts[0]), // day
+                );
               }
             }
 
-            _isLoading = false;
-          });
-        }
-      } catch (e) {
-        setState(() => _isLoading = false);
+            if (parsedDate != null) {
+              _selectedDate = parsedDate;
+              _dobController.text =
+                  "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+            }
+          }
+
+          _isLoading = false;
+        });
       }
+    } catch (e) {
+      debugPrint("Error loading guide data: $e");
+      setState(() => _isLoading = false);
     }
   }
 
@@ -143,23 +157,39 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      setState(() => _pickedImage = File(image.path));
+      if (kIsWeb) {
+        _webImage = await image.readAsBytes();
+        _pickedImage = null;
+      } else {
+        _pickedImage = File(image.path);
+        _webImage = null;
+      }
+      setState(() {});
     }
   }
 
   Future<String?> _uploadImage(String uid) async {
-    final user = FirebaseAuth.instance.currentUser;
-    debugPrint("CURRENT USER UID: ${user?.uid}");
-    if (_pickedImage == null) return _profileImageUrl;
+    if (_webImage == null && _pickedImage == null) {
+      return _profileImageUrl;
+    }
 
     try {
       Reference ref = _storage.ref().child('profile_pictures').child(uid);
-      UploadTask uploadTask = ref.putFile(_pickedImage!);
+
+      UploadTask uploadTask;
+
+      if (kIsWeb) {
+        uploadTask = ref.putData(_webImage!);
+      } else {
+        uploadTask = ref.putFile(_pickedImage!);
+      }
+
       TaskSnapshot snapshot = await uploadTask;
+
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
       debugPrint("Image Upload Error: $e");
-      return null;
+      return _profileImageUrl;
     }
   }
 
@@ -238,14 +268,24 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
       _confirmPasswordController.clear();
 
       _showSnackBar("Password updated successfully!", Colors.green);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+        _showSnackBar("Current password is incorrect", Colors.red);
+      } else if (e.code == 'weak-password') {
+        _showSnackBar("Password must be at least 6 characters", Colors.red);
+      } else {
+        _showSnackBar(e.message ?? "Password update failed", Colors.red);
+      }
     } catch (e) {
-      _showSnackBar("Current password is incorrect", Colors.red);
+      _showSnackBar("Something went wrong", Colors.red);
     }
   }
 
   Future<void> _saveAllChanges() async {
     if (!_formKey.currentState!.validate()) return;
+
     setState(() => _isLoading = true);
+
     final user = _auth.currentUser;
     if (user == null) return;
 
@@ -253,30 +293,30 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
       // Upload image
       String? imageUrl = await _uploadImage(user.uid);
 
-      // UPDATE UI immediately
-      if (imageUrl != null) {
-        setState(() {
-          _profileImageUrl = imageUrl;
-        });
-      }
+      final idToken = await user.getIdToken();
 
-      // Save data to Firestore
-      await _db.collection('users').doc(user.uid).update({
-        'firstName': _firstNameController.text.trim(),
-        'lastName': _lastNameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'phoneNumber': _phoneController.text.trim(),
-        'address': _addressController.text.trim(),
-        'location': _selectedLocation,
-        'gender': _selectedGender,
-        'dob': _selectedDate?.toIso8601String(),
-        'profilePicture': imageUrl,
-        'languages': _selectedLanguages,
-      });
+      final response = await http.put(
+        Uri.parse("${AppConfig.SERVER_URL}/api/users/update-guide-profile"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "idToken": idToken,
+          "firstName": _firstNameController.text.trim(),
+          "lastName": _lastNameController.text.trim(),
+          "phoneNumber": _phoneController.text.trim(),
+          "address": _addressController.text.trim(),
+          "location": _selectedLocation,
+          "gender": _selectedGender,
+          "dob": _selectedDate?.toIso8601String(),
+          "languages": _selectedLanguages,
+          "profilePicture": imageUrl,
+        }),
+      );
 
-      if (mounted) {
+      if (response.statusCode == 200) {
         _showSnackBar("Profile updated successfully!", Colors.green);
         Navigator.pop(context);
+      } else {
+        _showSnackBar("Failed to update profile", Colors.red);
       }
     } catch (e) {
       _showSnackBar("Error: $e", Colors.red);
@@ -382,6 +422,8 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                       backgroundColor: Colors.grey[200],
                       backgroundImage: _pickedImage != null
                           ? FileImage(_pickedImage!)
+                          : _webImage != null
+                          ? MemoryImage(_webImage!)
                           : (_profileImageUrl != null &&
                                 _profileImageUrl!.isNotEmpty)
                           ? NetworkImage(_profileImageUrl!)
@@ -698,13 +740,30 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     filled: true,
     fillColor: Colors.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(color: Colors.grey.shade300),
     ),
+
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: Colors.lightGreen, width: 2),
+    ),
+
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: Colors.red, width: 2),
+    ),
+
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: Colors.red, width: 2),
     ),
   );
 }

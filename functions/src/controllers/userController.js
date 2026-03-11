@@ -110,6 +110,8 @@ export const registerGuide = async (req, res) => {
       country,
       rating,
       availability,
+      languages: [],
+      profilePicture: "",
       certificate: certificateUrl,
       createdAt,
     });
@@ -238,3 +240,92 @@ export const logoutUser = async (req, res) => {
     res.status(400).json({ msg: e.message });
   }
 };
+<<<<<<< HEAD
+=======
+
+// update tourist profile
+export const updateTouristProfile = async (req, res) => {
+  try {
+    const {
+      idToken,
+      firstName,
+      lastName,
+      country,
+      gender,
+      dob,
+      profilePicture
+    } = req.body;
+
+    const decoded = await auth.verifyIdToken(idToken);
+    const uid = decoded.uid;
+
+    const userRef = db.collection("users").doc(uid);
+
+    await userRef.update({
+      firstName,
+      lastName,
+      country,
+      gender,
+      dob,
+      profilePicture
+    });
+
+    res.status(200).json({
+      msg: "Profile updated successfully"
+    });
+
+  } catch (error) {
+    res.status(400).json({
+      msg: "Failed to update profile",
+      error: error.message
+    });
+  }
+};
+
+// update guide profile
+export const updateGuideProfile = async (req, res) => {
+  try {
+    const {
+      idToken,
+      firstName,
+      lastName,
+      phoneNumber,
+      address,
+      location,
+      gender,
+      dob,
+      languages,
+      profilePicture
+    } = req.body;
+
+    const decoded = await auth.verifyIdToken(idToken);
+    const uid = decoded.uid;
+
+    const userRef = db.collection("users").doc(uid);
+
+    const updateData = {};
+
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if (address !== undefined) updateData.address = address;
+    if (location !== undefined) updateData.location = location;
+    if (gender !== undefined) updateData.gender = gender;
+    if (dob !== undefined) updateData.dob = dob;
+    if (languages !== undefined) updateData.languages = languages;
+    if (profilePicture !== undefined) updateData.profilePicture = profilePicture;
+
+    await userRef.update(updateData);
+
+    res.status(200).json({
+      msg: "Guide profile updated successfully"
+    });
+
+  } catch (error) {
+    res.status(400).json({
+      msg: "Failed to update guide profile",
+      error: error.message
+    });
+  }
+};
+>>>>>>> main

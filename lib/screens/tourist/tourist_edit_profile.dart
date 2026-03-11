@@ -7,6 +7,8 @@ import '../../list-data.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:traamp_frontend/app_config.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
 
 class EditTouristProfile extends StatefulWidget {
   const EditTouristProfile({super.key});
@@ -40,6 +42,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
   bool _isLoading = true;
 
   File? _pickedImage;
+  Uint8List? _webImage;
 
   @override
   void initState() {
@@ -131,26 +134,41 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      setState(() {
+      if (kIsWeb) {
+        _webImage = await image.readAsBytes();
+        _pickedImage = null;
+      } else {
         _pickedImage = File(image.path);
-      });
+        _webImage = null;
+      }
+
+      setState(() {});
     }
   }
 
   // upload image to firebase storage
   Future<String?> _uploadImage(String uid) async {
-    final user = FirebaseAuth.instance.currentUser;
-    debugPrint("CURRENT USER UID: ${user?.uid}");
-    if (_pickedImage == null) return _profileImageUrl;
-
     try {
+      if (_webImage == null && _pickedImage == null) {
+        return _profileImageUrl;
+      }
+
       Reference ref = _storage.ref().child('profile_pictures').child(uid);
-      UploadTask uploadTask = ref.putFile(_pickedImage!);
+
+      UploadTask uploadTask;
+
+      if (kIsWeb) {
+        uploadTask = ref.putData(_webImage!);
+      } else {
+        uploadTask = ref.putFile(_pickedImage!);
+      }
+
       TaskSnapshot snapshot = await uploadTask;
+
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
       debugPrint("Image Upload Error: $e");
-      return null;
+      return _profileImageUrl;
     }
   }
 
@@ -191,26 +209,52 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
   }
 
   Future<void> _changePassword() async {
-    if (_newPasswordController.text != _confirmPasswordController.text) {
-      _showSnack("Passwords do not match");
+    final currentPassword = _currentPasswordController.text.trim();
+    final newPassword = _newPasswordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (currentPassword.isEmpty) {
+      _showSnack("Enter your current password", isError: true);
       return;
     }
+
+    if (newPassword.length < 6) {
+      _showSnack("Password must be at least 6 characters", isError: true);
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      _showSnack("Passwords do not match", isError: true);
+      return;
+    }
+
     try {
       final user = _auth.currentUser!;
+
       final credential = EmailAuthProvider.credential(
         email: user.email!,
-        password: _currentPasswordController.text,
+        password: currentPassword,
       );
 
       await user.reauthenticateWithCredential(credential);
-      await user.updatePassword(_newPasswordController.text.trim());
+
+      await user.updatePassword(newPassword);
 
       _showSnack("Password updated successfully");
+
       _currentPasswordController.clear();
       _newPasswordController.clear();
       _confirmPasswordController.clear();
-    } catch (_) {
-      _showSnack("Current password is incorrect");
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+        _showSnack("Current password is incorrect", isError: true);
+      } else if (e.code == 'weak-password') {
+        _showSnack("Password must be at least 6 characters", isError: true);
+      } else {
+        _showSnack(e.message ?? "Password update failed", isError: true);
+      }
+    } catch (e) {
+      _showSnack("Something went wrong", isError: true);
     }
   }
 
@@ -331,6 +375,8 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
 
                       backgroundImage: _pickedImage != null
                           ? FileImage(_pickedImage!)
+                          : _webImage != null
+                          ? MemoryImage(_webImage!)
                           : (_profileImageUrl != null &&
                                         _profileImageUrl!.isNotEmpty
                                     ? NetworkImage(_profileImageUrl!)
@@ -468,8 +514,13 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
     );
   }
 
-  void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  void _showSnack(String msg, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: isError ? Colors.red : Colors.green,
+      ),
+    );
   }
 
   Widget _inputField(String label, TextEditingController ctrl, bool obscure) {
@@ -542,13 +593,25 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
     filled: true,
     fillColor: Colors.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(color: Colors.grey.shade300),
     ),
+
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(color: Colors.grey.shade300),
+    ),
+
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: Colors.lightGreen, width: 2),
+    ),
+
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: const BorderSide(color: Colors.red, width: 2),
     ),
   );
 }
