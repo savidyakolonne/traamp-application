@@ -5,7 +5,8 @@ import '../../../widgets/image_card_other.dart';
 class OtherImages extends StatefulWidget {
   List<Map<String, String>> galleryImages = [];
   Future<void> Function() onRefresh;
-  OtherImages(this.galleryImages, this.onRefresh, {super.key});
+  String uid;
+  OtherImages(this.galleryImages, this.onRefresh, this.uid, {super.key});
 
   @override
   State<OtherImages> createState() => _OtherImagesState();
@@ -36,7 +37,7 @@ class _OtherImagesState extends State<OtherImages> {
           ),
           children: [
             for (int i = 0; i < widget.galleryImages.length; i++)
-              ImageCardOther(widget.galleryImages[i]),
+              ImageCardOther(widget.galleryImages[i], widget.uid),
           ],
         ),
       );
