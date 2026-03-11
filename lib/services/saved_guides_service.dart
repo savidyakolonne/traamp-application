@@ -1,7 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../app_config.dart';
 
 class SavedGuidesService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // Use AppConfig.SERVER_URL instead of hardcoded localhost
+  final String _baseUrl = '${AppConfig.SERVER_URL}/api/saved-guides';
 
   /// Add a guide to the tourist's saved guides list
   Future<bool> saveGuide({
@@ -9,10 +12,26 @@ class SavedGuidesService {
     required String guideUid,
   }) async {
     try {
-      await _firestore.collection('users').doc(touristUid).update({
-        'savedGuides': FieldValue.arrayUnion([guideUid]),
-      });
-      return true;
+      final response = await http.post(
+        Uri.parse('$_baseUrl/save'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'touristUid': touristUid,
+          'guideUid': guideUid,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        return data['success'] == true;
+      } else if (response.statusCode == 409) {
+        // Guide already saved - treat as success
+        print('Guide already saved');
+        return true;
+      } else {
+        print('Error saving guide: ${response.statusCode}');
+        return false;
+      }
     } catch (e) {
       print('Error saving guide: $e');
       return false;
@@ -25,10 +44,22 @@ class SavedGuidesService {
     required String guideUid,
   }) async {
     try {
-      await _firestore.collection('users').doc(touristUid).update({
-        'savedGuides': FieldValue.arrayRemove([guideUid]),
-      });
-      return true;
+      final response = await http.post(
+        Uri.parse('$_baseUrl/remove'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'touristUid': touristUid,
+          'guideUid': guideUid,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['success'] == true;
+      } else {
+        print('Error removing saved guide: ${response.statusCode}');
+        return false;
+      }
     } catch (e) {
       print('Error removing saved guide: $e');
       return false;
@@ -41,71 +72,49 @@ class SavedGuidesService {
     required String guideUid,
   }) async {
     try {
-      final doc = await _firestore.collection('users').doc(touristUid).get();
-      final data = doc.data();
-      
-      if (data == null || !data.containsKey('savedGuides')) {
+      final uri = Uri.parse('$_baseUrl/check').replace(queryParameters: {
+        'touristUid': touristUid,
+        'guideUid': guideUid,
+      });
+
+      final response = await http.get(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['isSaved'] == true;
+      } else {
+        print('Error checking if guide is saved: ${response.statusCode}');
         return false;
       }
-      
-      final savedGuides = List<String>.from(data['savedGuides'] ?? []);
-      return savedGuides.contains(guideUid);
     } catch (e) {
       print('Error checking if guide is saved: $e');
       return false;
     }
   }
 
-  /// Get all saved guide IDs for a tourist
-  Future<List<String>> getSavedGuideIds({
-    required String touristUid,
-  }) async {
-    try {
-      final doc = await _firestore.collection('users').doc(touristUid).get();
-      final data = doc.data();
-      
-      if (data == null || !data.containsKey('savedGuides')) {
-        return [];
-      }
-      
-      return List<String>.from(data['savedGuides'] ?? []);
-    } catch (e) {
-      print('Error fetching saved guide IDs: $e');
-      return [];
-    }
-  }
-
-  /// Get full guide documents for all saved guides
+  /// Get all saved guides for a tourist
   Future<List<Map<String, dynamic>>> getSavedGuides({
     required String touristUid,
   }) async {
     try {
-      final savedGuideIds = await getSavedGuideIds(touristUid: touristUid);
-      
-      if (savedGuideIds.isEmpty) {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/$touristUid'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] != null) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+        return [];
+      } else {
+        print('Error fetching saved guides: ${response.statusCode}');
         return [];
       }
-      
-      final guides = <Map<String, dynamic>>[];
-      
-      for (final guideId in savedGuideIds) {
-        final guideDoc = await _firestore
-            .collection('users')
-            .doc(guideId)
-            .get();
-        
-        if (guideDoc.exists) {
-          final guideData = guideDoc.data();
-          if (guideData != null && guideData['type'] == 'guide') {
-            guides.add({
-              ...guideData,
-              'uid': guideDoc.id,
-            });
-          }
-        }
-      }
-      
-      return guides;
     } catch (e) {
       print('Error fetching saved guides: $e');
       return [];
@@ -122,7 +131,7 @@ class SavedGuidesService {
         touristUid: touristUid,
         guideUid: guideUid,
       );
-      
+
       if (isSaved) {
         return await unsaveGuide(
           touristUid: touristUid,
@@ -140,33 +149,39 @@ class SavedGuidesService {
     }
   }
 
-  /// Stream saved guide IDs for real-time updates
-  Stream<List<String>> savedGuideIdsStream({
-    required String touristUid,
-  }) {
-    return _firestore
-        .collection('users')
-        .doc(touristUid)
-        .snapshots()
-        .map((snapshot) {
-      final data = snapshot.data();
-      if (data == null || !data.containsKey('savedGuides')) {
-        return <String>[];
-      }
-      return List<String>.from(data['savedGuides'] ?? []);
-    });
-  }
-
   /// Get count of saved guides
   Future<int> getSavedGuidesCount({
     required String touristUid,
   }) async {
     try {
-      final savedGuideIds = await getSavedGuideIds(touristUid: touristUid);
-      return savedGuideIds.length;
+      final response = await http.get(
+        Uri.parse('$_baseUrl/$touristUid/count'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['count'] ?? 0;
+      } else {
+        print('Error getting saved guides count: ${response.statusCode}');
+        return 0;
+      }
     } catch (e) {
       print('Error getting saved guides count: $e');
       return 0;
+    }
+  }
+
+  /// Get all saved guide IDs for a tourist (helper method for compatibility)
+  Future<List<String>> getSavedGuideIds({
+    required String touristUid,
+  }) async {
+    try {
+      final guides = await getSavedGuides(touristUid: touristUid);
+      return guides.map((guide) => guide['uid'] as String).toList();
+    } catch (e) {
+      print('Error fetching saved guide IDs: $e');
+      return [];
     }
   }
 }
