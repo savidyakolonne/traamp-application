@@ -7,6 +7,8 @@ import '../../list-data.dart';
 import '../../models/guide.dart';
 import 'login_setup.dart';
 import 'package:file_picker/file_picker.dart';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 class GuideSignupForm extends StatefulWidget {
   const GuideSignupForm({super.key});
@@ -36,6 +38,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   String? guideCertificateType;
   String? certificateNumber;
   File? uploadedCertificatePath;
+  Uint8List? uploadedCertificateBytes;
   String nic = "";
   String location = "";
   String address = "";
@@ -365,13 +368,18 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
             FilePickerResult? result = await FilePicker.platform.pickFiles(
               type: FileType.custom,
               allowedExtensions: ['jpg', 'pdf', 'doc', 'heif', 'png', 'jpeg'],
+              withData: true,
             );
             if (result != null) {
               PlatformFile platformFile = result.files.single;
-              uploadedCertificatePath = File(platformFile.path!);
               setState(() {
                 hint = platformFile.name;
               });
+              if (kIsWeb) {
+                uploadedCertificateBytes = platformFile.bytes;
+              } else {
+                uploadedCertificatePath = File(platformFile.path!);
+              }
             }
           },
           child: Text("Upload", style: TextStyle(color: Colors.green)),
@@ -498,12 +506,20 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                             }
                           });
 
-                          // Add file
-                          if (guide.uploadedCertificatePath != null) {
+                          // Add certificate file (web + mobile)
+                          if (uploadedCertificateBytes != null) {
+                            request.files.add(
+                              http.MultipartFile.fromBytes(
+                                "certificate",
+                                uploadedCertificateBytes!,
+                                filename: hint,
+                              ),
+                            );
+                          } else if (uploadedCertificatePath != null) {
                             request.files.add(
                               await http.MultipartFile.fromPath(
-                                "certificate", // field name to backend
-                                guide.uploadedCertificatePath!.path,
+                                "certificate",
+                                uploadedCertificatePath!.path,
                               ),
                             );
                           }
