@@ -18,16 +18,18 @@ class EmergencyServices extends StatelessWidget {
   Widget build(BuildContext c) => Scaffold(
     backgroundColor: Colors.grey.shade100,
     appBar: AppBar(title: const Text("Emergency Contacts"),centerTitle: true,
-      backgroundColor: Colors.white,foregroundColor: Colors.black),
-    body: ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        ...data.map((e)=>EmergencyItem(
-          image:e[0] as String,title:e[1] as String,subtitle:e[2] as String,
-          phone:e[3] as String,color:e[4] as Color,
-          onWebsiteTap:()=>open(e[5] as String))),
-        const TravelSafeTip()
-      ],
+      backgroundColor: Colors.grey.shade100),
+    body: Center(
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          ...data.map((e)=>EmergencyItem(
+            image:e[0] as String,title:e[1] as String,subtitle:e[2] as String,
+            phone:e[3] as String,color:e[4] as Color,
+            onWebsiteTap:()=>open(e[5] as String))),
+          const TravelSafeTip()
+        ],
+      ),
     ),
   );
 }

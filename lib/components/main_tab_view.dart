@@ -29,15 +29,13 @@ class _MainTabViewState extends State<MainTabView> {
             widget.isTourist
                 ? TouristNotificationScreen()
                 : GuideNotificationScreen(),
-            widget.isTourist
-                ? Settings(true, widget.idToken, widget.userData)
-                : Settings(false, widget.idToken, widget.userData),
+            Settings(widget.isTourist, widget.idToken, widget.userData),
           ],
         ),
         bottomNavigationBar: Container(
           height: 60,
           decoration: BoxDecoration(
-            color: Color.fromARGB(255, 247, 248, 246),
+            color: const Color.fromARGB(255, 247, 248, 246),
             boxShadow: [
               BoxShadow(
                 color: const Color.fromARGB(94, 0, 0, 0),
