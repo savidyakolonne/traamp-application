@@ -37,7 +37,7 @@ class _MainTabViewState extends State<MainTabView> {
         bottomNavigationBar: Container(
           height: 60,
           decoration: BoxDecoration(
-            color: Color.fromARGB(255, 247, 248, 246),
+            color: const Color.fromARGB(255, 247, 248, 246),
             boxShadow: [
               BoxShadow(
                 color: const Color.fromARGB(94, 0, 0, 0),

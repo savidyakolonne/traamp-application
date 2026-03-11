@@ -8,6 +8,11 @@ import {
   getUserData,
   updateGuideAvailability,
   logoutUser,
+<<<<<<< HEAD
+=======
+  updateTouristProfile,
+  updateGuideProfile
+>>>>>>> main
 } from "../controllers/userController.js";
 
 const userRouter = Router();
@@ -21,6 +26,10 @@ userRouter.post("/register-guide", upload.single("certificate"), registerGuide);
 userRouter.post("/loginWithEmail", loginWithEmail);
 
 userRouter.post("/get-user-data", getUserData);
+
+userRouter.put("/update-tourist-profile", updateTouristProfile);
+
+userRouter.put("/update-guide-profile", updateGuideProfile);
 
 userRouter.put("/update-guide-availability", updateGuideAvailability);
 
