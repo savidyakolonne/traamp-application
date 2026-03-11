@@ -256,11 +256,16 @@ class _GuideGalleryState extends State<GuideGallery> {
             onRefresh: _getImageDocuments,
             child: TabBarView(
               children: [
-                AllImages(galleryImages, packageImages, _getImageDocuments),
+                AllImages(
+                  galleryImages,
+                  packageImages,
+                  _getImageDocuments,
+                  widget.uid,
+                ),
 
                 PackageImages(packageImages),
 
-                OtherImages(galleryImages, _getImageDocuments),
+                OtherImages(galleryImages, _getImageDocuments, widget.uid),
               ],
             ),
           ),
