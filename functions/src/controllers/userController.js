@@ -57,10 +57,15 @@ export const registerGuide = async (req, res) => {
       availability,
     } = req.body;
 
+     const userRecord = await auth.createUser({
+      email,
+      password,
+    });
+
     let certificateUrl = null;
 
     if (req.file) {
-      const blob = bucket.file(`guide_certificates/${req.file.originalname}`);
+      const blob = bucket.file(`guide_certificates/${userRecord.uid}_${req.file.originalname}`);
       const blobStream = blob.createWriteStream({
         metadata: { contentType: req.file.mimetype },
       });
@@ -78,8 +83,6 @@ export const registerGuide = async (req, res) => {
 
       certificateUrl = url;
     }
-
-    const userRecord = await auth.createUser({ email, password });
 
     await db.collection("users").doc(userRecord.uid).set({
       uid: userRecord.uid,
@@ -279,6 +282,74 @@ export const updateGuideProfile = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       msg: "Failed to update guide profile",
+      error: error.message
+    });
+  }
+};
+
+// Update Guide Certificate
+export const updateGuideCertificate = async (req, res) => {
+  try {
+    const { idToken, delete: deleteCert } = req.body;
+
+    const decoded = await auth.verifyIdToken(idToken);
+    const uid = decoded.uid;
+
+    let certificateUrl = null;
+
+    if (deleteCert) {
+
+      const userDoc = await db.collection("users").doc(uid).get();
+      const certificateUrl = userDoc.data()?.certificate;
+
+      if (certificateUrl) {
+        const fileName = certificateUrl.split("guide_certificates/")[1].split("?")[0];
+
+        await bucket.file(`guide_certificates/${fileName}`).delete().catch(() => {});
+      }
+
+      await db.collection("users").doc(uid).update({
+        certificate: null
+      });
+
+      return res.status(200).json({
+        msg: "Certificate deleted successfully"
+      });
+    }
+
+    if (req.file) {
+      const blob = bucket.file(`guide_certificates/${uid}_${req.file.originalname}`);
+
+      const blobStream = blob.createWriteStream({
+        metadata: { contentType: req.file.mimetype },
+      });
+
+      await new Promise((resolve, reject) => {
+        blobStream.on("error", reject);
+        blobStream.on("finish", resolve);
+        blobStream.end(req.file.buffer);
+      });
+
+      const [url] = await blob.getSignedUrl({
+        action: "read",
+        expires: "03-09-2491",
+      });
+
+      certificateUrl = url;
+    }
+
+    await db.collection("users").doc(uid).update({
+      certificate: certificateUrl,
+    });
+
+    res.status(200).json({
+      msg: "Certificate updated successfully",
+      certificate: certificateUrl
+    });
+
+  } catch (error) {
+    res.status(400).json({
+      msg: "Failed to update certificate",
       error: error.message
     });
   }

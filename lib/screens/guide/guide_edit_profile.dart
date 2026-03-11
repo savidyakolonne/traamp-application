@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +10,7 @@ import 'dart:convert';
 import 'package:traamp_frontend/app_config.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:typed_data';
+import 'guide_certificate_viewer.dart';
 
 class EditGuideProfile extends StatefulWidget {
   const EditGuideProfile({super.key});
@@ -49,6 +51,10 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   bool _isLoading = true;
   File? _pickedImage;
   Uint8List? _webImage;
+  File? _certificateFile;
+  Uint8List? _webCertificate;
+  String? _certificateUrl;
+  String? _certificateName;
   List<String> _selectedLanguages = [];
 
   @override
@@ -109,6 +115,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
           _selectedLocation = data['location'];
           _selectedGender = data['gender'];
           _profileImageUrl = data['profilePicture'];
+          _certificateUrl = data['certificate'];
           _selectedLanguages = List<String>.from(data['languages'] ?? []);
 
           // Read-only fields
@@ -282,6 +289,8 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   }
 
   Future<void> _saveAllChanges() async {
+    await _uploadCertificate();
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -358,6 +367,106 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
         );
       },
     );
+  }
+
+  // pick certificate
+  Future<void> _pickCertificate() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+    );
+
+    if (result != null) {
+      final file = result.files.first;
+
+      if (kIsWeb) {
+        _webCertificate = file.bytes;
+        _certificateName = file.name;
+        _certificateFile = null;
+      } else {
+        _certificateFile = File(file.path!);
+        _certificateName = file.name;
+        _webCertificate = null;
+      }
+
+      setState(() {});
+    }
+  }
+
+  // upload certificate
+  Future<void> _uploadCertificate() async {
+    if (_certificateFile == null && _webCertificate == null) {
+      return;
+    }
+
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final idToken = await user.getIdToken();
+    if (idToken == null) return;
+
+    var uri = Uri.parse(
+      "${AppConfig.SERVER_URL}/api/users/update-guide-certificate",
+    );
+
+    var request = http.MultipartRequest("PUT", uri);
+
+    request.fields["idToken"] = idToken;
+
+    if (kIsWeb && _webCertificate != null) {
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          "certificate",
+          _webCertificate!,
+          filename: _certificateName ?? "certificate",
+        ),
+      );
+    } else if (_certificateFile != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          "certificate",
+          _certificateFile!.path,
+        ),
+      );
+    }
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      final resp = await http.Response.fromStream(response);
+      final data = jsonDecode(resp.body);
+
+      setState(() {
+        _certificateUrl = data["certificate"];
+      });
+
+      _showSnackBar("Certificate uploaded", Colors.green);
+    } else {
+      _showSnackBar("Upload failed", Colors.red);
+    }
+  }
+
+  // delete certificate
+  Future<void> _deleteCertificate() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final idToken = await user.getIdToken();
+
+    await http.put(
+      Uri.parse("${AppConfig.SERVER_URL}/api/users/update-guide-certificate"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"idToken": idToken, "delete": true}),
+    );
+
+    setState(() {
+      _certificateFile = null;
+      _webCertificate = null;
+      _certificateUrl = null;
+      _certificateName = null;
+    });
+
+    _showSnackBar("Certificate removed", Colors.green);
   }
 
   void _showSnackBar(String message, Color color) {
@@ -697,7 +806,121 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                 readOnly: true,
                 decoration: _inputDecoration("Certificate Number"),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 15),
+
+              _buildLabel("Guide Certificate"),
+
+              GestureDetector(
+                onTap: () {
+                  if (_certificateFile != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            CertificateViewer(file: _certificateFile),
+                      ),
+                    );
+                  } else if (_webCertificate != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            CertificateViewer(bytes: _webCertificate),
+                      ),
+                    );
+                  } else if (_certificateUrl != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CertificateViewer(url: _certificateUrl),
+                      ),
+                    );
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 220,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                    image: _certificateFile != null
+                        ? DecorationImage(
+                            image: FileImage(_certificateFile!),
+                            fit: BoxFit.contain,
+                          )
+                        : _webCertificate != null
+                        ? DecorationImage(
+                            image: MemoryImage(_webCertificate!),
+                            fit: BoxFit.contain,
+                          )
+                        : _certificateUrl != null
+                        ? DecorationImage(
+                            image: NetworkImage(_certificateUrl!),
+                            fit: BoxFit.contain,
+                          )
+                        : null,
+                  ),
+                  child: Stack(
+                    children: [
+                      if (_certificateFile == null &&
+                          _webCertificate == null &&
+                          _certificateUrl == null)
+                        const Center(
+                          child: Text(
+                            "No Certificate Uploaded",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+
+                      if (_certificateFile != null ||
+                          _webCertificate != null ||
+                          _certificateUrl != null)
+                        const Positioned(
+                          right: 10,
+                          bottom: 10,
+                          child: Icon(
+                            Icons.zoom_in,
+                            color: Colors.black54,
+                            size: 28,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: _pickCertificate,
+                    child: const Text(
+                      "Upload",
+                      style: TextStyle(
+                        color: Colors.lightGreen,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 20),
+
+                  if (_certificateUrl != null ||
+                      _certificateFile != null ||
+                      _webCertificate != null)
+                    TextButton(
+                      onPressed: _deleteCertificate,
+                      child: const Text(
+                        "Delete",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
         ),
