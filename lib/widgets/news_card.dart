@@ -48,7 +48,10 @@ class NewsCard extends StatelessWidget {
                 /// DATE
                 Text(
                   news.date,
-                  style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  style: const TextStyle(
+                    color: Color.fromARGB(255, 76, 175, 80),
+                    fontSize: 13,
+                  ),
                 ),
 
                 const SizedBox(height: 10),
