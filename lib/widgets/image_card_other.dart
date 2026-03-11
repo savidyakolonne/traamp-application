@@ -6,7 +6,8 @@ import '../app_config.dart';
 // ignore: must_be_immutable
 class ImageCardOther extends StatefulWidget {
   Map<String, String> imageData = {};
-  ImageCardOther(this.imageData, {super.key});
+  String uid;
+  ImageCardOther(this.imageData, this.uid, {super.key});
 
   @override
   State<ImageCardOther> createState() => _ImageCardOtherState();
@@ -23,7 +24,7 @@ class _ImageCardOtherState extends State<ImageCardOther> {
         body: jsonEncode({
           'galleryId': widget.imageData['galleryId'],
           'image': widget.imageData['url'],
-          'uid': widget.imageData['uid'],
+          'uid': widget.uid,
         }),
       );
       final data = jsonDecode(response.body);

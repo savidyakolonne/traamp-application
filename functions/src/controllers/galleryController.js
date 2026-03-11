@@ -143,7 +143,7 @@ export const deleteGallery = async (req, res) => {
     console.log("notificationDocRef: ", notificationDocRef);
     await notificationDocRef.set({
       notificationId: notificationDocRef.id,
-      uid,
+      uid: uid,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       isUnread: true,
       type: "gallery-removed",

@@ -122,7 +122,7 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -148,10 +148,14 @@ class _SettingsState extends State<Settings> {
                       builder: (context) {
                         if (widget.isTourist) {
                           return TouristProfileScreen(
-                              widget.idToken, widget.userData);
+                            widget.idToken,
+                            widget.userData,
+                          );
                         } else {
                           return GuideProfileScreen(
-                              widget.idToken, widget.userData);
+                            widget.idToken,
+                            widget.userData,
+                          );
                         }
                       },
                     ),
@@ -178,9 +182,7 @@ class _SettingsState extends State<Settings> {
                 subtitle: "Secure your account with privacy",
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => SettingsPrivacy(),
-                    ),
+                    MaterialPageRoute(builder: (context) => SettingsPrivacy()),
                   );
                 },
               ),
@@ -194,9 +196,7 @@ class _SettingsState extends State<Settings> {
                 subtitle: "Get help from our team",
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => HelpAndSupport(),
-                    ),
+                    MaterialPageRoute(builder: (context) => HelpAndSupport()),
                   );
                 },
               ),
@@ -210,9 +210,7 @@ class _SettingsState extends State<Settings> {
                 subtitle: "Version info, terms & conditions, privacy policy",
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => SettingsAbout(),
-                    ),
+                    MaterialPageRoute(builder: (context) => SettingsAbout()),
                   );
                 },
               ),

@@ -7,10 +7,12 @@ class AllImages extends StatefulWidget {
   List<Map<String, String>> galleryImages = [];
   List<String> packageImages = [];
   Future<void> Function() onRefresh;
+  String uid;
   AllImages(
     this.galleryImages,
     this.packageImages,
-    this.onRefresh, {
+    this.onRefresh,
+    this.uid, {
     super.key,
   });
 
@@ -43,7 +45,7 @@ class _AllImagesState extends State<AllImages> {
           ),
           children: [
             for (int i = 0; i < widget.galleryImages.length; i++)
-              ImageCardOther(widget.galleryImages[i]),
+              ImageCardOther(widget.galleryImages[i], widget.uid),
 
             for (int i = 0; i < widget.packageImages.length; i++)
               ImageCardPackage(widget.packageImages[i]),

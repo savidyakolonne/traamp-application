@@ -8,6 +8,7 @@ import galleryRouter from "./routes/galleryRouter.js";
 import userRoutes from "./routes/userRoutes.js";
 import newsRoutes from "./routes/newsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import notificationRouter from "./routes/notificationRoute.js";
 
 const app = express();
 
@@ -23,7 +24,7 @@ app.use("/api/activity", activityRoutes);
 app.use("/api/guidePackage", packageRouter);
 app.use("/api/gallery", galleryRouter);
 app.use("/api/news", newsRoutes);
-
+app.use("/api/notification", notificationRouter);
 //guides
 app.use("/api/guides", guideRoutes);
 app.use("/api/admin", adminRoutes);
