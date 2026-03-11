@@ -1,13 +1,11 @@
 import express from "express";
 import cors from "cors";
-
-import guideRoutes from "./routes/guideRoutes.js"
-import activityRoutes from "./routes/activityRoutes.js" ;
-import placeRoutes from "./routes/placeRoutes.js" ;
-import packageRouter from "./routes/guide_package.mjs";
-import galleryRouter from "./routes/gallery.mjs";
+import guideRoutes from "./routes/guideRoutes.js";
+import activityRoutes from "./routes/activityRoutes.js";
+import placeRoutes from "./routes/placeRoutes.js";
+import packageRouter from "./routes/packageRouter.js";
+import galleryRouter from "./routes/galleryRouter.js";
 import userRoutes from "./routes/userRoutes.js";
-
 
 const app = express();
 
@@ -24,6 +22,6 @@ app.use("/api/guidePackage", packageRouter);
 app.use("/api/gallery", galleryRouter);
 
 //guides
-app.use("/api/guides", guideRoutes) ;
+app.use("/api/guides", guideRoutes);
 
 export default app;

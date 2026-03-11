@@ -7,7 +7,7 @@ import {
   loginWithEmail,
   getUserData,
   updateGuideAvailability,
-  logoutUser
+  logoutUser,
 } from "../controllers/userController.js";
 
 const userRouter = Router();
@@ -16,11 +16,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 userRouter.post("/register-tourist", registerTourist);
 
-userRouter.post(
-  "/register-guide",
-  upload.single("certificate"),
-  registerGuide
-);
+userRouter.post("/register-guide", upload.single("certificate"), registerGuide);
 
 userRouter.post("/loginWithEmail", loginWithEmail);
 
