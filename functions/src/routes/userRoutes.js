@@ -8,11 +8,8 @@ import {
   getUserData,
   updateGuideAvailability,
   logoutUser,
-<<<<<<< HEAD
-=======
   updateTouristProfile,
-  updateGuideProfile
->>>>>>> main
+  updateGuideProfile,
 } from "../controllers/userController.js";
 
 const userRouter = Router();
