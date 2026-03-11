@@ -240,8 +240,6 @@ export const logoutUser = async (req, res) => {
     res.status(400).json({ msg: e.message });
   }
 };
-<<<<<<< HEAD
-=======
 
 // update tourist profile
 export const updateTouristProfile = async (req, res) => {
@@ -253,7 +251,7 @@ export const updateTouristProfile = async (req, res) => {
       country,
       gender,
       dob,
-      profilePicture
+      profilePicture,
     } = req.body;
 
     const decoded = await auth.verifyIdToken(idToken);
@@ -267,17 +265,27 @@ export const updateTouristProfile = async (req, res) => {
       country,
       gender,
       dob,
-      profilePicture
+      profilePicture,
+    });
+
+    // setup a notification
+    const notificationDocRef = db.collection("notifications").doc();
+    console.log("notificationDocRef: ", notificationDocRef);
+    await notificationDocRef.set({
+      notificationId: notificationDocRef.id,
+      uid: uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      isUnread: true,
+      type: "user-info-changed",
     });
 
     res.status(200).json({
-      msg: "Profile updated successfully"
+      msg: "Profile updated successfully",
     });
-
   } catch (error) {
     res.status(400).json({
       msg: "Failed to update profile",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -295,7 +303,7 @@ export const updateGuideProfile = async (req, res) => {
       gender,
       dob,
       languages,
-      profilePicture
+      profilePicture,
     } = req.body;
 
     const decoded = await auth.verifyIdToken(idToken);
@@ -313,19 +321,29 @@ export const updateGuideProfile = async (req, res) => {
     if (gender !== undefined) updateData.gender = gender;
     if (dob !== undefined) updateData.dob = dob;
     if (languages !== undefined) updateData.languages = languages;
-    if (profilePicture !== undefined) updateData.profilePicture = profilePicture;
+    if (profilePicture !== undefined)
+      updateData.profilePicture = profilePicture;
 
     await userRef.update(updateData);
 
-    res.status(200).json({
-      msg: "Guide profile updated successfully"
+    // setup a notification
+    const notificationDocRef = db.collection("notifications").doc();
+    console.log("notificationDocRef: ", notificationDocRef);
+    await notificationDocRef.set({
+      notificationId: notificationDocRef.id,
+      uid: uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      isUnread: true,
+      type: "user-info-changed",
     });
 
+    res.status(200).json({
+      msg: "Guide profile updated successfully",
+    });
   } catch (error) {
     res.status(400).json({
       msg: "Failed to update guide profile",
-      error: error.message
+      error: error.message,
     });
   }
 };
->>>>>>> main
