@@ -27,6 +27,8 @@ app.use("/api/news", newsRoutes);
 
 //guides
 app.use("/api/guides", guideRoutes) ;
+
+//admin dashboard
 app.use("/api/admin", adminRoutes);
 
 export default app;
