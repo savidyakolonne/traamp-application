@@ -154,6 +154,12 @@ backend
 Start Backend - 
 cd functions
 npm run dev
+//run on the 3000 port
+
+Start traamp-admin
+cd traamp-admin
+npm run dev -- -p 3001
+// run on the 3001 port
 
 Start Flutter App - 
 flutter run 
