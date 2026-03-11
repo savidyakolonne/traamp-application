@@ -10,6 +10,7 @@ import {
   logoutUser,
   updateTouristProfile,
   updateGuideProfile,
+  updateGuideCertificate,
 } from "../controllers/userController.js";
 
 const userRouter = Router();
@@ -19,6 +20,12 @@ const upload = multer({ storage: multer.memoryStorage() });
 userRouter.post("/register-tourist", registerTourist);
 
 userRouter.post("/register-guide", upload.single("certificate"), registerGuide);
+
+userRouter.put(
+  "/update-guide-certificate",
+  upload.single("certificate"),
+  updateGuideCertificate,
+);
 
 userRouter.post("/loginWithEmail", loginWithEmail);
 
