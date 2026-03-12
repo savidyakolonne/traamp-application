@@ -15,55 +15,96 @@ This repository contains:
 ```text
 TRAAMP-MOBILE-FRONTEND/
 ├── lib/                      # Flutter frontend source code
-|   |   components/
+|   |── components/
 |   |   |   packages/
-|   |   |   |── guide_package_card.dart
+|   |   |   └──guide_package_card.dart
 |   |   |   weather/
 |   |   |   |── weather_card_element.dart
 |   |   |   |── weather_forecast.dart
-|   |   |   |── weather_screen.dart 
+|   |   |   └── weather_screen.dart 
 |   |   |   main_tab_view.dart
 |   |   |   settings_screen.dart
 |   |   models/
-|   |   |   |── activity_model.dart
-|   |   |   |── char_message.dart
-|   |   |   |── place_model.dart
+|   |       |── activity_model.dart
+|   |       |── char_message.dart
+|   |       └──place_model.dart
 │   ├── screens/              # UI screens and layouts
 │   │   ├── auth/             # Login and Registration screens
+|   |   |     |── guide_signup_form.dart
+|   |   |     |── login_screen.dart
+|   |   |     |── login_setup.dart
+|   |   |     |── role_router.dart
+|   |   |     |── signup.dart
+|   |   |     |── tourist_signup_form.dart
 |   |   |── activities/
+|   |   |     |── activities_list_screen.dart
+|   |   |     |── activities_detail_screen.dart
 |   |   |── assistant/
+|   |   |     |──assistant_home.dart
 |   |   |── emergency/
+|   |   |     |──emergency_services.dart
 |   |   |── places/
 │   │   ├── guide/            # Guide dashboard and specific features
+|   |   |     |──guide_gallery/
+|   |   |     |   |──
+|   |   |     |──guide_packages/
+|   |   |         |── guide_dashboard.dart
+|   |   |         |── guide_edit_profile.dart
 │   │   ├── tourist/          # Tourist dashboard and specific features
 │   │   └── map/
-│   │       └── map_screen.dart # Google Maps integration and nearby places UI
+│   │   |    └── map_screen.dart # Google Maps integration and nearby places UI
+|   |   |── places/
+|   |   |    |──place_detail_screen.dart
+|   |   |    |── place_list_screen.dart
+|   |   |── profile/
+|   |   |    |──guide_proflie_screen.dart
+|   |   |    |──tourist_proflie_screen.dart
+|   |   |    |── guide_public_view_screen.dart
+|   |   |── tourist/
 │   ├── services/
-│   │   └── position.dart     # GPS logic and location permission handling
-│   └── main.dart             # Application entry point
+│   │   |──position.dart     # GPS logic and location permission handling
+|   |   |── activiies_service.dart
+|   |   |── appUser.dart
+|   |   |── auth_service.dart
+|   |   |── gemini_service.dart
+|   |   |── gudie_service.dart
+|   |   |── location_service.dart
+|   |   |── places_service.dart
+|   |   |── user_service.dart
+|   |   └──  weather_service.dart
+|   |──widgets/
+|   |   |──activity_tile.dart
+|   |   └──place_tile.dart
+│   |── main.dart             # Application entry point
+|   |── firebase_options.dart
+|   |── list-data.dart
+|   └── app_config.dart
 |   
 ├── functions/  # Node.js (Firebase Functions) backend
 |   |── node_modules/
 |   |──src/
 |   |   |──config/
 |   |   |     |──firebaseAdmin.js  # Firebase Admin SDK initialization
-|   |   |     |──serviceAccountKey.json # service account uris and other related stuff
+|   |   |     └──serviceAccountKey.json # service account uris and other related stuff
 │   |   |── routes/
 │   │   |     |──placeRoutes.js  # Nearby places API endpoints
 |   |   |     |──activityRoutes.js # activity listing route .
 |   |   |     |──guide_package.mjs #
 |   |   |     |──userRoutes.js         #
-|   |   |     |──guideRoutes.js
+|   |   |     └──guideRoutes.js
 |   |   |──controllers/
 |   |   |     |──activityController.js
 |   |   |     |──guideController.js
 |   |   |     |──placeController.js
-|   |   |     |──userController.js
+|   |   |     └──userController.js
 │   |   |──app.js  # Express.js application configuration
-│   |   |──index.js # Backend entry point           
+│   |   └──index.js # Backend entry point           
 │   ├── package.json          # Node.js dependencies
 │   └── package-lock.json
 | 
+|──traamp-admin/
+|      |──
+|
 |── .env
 ├── assets/                   # Images, icons, and static assets
 ├── web/                      # Flutter web platform configuration
@@ -113,6 +154,12 @@ backend
 Start Backend - 
 cd functions
 npm run dev
+//run on the 3000 port
+
+Start traamp-admin
+cd traamp-admin
+npm run dev -- -p 3001
+// run on the 3001 port
 
 Start Flutter App - 
 flutter run 

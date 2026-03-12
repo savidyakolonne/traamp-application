@@ -264,7 +264,9 @@ class _TouristDashboardState extends State<TouristDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
         automaticallyImplyLeading: false,
         title: Row(
           children: [
