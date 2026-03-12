@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes.js";
 import newsRoutes from "./routes/newsRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import notificationRouter from "./routes/notificationRoute.js";
+import savedGuidesRoutes from "./routes/savedGuidesRoutes.js";
 
 const app = express();
 
@@ -28,5 +29,11 @@ app.use("/api/notification", notificationRouter);
 
 //guides
 app.use("/api/guides", guideRoutes) ;
+
+// saved guides
+app.use("/api/saved-guides", savedGuidesRoutes);
+
+//admin dashboard
+app.use("/api/admin", adminRoutes);
 
 export default app;
