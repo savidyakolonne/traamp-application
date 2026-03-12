@@ -373,7 +373,7 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   Future<void> _pickCertificate() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      allowedExtensions: ['jpg', 'pdf', 'doc', 'heif', 'png', 'jpeg'],
     );
 
     if (result != null) {

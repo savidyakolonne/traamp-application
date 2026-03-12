@@ -22,6 +22,8 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   // DOB text editing controller
   final TextEditingController _dobController = TextEditingController();
 
+  final Color primaryColor = Colors.lightGreen;
+
   final List<String> _genders = ListData.gender;
   final List<String> _certificateType = ListData.guideCertificates;
   final List<String> _districts = ListData.districts;
@@ -50,7 +52,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   // first name
   Widget firstNameFormField() {
     return TextFormField(
-      decoration: InputDecoration(hintText: "First Name"),
+      decoration: fieldStyle("First Name"),
       //validation
       validator: (text) {
         if (text == null || text == "") {
@@ -72,7 +74,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   // last name
   Widget lastNameFormField() {
     return TextFormField(
-      decoration: InputDecoration(hintText: "Last Name"),
+      decoration: fieldStyle("Last Name"),
       //validation
       validator: (text) {
         if (text == null || text == "") {
@@ -94,7 +96,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   Widget emailFormField() {
     return TextFormField(
       keyboardType: TextInputType.emailAddress,
-      decoration: InputDecoration(hintText: "Email Address"),
+      decoration: fieldStyle("Email Address"),
       validator: (mail) {
         final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
         if (mail == null || mail == "") {
@@ -116,7 +118,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   Widget passwordFormField() {
     return TextFormField(
       obscureText: true,
-      decoration: InputDecoration(hintText: "Password"),
+      decoration: fieldStyle("Password"),
       validator: (pass) {
         if (pass != null && pass != "") {
           if (pass.length >= 8 && pass.length <= 16) {
@@ -151,7 +153,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   Widget confirmPasswordFormField() {
     return TextFormField(
       obscureText: true,
-      decoration: InputDecoration(hintText: "Confirm Password"),
+      decoration: fieldStyle("Confirm Password"),
       validator: (cPass) {
         if (cPass != null && cPass != "") {
           if (rowPassword != cPass) {
@@ -168,10 +170,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   // Gender
   Widget genderFormField() {
     return DropdownButtonFormField<String>(
-      decoration: const InputDecoration(
-        labelText: "Select Gender",
-        border: OutlineInputBorder(),
-      ),
+      decoration: fieldStyle("Select Gender"),
       items: _genders.map((gender) {
         return DropdownMenuItem(value: gender, child: Text(gender));
       }).toList(),
@@ -194,11 +193,9 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
     return TextFormField(
       controller: _dobController,
       readOnly: true, // prevent manual typing
-      decoration: const InputDecoration(
-        labelText: "Date of Birth",
-        border: OutlineInputBorder(),
-        suffixIcon: Icon(Icons.calendar_today),
-      ),
+      decoration: fieldStyle(
+        "DOB",
+      ).copyWith(suffixIcon: const Icon(Icons.calendar_month)),
       onTap: () async {
         DateTime? pickedDate = await showDatePicker(
           context: context,
@@ -229,7 +226,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   // phone number
   Widget phoneNumberFormField() {
     return TextFormField(
-      decoration: InputDecoration(hintText: "Phone Number (ex: +94771234567)"),
+      decoration: fieldStyle("Phone Number (ex: +94771234567)"),
       //validation
       validator: (number) {
         if (number == null || number.isEmpty) {
@@ -261,10 +258,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   //certificate type
   Widget certificateTypeFormField() {
     return DropdownButtonFormField<String>(
-      decoration: const InputDecoration(
-        labelText: "Select Certificate Type",
-        border: OutlineInputBorder(),
-      ),
+      decoration: fieldStyle("Select Certificate Type"),
       items: _certificateType.map((certificateType) {
         return DropdownMenuItem(
           value: certificateType,
@@ -288,9 +282,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   //NIC
   Widget NICFormField() {
     return TextFormField(
-      decoration: InputDecoration(
-        hintText: "NIC Number (123214255v/123456789123)",
-      ),
+      decoration: fieldStyle("NIC Number (123214255v/123456789123)"),
       //validation
       validator: (number) {
         if (number == null || number.isEmpty) {
@@ -311,7 +303,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   // certificate number
   Widget certificateNumberField() {
     return TextFormField(
-      decoration: InputDecoration(hintText: "Certificate Number"),
+      decoration: fieldStyle("Certificate Number"),
       //validation
       validator: (number) {
         return null;
@@ -330,10 +322,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   // Location
   Widget locationFormField() {
     return DropdownButtonFormField<String>(
-      decoration: const InputDecoration(
-        labelText: "Select Location",
-        border: OutlineInputBorder(),
-      ),
+      decoration: fieldStyle("Select Location"),
       items: _districts.map((district) {
         return DropdownMenuItem(value: district, child: Text(district));
       }).toList(),
@@ -353,46 +342,82 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
 
   // upload certificate section
   String hint = "";
-  Widget uploadDocumentField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextFormField(
-          readOnly: true,
-          decoration: hint.isEmpty
-              ? InputDecoration(hintText: "Upload your certificate")
-              : InputDecoration(hintText: hint),
-        ),
-        OutlinedButton(
-          onPressed: () async {
-            FilePickerResult? result = await FilePicker.platform.pickFiles(
-              type: FileType.custom,
-              allowedExtensions: ['jpg', 'pdf', 'doc', 'heif', 'png', 'jpeg'],
-              withData: true,
-            );
-            if (result != null) {
-              PlatformFile platformFile = result.files.single;
-              setState(() {
-                hint = platformFile.name;
-              });
-              if (kIsWeb) {
-                uploadedCertificateBytes = platformFile.bytes;
-              } else {
-                uploadedCertificatePath = File(platformFile.path!);
-              }
-            }
-          },
-          child: Text("Upload", style: TextStyle(color: Colors.green)),
-          style: ButtonStyle(),
-        ),
-      ],
+  Widget uploadCertificateBox() {
+    return GestureDetector(
+      onTap: () async {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['jpg', 'pdf', 'doc', 'heif', 'png', 'jpeg'],
+          withData: true,
+        );
+
+        if (result != null) {
+          PlatformFile file = result.files.single;
+
+          setState(() {
+            hint = file.name;
+          });
+
+          if (kIsWeb) {
+            uploadedCertificateBytes = file.bytes;
+          } else {
+            uploadedCertificatePath = File(file.path!);
+          }
+        }
+      },
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Upload Guide Certificate",
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 120,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.cloud_upload, color: primaryColor, size: 32),
+                const SizedBox(height: 8),
+                Text(
+                  hint.isEmpty ? "Tap to upload certificate" : hint,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  final ScrollController _scrollController = ScrollController();
+  Color _appBarColor = Colors.white;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _scrollController.addListener(() {
+      if (_scrollController.offset > 10) {
+        setState(() => _appBarColor = const Color.fromARGB(241, 177, 177, 177));
+      } else {
+        setState(() => _appBarColor = Colors.white);
+      }
+    });
   }
 
   //Address
   Widget addressFormField() {
     return TextFormField(
-      decoration: InputDecoration(hintText: "Address"),
+      decoration: fieldStyle("Address"),
       //validation
       validator: (text) {
         if (text == null || text == "") {
@@ -414,125 +439,208 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 254, 254),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.black),
         title: const Text(
           'Welcome to Traamp',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
-        backgroundColor: Colors.green,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(25.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKeyGuide,
-            child: SizedBox(
-              width: double.infinity,
-              child: Column(
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        controller: _scrollController,
+        padding: const EdgeInsets.all(20),
+
+        child: Form(
+          key: _formKeyGuide,
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+
+            children: [
+              /// LOGO
+              Center(child: Image.asset("assets/images/logo.png", height: 90)),
+
+              const SizedBox(height: 20),
+
+              const Center(
+                child: Text(
+                  "Register as a Guide",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              const Center(
+                child: Text(
+                  "Fill the details below to continue",
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// FIRST + LAST NAME
+              Row(
                 children: [
-                  Image.asset('assets/images/logo.png'),
-                  SizedBox(height: 20.0),
-                  Text(
-                    "Please Register as a Guide",
-                    style: TextStyle(fontSize: 20.0),
-                  ),
-                  SizedBox(height: 20.0),
-                  Container(
-                    child: Column(
-                      children: [
-                        // Form elements here
-                        firstNameFormField(),
-                        lastNameFormField(),
-                        emailFormField(),
-                        passwordFormField(),
-                        confirmPasswordFormField(),
-                        SizedBox(height: 15.0), // to reserve some space
-                        genderFormField(),
-                        SizedBox(height: 15.0),
-                        dobFormField(),
-                        SizedBox(height: 15.0),
-                        phoneNumberFormField(),
-                        NICFormField(),
-                        SizedBox(height: 15.0),
-                        certificateTypeFormField(),
-                        SizedBox(height: 15.0),
-                        certificateNumberField(),
-                        SizedBox(height: 15.0),
-                        uploadDocumentField(),
-                        SizedBox(height: 15.0),
-                        addressFormField(),
-                        SizedBox(height: 15.0),
-                        locationFormField(),
-                      ],
+                  Expanded(child: firstNameFormField()),
+                  const SizedBox(width: 15),
+                  Expanded(child: lastNameFormField()),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+
+              emailFormField(),
+
+              const SizedBox(height: 15),
+
+              Row(
+                children: [
+                  Expanded(child: genderFormField()),
+                  const SizedBox(width: 15),
+                  Expanded(child: dobFormField()),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+
+              phoneNumberFormField(),
+
+              const SizedBox(height: 15),
+
+              addressFormField(),
+
+              const SizedBox(height: 15),
+
+              NICFormField(),
+
+              const SizedBox(height: 15),
+
+              certificateTypeFormField(),
+
+              const SizedBox(height: 15),
+
+              certificateNumberField(),
+
+              const SizedBox(height: 15),
+
+              uploadCertificateBox(),
+
+              const SizedBox(height: 15),
+
+              locationFormField(),
+
+              const SizedBox(height: 30),
+
+              passwordFormField(),
+
+              const SizedBox(height: 15),
+
+              confirmPasswordFormField(),
+
+              const SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  SizedBox(height: 30.0),
-                  OutlinedButton(
-                    onPressed: () async {
-                      // if validated save to global variables
-                      if (_formKeyGuide.currentState!.validate()) {
-                        _formKeyGuide.currentState?.save();
-                        Guide guide = Guide(
-                          firstName: firstName,
-                          lastName: lastName,
-                          email: email,
-                          password: password,
-                          gender: gender,
-                          dob: dob,
-                          phoneNumber: phoneNumber,
-                          guideCertificateType: guideCertificateType,
-                          certificateNumber: certificateNumber,
-                          uploadedCertificatePath: uploadedCertificatePath,
-                          nic: nic,
-                          location: location,
-                          address: address,
-                          country: country,
-                          type: type,
-                          rating: rating,
-                          availability: availability,
+
+                  onPressed: () async {
+                    if (_formKeyGuide.currentState!.validate()) {
+                      _formKeyGuide.currentState?.save();
+                      Guide guide = Guide(
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        password: password,
+                        gender: gender,
+                        dob: dob,
+                        phoneNumber: phoneNumber,
+                        guideCertificateType: guideCertificateType,
+                        certificateNumber: certificateNumber,
+                        uploadedCertificatePath: uploadedCertificatePath,
+                        nic: nic,
+                        location: location,
+                        address: address,
+                        country: country,
+                        type: type,
+                        rating: rating,
+                        availability: availability,
+                      );
+                      // save to database after validation
+                      try {
+                        var uri = Uri.parse(
+                          "${AppConfig.SERVER_URL}/api/users/register-guide",
                         );
-                        // save to database after validation
-                        try {
-                          var uri = Uri.parse(
-                            "${AppConfig.SERVER_URL}/api/users/register-guide",
-                          );
 
-                          var request = http.MultipartRequest("POST", uri);
+                        var request = http.MultipartRequest("POST", uri);
 
-                          // Add JSON fields
-                          guide.toMap().forEach((key, value) {
-                            if (value != null) {
-                              request.fields[key] = value.toString();
-                            }
-                          });
-
-                          // Add certificate file (web + mobile)
-                          if (uploadedCertificateBytes != null) {
-                            request.files.add(
-                              http.MultipartFile.fromBytes(
-                                "certificate",
-                                uploadedCertificateBytes!,
-                                filename: hint,
-                              ),
-                            );
-                          } else if (uploadedCertificatePath != null) {
-                            request.files.add(
-                              await http.MultipartFile.fromPath(
-                                "certificate",
-                                uploadedCertificatePath!.path,
-                              ),
-                            );
+                        // Add JSON fields
+                        guide.toMap().forEach((key, value) {
+                          if (value != null) {
+                            request.fields[key] = value.toString();
                           }
+                        });
+
+                        // Add certificate file (web + mobile)
+                        if (uploadedCertificateBytes != null) {
+                          request.files.add(
+                            http.MultipartFile.fromBytes(
+                              "certificate",
+                              uploadedCertificateBytes!,
+                              filename: hint,
+                            ),
+                          );
+                        } else if (uploadedCertificatePath != null) {
+                          request.files.add(
+                            await http.MultipartFile.fromPath(
+                              "certificate",
+                              uploadedCertificatePath!.path,
+                            ),
+                          );
+                        }
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("Connecting... "),
+                                CircularProgressIndicator.adaptive(),
+                              ],
+                            ),
+                            backgroundColor: const Color.fromARGB(
+                              180,
+                              76,
+                              175,
+                              79,
+                            ),
+                          ),
+                        );
+
+                        var response = await request.send();
+                        var resp = await http.Response.fromStream(response);
+                        final data = jsonDecode(resp.body);
+
+                        if (response.statusCode == 201) {
+                          print("Guide registered successfully");
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text("Connecting... "),
-                                  CircularProgressIndicator.adaptive(),
-                                ],
-                              ),
+                              content: Text(data['msg']),
                               backgroundColor: const Color.fromARGB(
                                 180,
                                 76,
@@ -541,49 +649,14 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                               ),
                             ),
                           );
+                          Navigator.pop(context, LoginSetup());
+                        } else {
+                          print("Error: ${data['msg']}");
 
-                          var response = await request.send();
-                          var resp = await http.Response.fromStream(response);
-                          final data = jsonDecode(resp.body);
-
-                          if (response.statusCode == 201) {
-                            print("Guide registered successfully");
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(data['msg']),
-                                backgroundColor: const Color.fromARGB(
-                                  180,
-                                  76,
-                                  175,
-                                  79,
-                                ),
-                              ),
-                            );
-                            Navigator.pop(context, LoginSetup());
-                          } else {
-                            print("Error: ${data['msg']}");
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  "Error: Already registered with this email. Please try a different email.",
-                                ),
-                                backgroundColor: const Color.fromARGB(
-                                  180,
-                                  244,
-                                  67,
-                                  54,
-                                ),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          print(e);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Error while connecting to server...',
+                                "Error: Already registered with this email. Please try a different email.",
                               ),
                               backgroundColor: const Color.fromARGB(
                                 180,
@@ -594,18 +667,85 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                             ),
                           );
                         }
+                      } catch (e) {
+                        print(e);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Error while connecting to server...',
+                            ),
+                            backgroundColor: const Color.fromARGB(
+                              180,
+                              244,
+                              67,
+                              54,
+                            ),
+                          ),
+                        );
                       }
-                    },
-                    child: Text(
-                      "Register",
-                      style: TextStyle(fontSize: 20.0, color: Colors.green),
+                    }
+                  },
+
+                  child: const Text(
+                    "Register",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+
+              const SizedBox(height: 15),
+
+              Center(
+                child: Text.rich(
+                  TextSpan(
+                    text: "By registering, you agree to Traamp's ",
+                    children: [
+                      TextSpan(
+                        text: "Terms & Conditions",
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 40),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration fieldStyle(String hint) {
+    return InputDecoration(
+      hintText: hint,
+
+      filled: true,
+      fillColor: Colors.white,
+
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.green),
       ),
     );
   }
