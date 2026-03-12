@@ -9,7 +9,7 @@ const __dirname = dirname(__filename);
 
 // Load service account JSON
 const serviceAccount = JSON.parse(
-  readFileSync(join(__dirname, "serviceAccountKey.json"), "utf8")
+  readFileSync(join(__dirname, "serviceAccountKey.json"), "utf8"),
 );
 
 admin.initializeApp({

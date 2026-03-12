@@ -31,6 +31,8 @@ class _DetailedGuidePackageState extends State<DetailedGuidePackage> {
           'packageId': widget.packageData['packageId'],
           'coverImage': widget.packageData['coverImage'],
           'images': widget.packageData['images'],
+          'uid': widget.packageData['uid'],
+          'packageTitle': widget.packageData['packageTitle'],
         }),
       );
       final data = jsonDecode(response.body);

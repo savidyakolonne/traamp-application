@@ -7,7 +7,10 @@ import {
   loginWithEmail,
   getUserData,
   updateGuideAvailability,
-  logoutUser
+  logoutUser,
+  updateTouristProfile,
+  updateGuideProfile,
+  updateGuideCertificate,
 } from "../controllers/userController.js";
 
 const userRouter = Router();
@@ -16,15 +19,21 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 userRouter.post("/register-tourist", registerTourist);
 
-userRouter.post(
-  "/register-guide",
+userRouter.post("/register-guide", upload.single("certificate"), registerGuide);
+
+userRouter.put(
+  "/update-guide-certificate",
   upload.single("certificate"),
-  registerGuide
+  updateGuideCertificate,
 );
 
 userRouter.post("/loginWithEmail", loginWithEmail);
 
 userRouter.post("/get-user-data", getUserData);
+
+userRouter.put("/update-tourist-profile", updateTouristProfile);
+
+userRouter.put("/update-guide-profile", updateGuideProfile);
 
 userRouter.put("/update-guide-availability", updateGuideAvailability);
 

@@ -33,7 +33,7 @@ migrate_working_dir/
 /build/
 /coverage/
 .env
-# pubspec.lock
+pubspec.lock
 
 # ADDED (missing Flutter generated files)
 .flutter-plugins
@@ -76,3 +76,9 @@ firebase-debug.log
 
 # Safety net (any nested node project)
 **/node_modules/
+
+# Next.js admin app
+traamp-admin/node_modules/
+traamp-admin/.next/
+traamp-admin/.env
+traamp-admin/config/serviceAccountKey.json

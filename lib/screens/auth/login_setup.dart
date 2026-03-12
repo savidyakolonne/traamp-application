@@ -19,6 +19,7 @@ class _LoginSetupState extends State<LoginSetup> {
   bool loading = false;
   bool _obscureState = true;
   late Map<String, dynamic> userData;
+  late String idToken;
 
   // function to hide and visible password
   Widget showAndHidePasswordIcon() {
@@ -45,7 +46,10 @@ class _LoginSetupState extends State<LoginSetup> {
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      final String? idToken = await userCredential.user!.getIdToken(true);
+      String? token = await userCredential.user!.getIdToken(true);
+      setState(() {
+        idToken = token!;
+      });
       final response = await http.post(
         Uri.parse("${AppConfig.SERVER_URL}/api/users/loginWithEmail"),
         headers: {"Content-Type": "application/json"},
@@ -89,7 +93,7 @@ class _LoginSetupState extends State<LoginSetup> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return MainTabView(true, idToken!, userData);
+                return MainTabView(true, idToken, userData);
               },
             ),
           );
@@ -97,7 +101,7 @@ class _LoginSetupState extends State<LoginSetup> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return MainTabView(false, idToken!, userData);
+                return MainTabView(false, idToken, userData);
               },
             ),
           );
