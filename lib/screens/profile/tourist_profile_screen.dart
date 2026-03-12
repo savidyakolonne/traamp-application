@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:traamp_frontend/app_config.dart';
 import '../tourist/tourist_edit_profile.dart';
 import '../tourist/saved_guides_screen.dart';
+import '../../services/saved_guides_service.dart';
 
 // ignore: must_be_immutable
 class TouristProfileScreen extends StatefulWidget {
@@ -20,6 +21,8 @@ class TouristProfileScreen extends StatefulWidget {
 class _TouristProfileScreenState extends State<TouristProfileScreen> {
   bool _isLoading = false;
   String profilePicture = "";
+  int _savedGuidesCount = 0;
+  final SavedGuidesService _savedGuidesService = SavedGuidesService();
 
   // get user data from DB
   Future<void> _getUserData() async {
@@ -42,6 +45,9 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
             }
           });
           print(data['msg']);
+          
+          // Fetch saved guides count after user data is loaded
+          await _loadSavedGuidesCount();
         } else if (response.statusCode == 401) {
           print(data['msg']);
         }
@@ -50,6 +56,23 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
       }
     } catch (e) {
       print(e.toString());
+    }
+  }
+
+  Future<void> _loadSavedGuidesCount() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final count = await _savedGuidesService.getSavedGuidesCount(
+          touristUid: user.uid,
+        );
+        
+        setState(() {
+          _savedGuidesCount = count;
+        });
+      }
+    } catch (e) {
+      print('Error loading saved guides count: $e');
     }
   }
 
@@ -185,13 +208,15 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                       // Saved Guides Button
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const SavedGuidesScreen(),
                               ),
                             );
+                            // Refresh count when returning from SavedGuidesScreen
+                            _loadSavedGuidesCount();
                           },
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.green,
@@ -205,9 +230,11 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                             Icons.favorite,
                             size: 18,
                           ),
-                          label: const Text(
-                            'Saved',
-                            style: TextStyle(
+                          label: Text(
+                            _savedGuidesCount > 0
+                                ? 'Saved ($_savedGuidesCount)'
+                                : 'Saved',
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                             ),
@@ -236,13 +263,15 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                             ),
                           ),
                           TextButton(
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const SavedGuidesScreen(),
                                 ),
                               );
+                              // Refresh count when returning from SavedGuidesScreen
+                              _loadSavedGuidesCount();
                             },
                             child: const Text(
                               'See All',
