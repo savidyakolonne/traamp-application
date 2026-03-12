@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../app_config.dart';
+import '../../services/saved_guides_service.dart';
 
 class GuidePublicViewScreen extends StatefulWidget {
   final String guideId;
@@ -17,11 +19,104 @@ class GuidePublicViewScreen extends StatefulWidget {
 class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   bool _isLoading = false;
   Map<String, dynamic>? _profileData;
+  
+  final SavedGuidesService _savedGuidesService = SavedGuidesService();
+  String? _touristUid;
+  bool _isGuideSaved = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeUser();
     _loadProfile();
+    _checkIfGuideSaved();
+  }
+
+  void _initializeUser() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _touristUid = user.uid;
+    }
+  }
+
+  Future<void> _checkIfGuideSaved() async {
+    if (_touristUid == null) return;
+
+    try {
+      final isSaved = await _savedGuidesService.isGuideSaved(
+        touristUid: _touristUid!,
+        guideUid: widget.guideId,
+      );
+      
+      setState(() {
+        _isGuideSaved = isSaved;
+      });
+    } catch (e) {
+      print('Error checking if guide is saved: $e');
+    }
+  }
+
+  Future<void> _toggleSaveGuide() async {
+    if (_touristUid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to save guides'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      final success = await _savedGuidesService.toggleSaveGuide(
+        touristUid: _touristUid!,
+        guideUid: widget.guideId,
+      );
+
+      if (success) {
+        setState(() {
+          _isGuideSaved = !_isGuideSaved;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _isGuideSaved
+                  ? 'Guide added to favorites'
+                  : 'Guide removed from favorites',
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to update favorites'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error toggling save guide: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An error occurred'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isSaving = false;
+      });
+    }
   }
 
   Future<void> _loadProfile() async {
@@ -66,6 +161,13 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
+          IconButton(
+            icon: Icon(
+              _isGuideSaved ? Icons.favorite : Icons.favorite_border,
+              color: _isGuideSaved ? Colors.red : Colors.black,
+            ),
+            onPressed: _isSaving ? null : _toggleSaveGuide,
+          ),
           IconButton(
             icon: const Icon(Icons.share, color: Colors.black),
             onPressed: () {
