@@ -25,8 +25,11 @@ app.use("/api/guidePackage", packageRouter);
 app.use("/api/gallery", galleryRouter);
 app.use("/api/news", newsRoutes);
 app.use("/api/notification", notificationRouter);
+
 //guides
 app.use("/api/guides", guideRoutes);
+
+//admin dashboard
 app.use("/api/admin", adminRoutes);
 
 export default app;

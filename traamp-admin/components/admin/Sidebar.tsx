@@ -6,10 +6,10 @@ import { usePathname } from "next/navigation";
 type NavItem = { href: string; icon: string; label: string; badge?: string };
 
 const items: NavItem[] = [
-  { href: "/dashboard", icon: "dashboard", label: "Dashboard" },
-  { href: "/guides", icon: "map", label: "Guides Management" },
-  { href: "/tourists", icon: "people", label: "Tourist Management" },
-  { href: "/verifications", icon: "verified_user", label: "Verification Queue", badge: "12" },
+  { href: "/admin/dashboard", icon: "dashboard", label: "Dashboard" },
+  { href: "/admin/guides", icon: "map", label: "Guides Management" },
+  { href: "/admin/tourists", icon: "people", label: "Tourist Management" },
+  { href: "/admin/verifications", icon: "verified_user", label: "Verification Queue", badge: "12" },
 ];
 
 export default function Sidebar() {
