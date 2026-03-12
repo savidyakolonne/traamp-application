@@ -1,10 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../../app_config.dart';
 
 // ignore: must_be_immutable
 class DetailedPackageViewTourist extends StatefulWidget {
   // map of package details retrieving from backend
   Map<String, dynamic> packageData = {};
-  DetailedPackageViewTourist(this.packageData, {super.key});
+  String uid;
+  DetailedPackageViewTourist(this.packageData, this.uid, {super.key});
 
   @override
   State<DetailedPackageViewTourist> createState() =>
@@ -19,6 +23,93 @@ class _DetailedPackageViewTouristState
   late List<dynamic> packageInclude = widget.packageData['packageInclude'];
   late List<dynamic> packageExclude = widget.packageData['packageExclude'];
   late List<dynamic> images = widget.packageData['images'];
+
+  bool isFavorite = false;
+  String favoriteId = "";
+
+  Future<void> setToFavorite() async {
+    try {
+      final response = await http.post(
+        Uri.parse("${AppConfig.SERVER_URL}/api/favorite/set-favorite"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "uid": widget.uid,
+          "packageId": widget.packageData['packageId'],
+        }),
+      );
+
+      final data = await jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print(data['msg']);
+      } else {
+        print(data['msg']);
+      }
+      getAllFavorites();
+    } catch (error) {
+      print(error.toString());
+    }
+  }
+
+  Future<void> getAllFavorites() async {
+    try {
+      final response = await http.post(
+        Uri.parse("${AppConfig.SERVER_URL}/api/favorite/get-favorites"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"uid": widget.uid}),
+      );
+
+      final data = await jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        print(data['msg']);
+        List<dynamic> favoriteList = data['favorites'];
+        print("favorite List: ${favoriteList}");
+        if (favoriteList.isNotEmpty) {
+          for (int i = 0; i < favoriteList.length; i++) {
+            if (favoriteList[i]['packageId'].toString() ==
+                widget.packageData['packageId'].toString()) {
+              setState(() {
+                isFavorite = true;
+                favoriteId = favoriteList[i]['favoriteId'].toString();
+                print("isFavorite: ${isFavorite}");
+              });
+            }
+          }
+        }
+      } else {
+        print(data['msg']);
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<void> clearFavorite() async {
+    try {
+      final response = await http.delete(
+        Uri.parse("${AppConfig.SERVER_URL}/api/favorite/clear-favorite"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"favoriteId": favoriteId}),
+      );
+
+      final data = await jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        print(data['msg']);
+      } else {
+        print(data['msg']);
+      }
+      getAllFavorites();
+    } catch (error) {
+      print(error.toString());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getAllFavorites();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,20 +179,52 @@ class _DetailedPackageViewTouristState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // category
-                          Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 229, 246, 211),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              widget.packageData['category'],
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 125, 212, 33),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // category
+                              Container(
+                                padding: EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(
+                                    255,
+                                    229,
+                                    246,
+                                    211,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  widget.packageData['category'],
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 125, 212, 33),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
                               ),
-                            ),
+
+                              // favorite button
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    if (isFavorite) {
+                                      setState(() {
+                                        clearFavorite();
+                                        isFavorite = false;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        setToFavorite();
+                                      });
+                                    }
+                                  });
+                                },
+                                icon: isFavorite
+                                    ? Icon(Icons.favorite, color: Colors.red)
+                                    : Icon(Icons.favorite_outline),
+                              ),
+                            ],
                           ),
                           // title
                           Text(
