@@ -399,7 +399,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   }
 
   final ScrollController _scrollController = ScrollController();
-  Color _appBarColor = Colors.white;
 
   @override
   void initState() {
@@ -407,10 +406,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
 
     _scrollController.addListener(() {
       if (_scrollController.offset > 10) {
-        setState(() => _appBarColor = const Color.fromARGB(241, 177, 177, 177));
-      } else {
-        setState(() => _appBarColor = Colors.white);
-      }
+      } else {}
     });
   }
 
