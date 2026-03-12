@@ -20,15 +20,15 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
   void initState() {
     super.initState();
     _initializeUser();
-    _loadSavedGuides();
   }
 
   void _initializeUser() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      _touristUid = user.uid;
-    }
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    _touristUid = user.uid;
+    _loadSavedGuides(); // load guides after UID is ready
   }
+}
 
   Future<void> _loadSavedGuides() async {
     if (_touristUid == null) return;
@@ -47,112 +47,16 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
       });
     } catch (e) {
       print('Error loading saved guides: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to load saved guides'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to load saved guides'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  Future<void> _showRemoveConfirmationDialog(
-    String guideUid,
-    String guideName,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: const Text('Remove Guide'),
-          content: Text(
-            'Remove $guideName from your saved guides?',
-            style: const TextStyle(fontSize: 15),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text(
-                'Remove',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed == true) {
-      await _removeGuide(guideUid);
-    }
-  }
-
-  Future<void> _removeGuide(String guideUid) async {
-    if (_touristUid == null) return;
-
-    try {
-      final success = await _savedGuidesService.unsaveGuide(
-        touristUid: _touristUid!,
-        guideUid: guideUid,
-      );
-
-      if (success) {
-        // Remove from local list immediately for better UX
-        setState(() {
-          _savedGuides.removeWhere((guide) => guide['uid'] == guideUid);
-        });
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Guide removed from saved list'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to remove guide'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      print('Error removing guide: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('An error occurred'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
   }
 
@@ -202,7 +106,9 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -223,20 +129,47 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
           const SizedBox(height: 8),
           Text(
             'Start exploring and save your favorite guides',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
             ),
           ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () {
+              // For now just go back to previous screen
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 32,
+                vertical: 14,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Explore Guides',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildGuideCard(Map<String, dynamic> guide) {
     final String firstName = guide['firstName'] ?? 'Unknown';
     final String lastName = guide['lastName'] ?? '';
-    final String fullName = '$firstName $lastName';
     final double rating = (guide['rating'] ?? 0.0).toDouble();
     final String guideUid = guide['uid'] ?? '';
     final String? profilePicture = guide['profilePicture'];
@@ -287,8 +220,7 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
                 ),
                 child: CircleAvatar(
                   radius: 30,
-                  backgroundImage: profilePicture != null &&
-                          profilePicture.isNotEmpty
+                  backgroundImage: profilePicture != null && profilePicture.isNotEmpty
                       ? NetworkImage(profilePicture)
                       : null,
                   backgroundColor: Colors.grey[200],
@@ -308,7 +240,7 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      fullName,
+                      '$firstName $lastName',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -335,16 +267,10 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
                   ],
                 ),
               ),
-              // Favorite Icon Button
-              IconButton(
-                icon: const Icon(
-                  Icons.favorite,
-                  color: Colors.red,
-                ),
-                onPressed: () {
-                  _showRemoveConfirmationDialog(guideUid, fullName);
-                },
-                tooltip: 'Remove from favorites',
+              // Arrow Icon
+              Icon(
+                Icons.chevron_right,
+                color: Colors.grey[400],
               ),
             ],
           ),
