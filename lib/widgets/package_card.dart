@@ -5,7 +5,8 @@ import '../screens/tourist/deatailed_package_view_tourist.dart';
 // ignore: must_be_immutable
 class PackageCard extends StatefulWidget {
   Map<String, dynamic> packageData = {};
-  PackageCard(this.packageData, {super.key});
+  String uid;
+  PackageCard(this.packageData, this.uid, {super.key});
 
   @override
   State<PackageCard> createState() => _PackageCardState();
@@ -164,7 +165,7 @@ class _PackageCardState extends State<PackageCard> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) {
-              return DetailedPackageViewTourist(widget.packageData);
+              return DetailedPackageViewTourist(widget.packageData, widget.uid);
             },
           ),
         );
