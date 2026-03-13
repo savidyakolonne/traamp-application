@@ -1,7 +1,7 @@
 import express from 'express' ; 
 import { getAllGuides, getGuideById } from '../controllers/guideController.js';
 import {getGuideProfile,updateGuideProfile} from "../controllers/guideController.js";
-import firebase from "../config/firebase.js";
+import admin from "../config/firebaseAdmin.js";
 
 const router = express.Router();
 
@@ -19,7 +19,7 @@ const checkGuideRole = (req, res, next) => {
   next();
 };
 
-router.use(firebase.firebaseAuth);
+router.use(admin.firebaseAuth);
 router.use(checkGuideRole);
 
 router.get("/profile", getGuideProfile);

@@ -1,17 +1,17 @@
 import express from "express";
-import firebase from "../config/firebase.js";
+import admin from "../config/firebaseAdmin.js";
 import { getTouristProfile } from "../controllers/tourist.controller.js";
 import { getGuideProfile } from "../controllers/guideController.js";
 
 const router = express.Router();
 
 // GET /api/profile - Get user profile (protected)
-router.get("/", firebase.firebaseAuth, async (req, res) => {
+router.get("/", admin.firebaseAuth, async (req, res) => { 
   try {
     const uid = req.user.uid;
 
     // Fetch user from Firestore to check type
-    const userDoc = await firebase.db.collection("users").doc(uid).get();
+    const userDoc = await admin.db.collection("users").doc(uid).get();
 
     if (!userDoc.exists) {
       return res.status(404).json({

@@ -1,10 +1,11 @@
-import firebase from "../config/firebase.js";
+import admin from "../config/firebaseAdmin.js";
+const db = admin.db;
 
 export const getTouristProfile = async (req, res) => {
   try {
     const uid = req.user.uid;
 
-    const docRef = firebase.db.collection("users").doc(uid);
+    const docRef = db.collection("users").doc(uid);
     const doc = await docRef.get();
 
     if (!doc.exists) {
