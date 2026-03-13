@@ -2,61 +2,53 @@ import admin from "../config/firebaseAdmin.js";
 
 const db = admin.db;
 
-// Save a guide to favorites
+// POST /api/saved-guides
 export const saveGuide = async (req, res) => {
   try {
-    const { touristUid, guideUid } = req.body;
+    const touristUid = req.user.uid;          // from auth, not body
+    const { guideUid } = req.body;
 
-    if (!touristUid || !guideUid) {
-      return res.status(400).json({ 
+    if (!guideUid) {
+      return res.status(400).json({
         success: false,
-        error: "touristUid and guideUid are required" 
+        error: "guideUid is required"
       });
     }
 
-    // Verify the guide exists
+    // Verify guide exists
     const guideDoc = await db.collection("users").doc(guideUid).get();
     if (!guideDoc.exists || guideDoc.data().type !== "guide") {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: "Guide not found" 
+        error: "Guide not found"
       });
     }
 
-    // Verify the tourist exists
-    const touristDoc = await db.collection("users").doc(touristUid).get();
-    if (!touristDoc.exists || touristDoc.data().type !== "tourist") {
-      return res.status(404).json({ 
-        success: false,
-        error: "Tourist not found" 
-      });
-    }
-
-    // Check if already saved
-    const existingDoc = await db.collection("saved_guides")
+    // Check for duplicate
+    const existing = await db.collection("saved_guides")
       .where("touristUid", "==", touristUid)
       .where("guideUid", "==", guideUid)
       .get();
 
-    if (!existingDoc.empty) {
-      return res.status(409).json({ 
+    if (!existing.empty) {
+      return res.status(409).json({
         success: false,
-        error: "Guide already saved" 
+        error: "Guide already saved"
       });
     }
 
-    // Save the guide
-    const savedGuideRef = await db.collection("saved_guides").add({
+    // Save it
+    const savedRef = await db.collection("saved_guides").add({
       touristUid,
       guideUid,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    res.status(201).json({ 
+    res.status(201).json({
       success: true,
       message: "Guide saved successfully",
       data: {
-        id: savedGuideRef.id,
+        id: savedRef.id,
         touristUid,
         guideUid,
       }
@@ -64,121 +56,77 @@ export const saveGuide = async (req, res) => {
 
   } catch (err) {
     console.error("Error saving guide:", err);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: "Failed to save guide" 
+      error: "Failed to save guide"
     });
   }
 };
 
-// Remove a saved guide
+// DELETE /api/saved-guides/:guideId
 export const removeSavedGuide = async (req, res) => {
   try {
-    const { touristUid, guideUid } = req.body;
+    const touristUid = req.user.uid;          // from auth, not body
+    const { guideId } = req.params;
 
-    if (!touristUid || !guideUid) {
-      return res.status(400).json({ 
+    if (!guideId) {
+      return res.status(400).json({
         success: false,
-        error: "touristUid and guideUid are required" 
+        error: "guideId is required"
       });
     }
 
-    // Find the saved guide document
     const snapshot = await db.collection("saved_guides")
       .where("touristUid", "==", touristUid)
-      .where("guideUid", "==", guideUid)
+      .where("guideUid", "==", guideId)
       .get();
 
     if (snapshot.empty) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: "Saved guide not found" 
+        error: "Saved guide not found"
       });
     }
 
-    // Delete the document
     const batch = db.batch();
-    snapshot.docs.forEach(doc => {
-      batch.delete(doc.ref);
-    });
+    snapshot.docs.forEach(doc => batch.delete(doc.ref));
     await batch.commit();
 
-    res.json({ 
+    res.json({
       success: true,
-      message: "Saved guide removed successfully" 
+      message: "Saved guide removed successfully"
     });
 
   } catch (err) {
     console.error("Error removing saved guide:", err);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: "Failed to remove saved guide" 
+      error: "Failed to remove saved guide"
     });
   }
 };
 
-// Check if a guide is saved
-export const checkIfGuideSaved = async (req, res) => {
-  try {
-    const { touristUid, guideUid } = req.query;
-
-    if (!touristUid || !guideUid) {
-      return res.status(400).json({ 
-        success: false,
-        error: "touristUid and guideUid are required" 
-      });
-    }
-
-    const snapshot = await db.collection("saved_guides")
-      .where("touristUid", "==", touristUid)
-      .where("guideUid", "==", guideUid)
-      .get();
-
-    res.json({ 
-      success: true,
-      isSaved: !snapshot.empty 
-    });
-
-  } catch (err) {
-    console.error("Error checking saved guide:", err);
-    res.status(500).json({ 
-      success: false,
-      error: "Failed to check saved guide" 
-    });
-  }
-};
-
-// Get all saved guides for a tourist
+// GET /api/saved-guides
 export const getSavedGuides = async (req, res) => {
   try {
-    const { touristUid } = req.params;
+    const touristUid = req.user.uid;          // from auth, not params
 
-    if (!touristUid) {
-      return res.status(400).json({ 
-        success: false,
-        error: "touristUid is required" 
-      });
-    }
-
-    // Get all saved guide references
-    const savedGuidesSnapshot = await db.collection("saved_guides")
+    const snapshot = await db.collection("saved_guides")
       .where("touristUid", "==", touristUid)
       .orderBy("createdAt", "desc")
       .get();
 
-    if (savedGuidesSnapshot.empty) {
-      return res.json({ 
+    if (snapshot.empty) {
+      return res.json({
         success: true,
-        data: [] 
+        data: []
       });
     }
 
     // Fetch full guide details
-    const guideUids = savedGuidesSnapshot.docs.map(doc => doc.data().guideUid);
     const guides = [];
-
-    for (const guideUid of guideUids) {
-      const guideDoc = await db.collection("users").doc(guideUid).get();
+    for (const doc of snapshot.docs) {
+      const guideDoc = await db.collection("users").doc(doc.data().guideUid).get();
       if (guideDoc.exists && guideDoc.data().type === "guide") {
         guides.push({
           uid: guideDoc.id,
@@ -187,46 +135,16 @@ export const getSavedGuides = async (req, res) => {
       }
     }
 
-    res.json({ 
+    res.json({
       success: true,
-      data: guides 
+      data: guides
     });
 
   } catch (err) {
     console.error("Error fetching saved guides:", err);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: "Failed to fetch saved guides" 
-    });
-  }
-};
-
-// Get saved guides count for a tourist
-export const getSavedGuidesCount = async (req, res) => {
-  try {
-    const { touristUid } = req.params;
-
-    if (!touristUid) {
-      return res.status(400).json({ 
-        success: false,
-        error: "touristUid is required" 
-      });
-    }
-
-    const snapshot = await db.collection("saved_guides")
-      .where("touristUid", "==", touristUid)
-      .get();
-
-    res.json({ 
-      success: true,
-      count: snapshot.size 
-    });
-
-  } catch (err) {
-    console.error("Error fetching saved guides count:", err);
-    res.status(500).json({ 
-      success: false,
-      error: "Failed to fetch saved guides count" 
+      error: "Failed to fetch saved guides"
     });
   }
 };
