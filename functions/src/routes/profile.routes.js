@@ -1,10 +1,10 @@
 import express from "express";
-import mockAuthMiddleware from "../middleware/mockAuth.middleware.js";
+import firebase from "../config/firebase.js";
 
 const router = express.Router();
 
 // GET /api/profile - Get user profile (protected)
-router.get("/", mockAuthMiddleware, (req, res) => {
+router.get("/", firebase.firebaseAuth, (req, res) => {
   try {
     // Mock profile data based on role
     const mockProfiles = {

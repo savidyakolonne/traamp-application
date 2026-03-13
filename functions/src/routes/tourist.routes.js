@@ -1,5 +1,5 @@
 import express from "express";
-import mockAuthMiddleware from "../middleware/mockAuth.middleware.js";
+import firebase from "../config/firebase.js";
 import {
   getTouristProfile,
   updateTouristProfile
@@ -18,7 +18,7 @@ const checkTouristRole = (req, res, next) => {
   next();
 };
 
-router.use(mockAuthMiddleware);
+router.use(firebase.firebaseAuth);
 router.use(checkTouristRole);
 
 router.get('/profile', getTouristProfile);
