@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 import '../../app_config.dart';
+import '../../widgets/suggestion_card.dart';
 import '../emergency_services/emergency_services.dart';
 import '../places/places_list_screen.dart';
 import '../activities/activities_list_screen.dart';
 import '../../components/weather/weather_screen.dart';
-import 'deatailed_package_view_tourist.dart';
+import 'favorite_screen.dart';
 import 'package_list.dart';
 import 'package:traamp_frontend/screens/tourist/tourist_find_guide.dart';
 import 'package:traamp_frontend/screens/assistant/assistant_home.dart';
@@ -81,136 +82,6 @@ class _TouristDashboardState extends State<TouristDashboard> {
       print(e.toString());
       print("error while connecting to server when retrieving packages");
     }
-  }
-
-  Widget suggestionScrollableView(
-    String url,
-    String title,
-    String location,
-    String price,
-    Map<String, dynamic> packageData,
-  ) {
-    return Container(
-      width: 250,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(47, 0, 0, 0),
-            spreadRadius: 1,
-            blurRadius: 5,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // image
-          Container(
-            width: double.infinity,
-            height: 150,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              image: DecorationImage(
-                fit: BoxFit.fill,
-                image: NetworkImage(url),
-              ),
-            ),
-          ),
-          // below image
-          Container(
-            padding: EdgeInsets.all(8),
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // package title
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 30, 41, 59),
-                  ),
-                ),
-                // location
-                Row(
-                  spacing: 8,
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      size: 18,
-                      color: const Color.fromARGB(255, 100, 116, 139),
-                    ),
-                    Text(
-                      location,
-                      style: TextStyle(
-                        color: const Color.fromARGB(255, 100, 116, 139),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                // price
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          "LKR $price",
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          "/pp",
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 100, 116, 139),
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return DetailedPackageViewTourist(packageData);
-                            },
-                          ),
-                        );
-                      },
-                      icon: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 16,
-                        ),
-                        child: Text(
-                          "View Now",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget detailIcons(
@@ -300,7 +171,15 @@ class _TouristDashboardState extends State<TouristDashboard> {
         actions: [
           IconButton(
             padding: EdgeInsets.only(right: 15),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return FavoriteScreen(widget.userData['uid'].toString());
+                  },
+                ),
+              );
+            },
             icon: CircleAvatar(
               backgroundColor: const Color.fromARGB(255, 241, 245, 249),
               child: Icon(
@@ -509,7 +388,10 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) {
-                                  return PackageList(packages);
+                                  return PackageList(
+                                    packages,
+                                    widget.userData['uid'].toString(),
+                                  );
                                 },
                               ),
                             );
@@ -539,12 +421,13 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               for (int i = 0; i < packages.length; i++)
-                                suggestionScrollableView(
+                                SuggestionCard(
                                   packages[i]['coverImage'],
                                   packages[i]['packageTitle'],
                                   packages[i]['location'],
                                   '${packages[i]['price']}',
                                   packages[i],
+                                  widget.userData['uid'].toString(),
                                 ),
                             ],
                           ),

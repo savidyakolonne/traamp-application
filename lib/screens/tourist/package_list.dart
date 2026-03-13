@@ -4,7 +4,8 @@ import 'package:traamp_frontend/widgets/package_card.dart';
 // ignore: must_be_immutable
 class PackageList extends StatefulWidget {
   List<dynamic> packages = [];
-  PackageList(this.packages, {super.key});
+  String uid;
+  PackageList(this.packages, this.uid, {super.key});
 
   @override
   State<PackageList> createState() => _PackageListState();
@@ -47,7 +48,7 @@ class _PackageListState extends State<PackageList> {
               )
             else
               for (int i = 0; i < widget.packages.length; i++)
-                PackageCard(widget.packages[i]),
+                PackageCard(widget.packages[i], widget.uid),
           ],
         ),
       ),
