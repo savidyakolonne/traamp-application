@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 class SettingsPrivacy extends StatelessWidget {
   const SettingsPrivacy({super.key});
 
+  void deleteProfile() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,6 +39,7 @@ class SettingsPrivacy extends StatelessWidget {
           ),
 
           child: Column(
+            spacing: 10,
             children: [
               /// Icon
               Container(
@@ -88,41 +91,6 @@ class SettingsPrivacy extends StatelessWidget {
                 ),
               ),
 
-              Column(
-                children: [
-                  /// Delete Profile Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.red),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      label: const Text(
-                        "Delete Profile",
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      onPressed: () {
-                        deleteProfile(context);
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  const Divider(height: 20),
-                ],
-              ),
-
-              const Divider(height: 30),
-
               /// OK Button
               SizedBox(
                 width: double.infinity,
@@ -154,6 +122,31 @@ class SettingsPrivacy extends StatelessWidget {
                   ),
                 ),
               ),
+
+              /// Delete Profile Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  label: const Text(
+                    "Delete Profile",
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () {
+                    deleteProfile();
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -161,5 +154,3 @@ class SettingsPrivacy extends StatelessWidget {
     );
   }
 }
-
-void deleteProfile(BuildContext context) {}

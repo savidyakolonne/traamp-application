@@ -63,15 +63,15 @@ class _MapScreenState extends State<MapScreen> {
       final pos = await _getLocation();
       if (!mounted) return;
 
-      setState(() {
-        _currentLocation = LatLng(pos.latitude, pos.longitude);
-      });
+      // setState(() {
+      //   _currentLocation = LatLng(pos.latitude, pos.longitude);
+      // });
 
       // for testing purpose tangalle lat and lang points ----------------------------------------------------------
 
-      // setState(() {
-      //   _currentLocation = const LatLng(6.0243, 80.7891);
-      // });
+      setState(() {
+        _currentLocation = const LatLng(6.0243, 80.7891);
+      });
 
       //------------------------------------------------------------------------------------------------------------------
 
@@ -370,7 +370,9 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator.adaptive()),
+      );
     }
 
     if (_currentLocation == null) {
