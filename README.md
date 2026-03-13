@@ -104,7 +104,36 @@ TRAAMP-MOBILE-FRONTEND/
 │   └── package-lock.json
 |
 |──traamp-admin/
-|      |──
+|      |──.next # generate when run the npm run dev
+|      |──app/
+|      |   |──admin/
+|      |   |   |──dashboard/
+|      |   |   |──guides/
+|      |   |   |──tourists/
+|      |   |   |──verifications
+|      |   |   |──layout.tsx
+|      |   |──favicon.ico
+|      |   |──global.css
+|      |   |──layout.tsx
+|      |   |──page.tsx
+|      |──components/
+|      |   |──admin/
+|      |        |──sidebar.tsx
+|      |        |──topbar.tsx
+|      |── config/
+|      |     |──serviceAccount.json
+|      |── lib/
+|      |     |──firebaseAdmin.ts
+|      |── public/
+|      |── nodemodules # generate, wehn run the npm intall
+|      |── .gitignore
+|      |── eslint.config.mjs
+|      |──package-lock.json
+|      |──package.json
+|      |──postcss.config.mjs
+|      |──next.config.ts
+|      |──next-env.d.ts
+|      |──ts.config.json
 |
 |── .env
 ├── assets/                   # Images, icons, and static assets
