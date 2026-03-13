@@ -49,13 +49,12 @@ export const getGuideById = async (req, res) => {
   }
 };
 
-// GET guide profile
+// GET guide profile (authenticated)
 export const getGuideProfile = async (req, res) => {
   try {
+    const uid = req.user.uid;
 
-    const guideId = req.user.uid;
-
-    const doc = await db.collection("users").doc(guideId).get();
+    const doc = await db.collection("users").doc(uid).get();
 
     if (!doc.exists) {
       return res.status(404).json({
@@ -68,7 +67,7 @@ export const getGuideProfile = async (req, res) => {
       success: true,
       data: {
         uid: doc.id,
-        ...doc.data()
+        ...doc.data()  // ✅ return full profile for authenticated user
       }
     });
 
@@ -81,17 +80,32 @@ export const getGuideProfile = async (req, res) => {
   }
 };
 
-// UPDATE guide profile
+// UPDATE guide profile (authenticated)
 export const updateGuideProfile = async (req, res) => {
   try {
+    const uid = req.user.uid;
 
-    const guideId = req.user.uid;
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields provided to update"
+      });
+    }
 
-    await db.collection("users").doc(guideId).update(req.body);
+    await db.collection("users").doc(uid).update({
+      ...req.body,
+      updatedAt: new Date().toISOString()
+    });
+
+    const doc = await db.collection("users").doc(uid).get();
 
     res.json({
       success: true,
-      message: "Guide profile updated successfully"
+      message: "Guide profile updated successfully",
+      data: {
+        uid: doc.id,
+        ...doc.data()
+      }
     });
 
   } catch (error) {

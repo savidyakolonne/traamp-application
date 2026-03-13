@@ -5,8 +5,7 @@ import admin from "../config/firebaseAdmin.js";
 
 const router = express.Router();
 
-router.get("/", getAllGuides) ; 
-router.get("/:id", getGuideById) ; 
+router.get("/", getAllGuides) ;  
 
 // GUIDE ROUTES
 const checkGuideRole = (req, res, next) => {
@@ -24,5 +23,6 @@ router.use(checkGuideRole);
 
 router.get("/profile", getGuideProfile);
 router.put("/profile", updateGuideProfile);
+router.get("/:id", getGuideById); 
 
 export default router ; 
