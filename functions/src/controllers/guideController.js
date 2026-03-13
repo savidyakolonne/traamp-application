@@ -38,14 +38,26 @@ export const getGuideById = async (req, res) => {
     const doc = await db.collection("users").doc(req.params.uid).get();
 
     if (!doc.exists || doc.data().type !== "guide") {
-      return res.status(404).json({ error: "Guide not found" });
+      return res.status(404).json({ success: false, message: "Guide not found" });
     }
 
-    res.json({ uid: doc.id, ...doc.data() });
+    const data = doc.data();
+    res.json({
+      success: true,
+      data: {
+        uid: doc.id,
+        name: data.name || "",
+        languages: data.languages || [],
+        location: data.location || "",
+        rating: data.rating || 0,
+        bio: data.bio || "",
+        profileImage: data.profileImage || "",
+      } 
+    });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch guide" });
+    res.status(500).json({ success: false, message: "Failed to fetch guide" });
   }
 };
 
