@@ -30,7 +30,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   void initState() {
     super.initState();
     _initializeUser();
-    _loadProfile();         // ✅ fetch from API in initState
+    _loadProfile();
     _checkIfGuideSaved();
   }
 
@@ -41,7 +41,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     }
   }
 
-  // ✅ fetch guide using GuideService
   Future<void> _loadProfile() async {
     setState(() {
       _isLoading = true;
@@ -139,16 +138,20 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     }
   }
 
+  // ✅ safe helper to get first letter of name
+  String _getInitial() {
+    final firstName = _guide?.firstName ?? '';
+    return firstName.isNotEmpty ? firstName.substring(0, 1) : '?';
+  }
+
   @override
   Widget build(BuildContext context) {
-    // ✅ loading state
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator(color: Colors.green)),
       );
     }
 
-    // ✅ error state
     if (_errorMessage != null) {
       return Scaffold(
         appBar: AppBar(
@@ -178,7 +181,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
       );
     }
 
-    // ✅ loaded state - use _guide fields
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -213,7 +215,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ✅ real profile picture from _guide
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -229,7 +230,8 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                         child: _guide?.profilePicture == null ||
                                 _guide!.profilePicture!.isEmpty
                             ? Text(
-                                _guide?.firstName.substring(0, 1) ?? '?',
+                                // ✅ crash fix — safe initial letter
+                                _getInitial(),
                                 style: const TextStyle(
                                     fontSize: 28, fontWeight: FontWeight.bold),
                               )
@@ -237,7 +239,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    // ✅ real name and rating from _guide
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,7 +257,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                                   color: Colors.amber, size: 16),
                               const SizedBox(width: 4),
                               Text(
-                                // ✅ real rating from _guide
                                 _guide?.rating.toStringAsFixed(1) ?? '0.0',
                                 style: const TextStyle(
                                   fontSize: 14,
@@ -265,7 +265,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                               ),
                               const SizedBox(width: 16),
                               Text(
-                                // ✅ real location from _guide
                                 _guide?.location ?? '',
                                 style: const TextStyle(
                                   fontSize: 14,
@@ -292,7 +291,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                             fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     Text(
-                      // ✅ real bio - no hardcoded fallback text
                       _guide?.bio ?? 'No bio available.',
                       style: const TextStyle(
                           fontSize: 14, color: Colors.black87, height: 1.4),
@@ -342,7 +340,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
               ),
               const SizedBox(height: 24),
 
-              // ✅ Languages from real data
+              // Languages
               if (_guide?.languages != null && _guide!.languages!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -374,7 +372,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 ),
               const SizedBox(height: 16),
 
-              // Skills Section - kept as static for now
+              // Skills Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
@@ -409,7 +407,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Tour Packages - kept as static for now
+              // Tour Packages
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
@@ -433,7 +431,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Recent Tours - kept as static for now
+              // Recent Tours
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
@@ -482,7 +480,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Reviews - kept as static for now
+              // Reviews
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
@@ -565,11 +563,9 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                   Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
                   const SizedBox(width: 4),
                   Text(duration,
-                      style:
-                          TextStyle(fontSize: 13, color: Colors.grey[600])),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600])),
                   const SizedBox(width: 16),
-                  Icon(Icons.attach_money,
-                      size: 14, color: Colors.green[700]),
+                  Icon(Icons.attach_money, size: 14, color: Colors.green[700]),
                   Text(price,
                       style: TextStyle(
                           fontSize: 14,
