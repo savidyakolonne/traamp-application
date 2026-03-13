@@ -80,7 +80,7 @@ export const updateTouristProfile = async (req, res) => {
     if (bio !== undefined) updateData.bio = bio;
     if (preferences !== undefined) updateData.preferences = preferences;
 
-    const docRef = firebase.db.collection("users").doc(uid);
+    const docRef = db.collection("users").doc(uid);
     await docRef.set(updateData, { merge: true });
 
     const doc = await docRef.get();
@@ -103,10 +103,6 @@ export const updateTouristProfile = async (req, res) => {
 
   } catch (error) {
     console.error("Update tourist profile error:", error);
-    res.status(500).json({
-      success: false,
-      error: "Internal Server Error",
-      message: "Failed to update profile"
-    });
+    res.status(500).json({ success: false, message: "Failed to fetch profile" });
   }
 };

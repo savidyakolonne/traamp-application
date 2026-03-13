@@ -67,7 +67,7 @@ export const getGuideProfile = async (req, res) => {
       success: true,
       data: {
         uid: doc.id,
-        ...doc.data()  // ✅ return full profile for authenticated user
+        ...doc.data()  // return full profile for authenticated user
       }
     });
 
