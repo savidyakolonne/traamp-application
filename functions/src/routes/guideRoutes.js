@@ -1,7 +1,7 @@
 import express from 'express' ; 
 import { getAllGuides, getGuideById } from '../controllers/guideController.js';
 import {getGuideProfile,updateGuideProfile} from "../controllers/guideController.js";
-import mockAuthMiddleware from "../middleware/mockAuth.middleware.js";
+import firebase from "../config/firebase.js";
 
 const router = express.Router();
 
@@ -19,7 +19,7 @@ const checkGuideRole = (req, res, next) => {
   next();
 };
 
-router.use(mockAuthMiddleware);
+router.use(firebase.firebaseAuth);
 router.use(checkGuideRole);
 
 router.get("/profile", getGuideProfile);
