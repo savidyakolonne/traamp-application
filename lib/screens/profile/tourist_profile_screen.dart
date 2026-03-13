@@ -63,9 +63,8 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        final count = await _savedGuidesService.getSavedGuidesCount(
-          touristUid: user.uid,
-        );
+        final guides = await _savedGuidesService.getSavedGuides();
+        final count = guides.length;
         
         setState(() {
           _savedGuidesCount = count;

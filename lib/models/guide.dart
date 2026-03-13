@@ -12,6 +12,8 @@ class Guide extends AppUser {
   final String country;
   final double rating;
   final bool availability;
+  final String? profilePicture;   
+  final List<String>? languages;
 
   Guide({
     required super.firstName,
@@ -31,6 +33,8 @@ class Guide extends AppUser {
     required this.country,
     required this.rating,
     required this.availability,
+    this.profilePicture,            
+    this.languages,
   });
 
   // ------------------------------------------------------------------------------------------------------ for the find guide - savidyakolonne
@@ -54,6 +58,10 @@ class Guide extends AppUser {
       country: map['country'] ?? '',
       rating: double.tryParse(map['rating']?.toString() ?? '0') ?? 0,
       availability: map['availability'] ?? false,
+      profilePicture: map['profilePicture'],                    // ✅ add this line
+      languages: map['languages'] != null 
+        ? List<String>.from(map['languages']) 
+        : [], 
     );
   }
 
@@ -73,6 +81,8 @@ class Guide extends AppUser {
       'country': country,
       'rating': rating,
       'availability': availability,
+      'profilePicture': profilePicture,  
+      'languages': languages, 
     };
   }
 }
