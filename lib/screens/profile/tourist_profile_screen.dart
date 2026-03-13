@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:traamp_frontend/app_config.dart';
 import '../tourist/tourist_edit_profile.dart';
 import '../tourist/saved_guides_screen.dart';
-import '../../services/saved_guides_service.dart';
 
 // ignore: must_be_immutable
 class TouristProfileScreen extends StatefulWidget {
@@ -21,10 +20,7 @@ class TouristProfileScreen extends StatefulWidget {
 class _TouristProfileScreenState extends State<TouristProfileScreen> {
   bool _isLoading = false;
   String profilePicture = "";
-  int _savedGuidesCount = 0;
-  final SavedGuidesService _savedGuidesService = SavedGuidesService();
 
-  // get user data from DB
   Future<void> _getUserData() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -45,9 +41,6 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
             }
           });
           print(data['msg']);
-          
-          // Fetch saved guides count after user data is loaded
-          await _loadSavedGuidesCount();
         } else if (response.statusCode == 401) {
           print(data['msg']);
         }
@@ -56,22 +49,6 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
       }
     } catch (e) {
       print(e.toString());
-    }
-  }
-
-  Future<void> _loadSavedGuidesCount() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final guides = await _savedGuidesService.getSavedGuides();
-        final count = guides.length;
-        
-        setState(() {
-          _savedGuidesCount = count;
-        });
-      }
-    } catch (e) {
-      print('Error loading saved guides count: $e');
     }
   }
 
@@ -103,13 +80,12 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Profile Header Section (Instagram-like)
+                // Profile Header Section
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Profile Picture
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -123,16 +99,15 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                           backgroundImage: (profilePicture.isNotEmpty)
                               ? NetworkImage(profilePicture)
                               : (widget.userData['gender'] == "Female"
-                                    ? const AssetImage(
-                                        'assets/images/avatar-female.avif',
-                                      )
-                                    : const AssetImage(
-                                        'assets/images/avatar-male.avif',
-                                      )),
+                                  ? const AssetImage(
+                                      'assets/images/avatar-female.avif',
+                                    )
+                                  : const AssetImage(
+                                      'assets/images/avatar-male.avif',
+                                    )),
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // Name and Info
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,88 +134,45 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                   ),
                 ),
 
-                // Action Buttons Row
+                // Edit Profile Button
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      // Edit Profile Button
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return EditTouristProfile();
-                                },
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 0,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => EditTouristProfile(),
                           ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator.adaptive(
-                                    backgroundColor: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Edit Profile',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
+                        elevation: 0,
                       ),
-                      const SizedBox(width: 12),
-                      // Saved Guides Button
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SavedGuidesScreen(),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator.adaptive(
+                                backgroundColor: Colors.white,
+                                strokeWidth: 2,
                               ),
-                            );
-                            // Refresh count when returning from SavedGuidesScreen
-                            _loadSavedGuidesCount();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.green,
-                            side: const BorderSide(color: Colors.green),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                            )
+                          : const Text(
+                              'Edit Profile',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          icon: const Icon(
-                            Icons.favorite,
-                            size: 18,
-                          ),
-                          label: Text(
-                            _savedGuidesCount > 0
-                                ? 'Saved ($_savedGuidesCount)'
-                                : 'Saved',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -266,11 +198,10 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const SavedGuidesScreen(),
+                                  builder: (context) =>
+                                      const SavedGuidesScreen(),
                                 ),
                               );
-                              // Refresh count when returning from SavedGuidesScreen
-                              _loadSavedGuidesCount();
                             },
                             child: const Text(
                               'See All',
