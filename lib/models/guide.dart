@@ -14,6 +14,7 @@ class Guide extends AppUser {
   final bool availability;
   final String? profilePicture;   
   final List<String>? languages;
+  final String? bio;
 
   Guide({
     required super.firstName,
@@ -35,6 +36,7 @@ class Guide extends AppUser {
     required this.availability,
     this.profilePicture,            
     this.languages,
+    this.bio,
   });
 
   // ------------------------------------------------------------------------------------------------------ for the find guide - savidyakolonne
@@ -62,6 +64,7 @@ class Guide extends AppUser {
       languages: map['languages'] != null 
         ? List<String>.from(map['languages']) 
         : [], 
+      bio: map['bio'], 
     );
   }
 
@@ -83,6 +86,7 @@ class Guide extends AppUser {
       'availability': availability,
       'profilePicture': profilePicture,  
       'languages': languages, 
+      'bio': bio,                      
     };
   }
 }
