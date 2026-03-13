@@ -1,5 +1,5 @@
 import express from "express";
-import firebase from "../config/firebase.js";
+import admin from "../config/firebaseAdmin.js";
 import {
   getTouristProfile,
   updateTouristProfile
@@ -18,7 +18,7 @@ const checkTouristRole = (req, res, next) => {
   next();
 };
 
-router.use(firebase.firebaseAuth);
+router.use(admin.firebaseAuth);
 router.use(checkTouristRole);
 
 router.get('/profile', getTouristProfile);
