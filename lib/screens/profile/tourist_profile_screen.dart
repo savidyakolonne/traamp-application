@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'package:traamp_frontend/app_config.dart';
 import '../tourist/tourist_edit_profile.dart';
 import '../tourist/saved_guides_screen.dart';
+import '../../services/saved_guides_service.dart';
+import '../profile/guide_public_view_screen.dart';
 
 // ignore: must_be_immutable
 class TouristProfileScreen extends StatefulWidget {
@@ -20,6 +22,9 @@ class TouristProfileScreen extends StatefulWidget {
 class _TouristProfileScreenState extends State<TouristProfileScreen> {
   bool _isLoading = false;
   String profilePicture = "";
+  List<Map<String, dynamic>> _savedGuides = [];
+  bool _isLoadingSavedGuides = false;
+  final SavedGuidesService _savedGuidesService = SavedGuidesService();
 
   Future<void> _getUserData() async {
     try {
@@ -52,10 +57,28 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
     }
   }
 
+  Future<void> _loadSavedGuides() async {
+    setState(() => _isLoadingSavedGuides = true);
+    try {
+      final guides = await _savedGuidesService.getSavedGuides();
+      setState(() => _savedGuides = guides);
+    } catch (e) {
+      print('Error loading saved guides: $e');
+    } finally {
+      setState(() => _isLoadingSavedGuides = false);
+    }
+  }
+
+  Future<void> _refreshAll() async {
+    await _getUserData();
+    await _loadSavedGuides();
+  }
+
   @override
   void initState() {
     super.initState();
     _getUserData();
+    _loadSavedGuides();
   }
 
   @override
@@ -75,7 +98,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: _getUserData,
+          onRefresh: _refreshAll,
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,6 +225,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                                       const SavedGuidesScreen(),
                                 ),
                               );
+                              _loadSavedGuides();
                             },
                             child: const Text(
                               'See All',
@@ -211,29 +235,50 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      _buildGuideListTile(
-                        'Amara J.',
-                        'Cultural Heritage Expert',
-                        4.9,
-                        124,
-                        'https://plus.unsplash.com/premium_photo-1682142702814-5999525b4346?q=80&w=883&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                      ),
-                      const SizedBox(height: 12),
-                      _buildGuideListTile(
-                        'Ruwan K.',
-                        'Wildlife & Safari Specialist',
-                        4.8,
-                        89,
-                        'https://plus.unsplash.com/premium_photo-1663089942980-b817c683b40f?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                      ),
-                      const SizedBox(height: 12),
-                      _buildGuideListTile(
-                        'Priya M.',
-                        'Adventure & Trekking Guide',
-                        4.7,
-                        56,
-                        'https://plus.unsplash.com/premium_photo-1682097908465-398bf580bf81?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                      ),
+
+                      // Loading state
+                      if (_isLoadingSavedGuides)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: CircularProgressIndicator(color: Colors.green),
+                          ),
+                        )
+
+                      // Empty state
+                      else if (_savedGuides.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.favorite_border,
+                                  size: 48,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'No saved guides yet',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+
+                      // Real saved guides from backend
+                      else
+                        ...List.generate(_savedGuides.length, (index) {
+                          final guide = _savedGuides[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _buildGuideListTile(guide),
+                          );
+                        }),
                     ],
                   ),
                 ),
@@ -246,18 +291,25 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
     );
   }
 
-  Widget _buildGuideListTile(
-    String name,
-    String specialty,
-    double rating,
-    int reviews,
-    String imageUrl,
-  ) {
+  Widget _buildGuideListTile(Map<String, dynamic> guide) {
+    final String firstName = guide['firstName'] ?? 'Unknown';
+    final String lastName = guide['lastName'] ?? '';
+    final double rating = (guide['rating'] ?? 0.0).toDouble();
+    final String guideUid = guide['uid'] ?? '';
+    final String? profilePicture = guide['profilePicture'];
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          print('Guide tapped: $name');
+          if (guideUid.isNotEmpty) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GuidePublicViewScreen(guideId: guideUid),
+              ),
+            ).then((_) => _loadSavedGuides());
+          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -271,8 +323,13 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundImage: NetworkImage(imageUrl),
                 backgroundColor: Colors.grey[200],
+                backgroundImage: profilePicture != null && profilePicture.isNotEmpty
+                    ? NetworkImage(profilePicture)
+                    : null,
+                child: profilePicture == null || profilePicture.isEmpty
+                    ? Icon(Icons.person, size: 24, color: Colors.grey[600])
+                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -280,7 +337,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      '$firstName $lastName',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -288,32 +345,22 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      specialty,
+                      guide['location'] ?? '',
                       style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                     ),
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        rating.toString(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
+                  const Icon(Icons.star, color: Colors.amber, size: 16),
+                  const SizedBox(width: 4),
                   Text(
-                    '$reviews tours',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    rating.toStringAsFixed(1),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
