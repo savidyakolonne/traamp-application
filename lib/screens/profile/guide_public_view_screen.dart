@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../app_config.dart';
+import '../../models/guide.dart';
+import '../../services/guide_service.dart';
 import '../../services/saved_guides_service.dart';
 
 class GuidePublicViewScreen extends StatefulWidget {
   final String guideId;
 
   const GuidePublicViewScreen({Key? key, required this.guideId})
-    : super(key: key);
+      : super(key: key);
 
   @override
   State<GuidePublicViewScreen> createState() => _GuidePublicViewScreenState();
@@ -18,9 +17,11 @@ class GuidePublicViewScreen extends StatefulWidget {
 
 class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   bool _isLoading = false;
-  Map<String, dynamic>? _profileData;
-  
+  Guide? _guide;
+  String? _errorMessage;
+
   final SavedGuidesService _savedGuidesService = SavedGuidesService();
+  final GuideService _guideService = GuideService();
   String? _touristUid;
   bool _isGuideSaved = false;
   bool _isSaving = false;
@@ -29,7 +30,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   void initState() {
     super.initState();
     _initializeUser();
-    _loadProfile();
+    _loadProfile();         // ✅ fetch from API in initState
     _checkIfGuideSaved();
   }
 
@@ -40,14 +41,41 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     }
   }
 
+  // ✅ fetch guide using GuideService
+  Future<void> _loadProfile() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final guide = await _guideService.getGuideByUid(widget.guideId);
+
+      if (guide != null) {
+        setState(() {
+          _guide = guide;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Guide not found';
+        });
+      }
+    } catch (e) {
+      print('Error loading profile: $e');
+      setState(() {
+        _errorMessage = 'Failed to load guide profile';
+      });
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _checkIfGuideSaved() async {
     if (_touristUid == null) return;
-
     try {
       final isSaved = await _savedGuidesService.isGuideSaved(
         guideUid: widget.guideId,
       );
-      
       setState(() {
         _isGuideSaved = isSaved;
       });
@@ -68,10 +96,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     }
 
     if (_isSaving) return;
-
-    setState(() {
-      _isSaving = true;
-    });
+    setState(() => _isSaving = true);
 
     try {
       final success = await _savedGuidesService.toggleSaveGuide(
@@ -82,7 +107,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
         setState(() {
           _isGuideSaved = !_isGuideSaved;
         });
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -111,44 +135,50 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
         ),
       );
     } finally {
-      setState(() {
-        _isSaving = false;
-      });
-    }
-  }
-
-  Future<void> _loadProfile() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final response = await http.get(
-        Uri.parse('${AppConfig.SERVER_URL}/api/guides/${widget.guideId}'),
-        headers: {'Content-Type': 'application/json'},
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['success'] == true) {
-          setState(() {
-            _profileData = data['data'];
-          });
-        }
-      }
-    } catch (e) {
-      print('Error loading profile: $e');
-    } finally {
-      setState(() => _isLoading = false);
+      setState(() => _isSaving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading && _profileData == null) {
+    // ✅ loading state
+    if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator(color: Colors.green)),
       );
     }
 
+    // ✅ error state
+    if (_errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 12),
+              Text(_errorMessage!,
+                  style: const TextStyle(fontSize: 16, color: Colors.black54)),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadProfile,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // ✅ loaded state - use _guide fields
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -168,9 +198,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.share, color: Colors.black),
-            onPressed: () {
-              print('Share tapped');
-            },
+            onPressed: () => print('Share tapped'),
           ),
         ],
       ),
@@ -179,33 +207,43 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Profile Header Section
+              // Profile Header
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Profile Picture
+                    // ✅ real profile picture from _guide
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.grey[300]!, width: 2),
                       ),
-                      child: const CircleAvatar(
+                      child: CircleAvatar(
                         radius: 45,
-                        backgroundImage: NetworkImage(
-                          'https://plus.unsplash.com/premium_photo-1663089942980-b817c683b40f?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                        ),
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage: _guide?.profilePicture != null &&
+                                _guide!.profilePicture!.isNotEmpty
+                            ? NetworkImage(_guide!.profilePicture!)
+                            : null,
+                        child: _guide?.profilePicture == null ||
+                                _guide!.profilePicture!.isEmpty
+                            ? Text(
+                                _guide?.firstName.substring(0, 1) ?? '?',
+                                style: const TextStyle(
+                                    fontSize: 28, fontWeight: FontWeight.bold),
+                              )
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 16),
-                    // Name, Rating, Stats
+                    // ✅ real name and rating from _guide
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${_profileData?['firstName'] ?? 'Kasun'} ${_profileData?['lastName'] ?? 'Perera'}',
+                            '${_guide?.firstName ?? ''} ${_guide?.lastName ?? ''}',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -214,23 +252,22 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              const Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                                size: 16,
-                              ),
+                              const Icon(Icons.star,
+                                  color: Colors.amber, size: 16),
                               const SizedBox(width: 4),
                               Text(
-                                '${_profileData?['rating'] ?? 4.9}',
+                                // ✅ real rating from _guide
+                                _guide?.rating.toStringAsFixed(1) ?? '0.0',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              const Text(
-                                '8 Years Experience',
-                                style: TextStyle(
+                              Text(
+                                // ✅ real location from _guide
+                                _guide?.location ?? '',
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -250,22 +287,15 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Bio',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    const Text('Bio',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     Text(
-                      _profileData?['bio'] ??
-                          'Passionate about sharing the hidden gems of Sri Lanka. Specializing in ancient history and tea plantation tours with a focus on sustainable travel.',
+                      // ✅ real bio - no hardcoded fallback text
+                      _guide?.bio ?? 'No bio available.',
                       style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                        height: 1.4,
-                      ),
+                          fontSize: 14, color: Colors.black87, height: 1.4),
                     ),
                   ],
                 ),
@@ -279,42 +309,32 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {
-                          print('Book Now tapped');
-                        },
+                        onPressed: () => print('Book Now tapped'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                              borderRadius: BorderRadius.circular(8)),
                           elevation: 0,
                         ),
-                        child: const Text(
-                          'Book Now',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
+                        child: const Text('Book Now',
+                            style: TextStyle(fontWeight: FontWeight.w600)),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () {
-                          print('Message tapped');
-                        },
+                        onPressed: () => print('Message tapped'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.green,
                           side: const BorderSide(color: Colors.green),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                              borderRadius: BorderRadius.circular(8)),
                         ),
-                        child: const Text(
-                          'Message',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
+                        child: const Text('Message',
+                            style: TextStyle(fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
@@ -322,44 +342,39 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Languages Section
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey[200]!),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Languages',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+              // ✅ Languages from real data
+              if (_guide?.languages != null && _guide!.languages!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey[200]!),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Languages',
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _guide!.languages!
+                              .map((lang) => _buildChip(lang))
+                              .toList(),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _buildChip('English (Fluent)'),
-                          _buildChip('Sinhala (Native)'),
-                          _buildChip('French (Basic)'),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
               const SizedBox(height: 16),
 
-              // Skills Section
+              // Skills Section - kept as static for now
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
@@ -373,13 +388,9 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Skills & Expertise',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      const Text('Skills & Expertise',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
@@ -398,46 +409,31 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Tour Packages Section
+              // Tour Packages - kept as static for now
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Tour Packages',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    const Text('Tour Packages',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
-                    _buildPackageCard(
-                      'Cultural Kandy Experience',
-                      '3 Days',
-                      '\$450',
-                      'Temple of the Tooth, Royal Botanical Gardens, Traditional Dance',
-                    ),
+                    _buildPackageCard('Cultural Kandy Experience', '3 Days',
+                        '\$450',
+                        'Temple of the Tooth, Royal Botanical Gardens, Traditional Dance'),
                     const SizedBox(height: 12),
-                    _buildPackageCard(
-                      'Yala Wildlife Safari',
-                      '2 Days',
-                      '\$350',
-                      'Leopard tracking, Elephant herds, Bird watching',
-                    ),
+                    _buildPackageCard('Yala Wildlife Safari', '2 Days', '\$350',
+                        'Leopard tracking, Elephant herds, Bird watching'),
                     const SizedBox(height: 12),
-                    _buildPackageCard(
-                      'Ella Hill Country',
-                      '4 Days',
-                      '\$550',
-                      'Nine Arch Bridge, Tea estates, Little Adam\'s Peak hiking',
-                    ),
+                    _buildPackageCard('Ella Hill Country', '4 Days', '\$550',
+                        'Nine Arch Bridge, Tea estates, Little Adam\'s Peak hiking'),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
 
-              // Posts Gallery
+              // Recent Tours - kept as static for now
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
@@ -445,13 +441,9 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Recent Tours',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        Text('Recent Tours',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -461,7 +453,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
-                              'https://images.unsplash.com/photo-1656159625990-8cd23231c218?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                              'https://images.unsplash.com/photo-1656159625990-8cd23231c218?q=80&w=870&auto=format&fit=crop',
                               height: 150,
                               fit: BoxFit.cover,
                             ),
@@ -472,7 +464,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
-                              'https://plus.unsplash.com/premium_photo-1663089942980-b817c683b40f?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                              'https://plus.unsplash.com/premium_photo-1663089942980-b817c683b40f?q=80&w=387&auto=format&fit=crop',
                               height: 150,
                               fit: BoxFit.cover,
                             ),
@@ -490,7 +482,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Reviews Section
+              // Reviews - kept as static for now
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
@@ -498,45 +490,25 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Reviews',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        const Text('Reviews',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
                         TextButton(
-                          onPressed: () {
-                            print('See All Reviews tapped');
-                          },
-                          child: const Text(
-                            'See All',
-                            style: TextStyle(color: Colors.green),
-                          ),
+                          onPressed: () => print('See All Reviews tapped'),
+                          child: const Text('See All',
+                              style: TextStyle(color: Colors.green)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildReviewTile(
-                      'SJ',
-                      'Sarah Jenkins',
-                      'United Kingdom',
-                      'Kasun was incredible! He took us to places we would never have found on our own. His knowledge about local wildlife in Yala was world-class.',
-                    ),
+                    _buildReviewTile('SJ', 'Sarah Jenkins', 'United Kingdom',
+                        'Kasun was incredible! His knowledge about local wildlife in Yala was world-class.'),
                     const SizedBox(height: 12),
-                    _buildReviewTile(
-                      'MK',
-                      'Markus K.',
-                      'Germany',
-                      'Great experience in Kandy. Punctual and very friendly!',
-                    ),
+                    _buildReviewTile('MK', 'Markus K.', 'Germany',
+                        'Great experience in Kandy. Punctual and very friendly!'),
                     const SizedBox(height: 12),
-                    _buildReviewTile(
-                      'LA',
-                      'Lucia A.',
-                      'Spain',
-                      'Kasun is the best guide we\'ve had in Sri Lanka. Highly recommend for families.',
-                    ),
+                    _buildReviewTile('LA', 'Lucia A.', 'Spain',
+                        'Kasun is the best guide we\'ve had in Sri Lanka. Highly recommend for families.'),
                   ],
                 ),
               ),
@@ -555,25 +527,17 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 12, color: Colors.black87),
-      ),
+      child: Text(label,
+          style: const TextStyle(fontSize: 12, color: Colors.black87)),
     );
   }
 
   Widget _buildPackageCard(
-    String title,
-    String duration,
-    String price,
-    String description,
-  ) {
+      String title, String duration, String price, String description) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          print('Package tapped: $title');
-        },
+        onTap: () => print('Package tapped: $title'),
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -592,43 +556,31 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Row(
                 children: [
                   Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
                   const SizedBox(width: 4),
-                  Text(
-                    duration,
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                  ),
+                  Text(duration,
+                      style:
+                          TextStyle(fontSize: 13, color: Colors.grey[600])),
                   const SizedBox(width: 16),
-                  Icon(Icons.attach_money, size: 14, color: Colors.green[700]),
-                  Text(
-                    price,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green[700],
-                    ),
-                  ),
+                  Icon(Icons.attach_money,
+                      size: 14, color: Colors.green[700]),
+                  Text(price,
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[700])),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[700],
-                  height: 1.4,
-                ),
-              ),
+              Text(description,
+                  style: TextStyle(
+                      fontSize: 13, color: Colors.grey[700], height: 1.4)),
             ],
           ),
         ),
@@ -637,11 +589,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   }
 
   Widget _buildReviewTile(
-    String initials,
-    String name,
-    String country,
-    String review,
-  ) {
+      String initials, String name, String country, String review) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -654,13 +602,9 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
           CircleAvatar(
             radius: 20,
             backgroundColor: Colors.grey[300],
-            child: Text(
-              initials,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
+            child: Text(initials,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.black87)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -673,43 +617,27 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          country,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Text(name,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14)),
+                        Text(country,
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600])),
                       ],
                     ),
                     Row(
                       children: List.generate(
                         5,
-                        (index) => const Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                          size: 14,
-                        ),
+                        (index) => const Icon(Icons.star,
+                            color: Colors.amber, size: 14),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  review,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.black87,
-                    height: 1.4,
-                  ),
-                ),
+                Text(review,
+                    style: const TextStyle(
+                        fontSize: 13, color: Colors.black87, height: 1.4)),
               ],
             ),
           ),
