@@ -1,27 +1,10 @@
-import firebaseAdmin from "../firebaseAdmin.js";
-
-const mockTouristProfile = {
-  firstName: "Alex",
-  lastName: "Chen",
-  email: "alex@example.com",
-  country: "Canada",
-  bio: "Love exploring new places",
-  preferences: ["nature", "culture"],
-  updatedAt: null
-};
+import firebase from "../config/firebase.js";
 
 export const getTouristProfile = async (req, res) => {
   try {
     const uid = req.user.uid;
 
-    if (!firebaseAdmin.db) {
-      return res.json({
-        success: true,
-        data: { ...mockTouristProfile, uid }
-      });
-    }
-
-    const docRef = firebaseAdmin.db.collection('users').doc(uid);
+    const docRef = firebase.db.collection("users").doc(uid);
     const doc = await docRef.get();
 
     if (!doc.exists) {
@@ -57,11 +40,11 @@ export const getTouristProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get tourist profile error:', error);
+    console.error("Get tourist profile error:", error);
     res.status(500).json({
       success: false,
-      error: 'Internal Server Error',
-      message: 'Failed to fetch profile'
+      error: "Internal Server Error",
+      message: "Failed to fetch profile"
     });
   }
 };
@@ -74,16 +57,16 @@ export const updateTouristProfile = async (req, res) => {
     if (!firstName && !lastName && !country && !bio && !preferences) {
       return res.status(400).json({
         success: false,
-        error: 'Bad Request',
-        message: 'At least one field required'
+        error: "Bad Request",
+        message: "At least one field required"
       });
     }
 
     if (preferences && !Array.isArray(preferences)) {
       return res.status(400).json({
         success: false,
-        error: 'Bad Request',
-        message: 'Preferences must be an array'
+        error: "Bad Request",
+        message: "Preferences must be an array"
       });
     }
 
@@ -96,15 +79,7 @@ export const updateTouristProfile = async (req, res) => {
     if (bio !== undefined) updateData.bio = bio;
     if (preferences !== undefined) updateData.preferences = preferences;
 
-    if (!firebaseAdmin.db) {
-      return res.json({
-        success: true,
-        message: 'Profile updated successfully',
-        data: { ...mockTouristProfile, ...updateData, uid }
-      });
-    }
-
-    const docRef = firebaseAdmin.db.collection('users').doc(uid);
+    const docRef = firebase.db.collection("users").doc(uid);
     await docRef.set(updateData, { merge: true });
 
     const doc = await docRef.get();
@@ -112,7 +87,7 @@ export const updateTouristProfile = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Profile updated successfully',
+      message: "Profile updated successfully",
       data: {
         uid,
         firstName: data.firstName || "",
@@ -126,11 +101,11 @@ export const updateTouristProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update tourist profile error:', error);
+    console.error("Update tourist profile error:", error);
     res.status(500).json({
       success: false,
-      error: 'Internal Server Error',
-      message: 'Failed to update profile'
+      error: "Internal Server Error",
+      message: "Failed to update profile"
     });
   }
 };
