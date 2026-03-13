@@ -370,8 +370,7 @@ class _GuidesTabState extends State<_GuidesTab> {
     if (oldWidget.search != widget.search ||
         oldWidget.location != widget.location ||
         oldWidget.languages != widget.languages) {
-      _fetchGuides();
-      setState(() {});
+      setState(() => _fetchGuides());
     }
   }
 
@@ -387,29 +386,42 @@ class _GuidesTabState extends State<_GuidesTab> {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("No guides found"));
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.person_search, size: 48, color: Colors.black26),
+                SizedBox(height: 12),
+                Text("No guides found",
+                    style: TextStyle(color: Colors.black45, fontSize: 15)),
+              ],
+            ),
+          );
         }
 
         final searchLower = widget.search.toLowerCase();
-        final filteredGuides = snapshot.data!
-            .where(
-              (g) =>
-                  g.firstName.toLowerCase().contains(searchLower) ||
-                  g.lastName.toLowerCase().contains(searchLower),
-            )
-            .toList();
+        final filtered = snapshot.data!.where((g) {
+          final fullName = "${g.firstName} ${g.lastName}".toLowerCase();
+          return fullName.contains(searchLower);
+        }).toList();
+
+        if (filtered.isEmpty) {
+          return const Center(child: Text("No guides match your search"));
+        }
 
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          itemCount: filteredGuides.length,
+          itemCount: filtered.length,
           itemBuilder: (context, index) {
-            final g = filteredGuides[index];
+          final g = filtered[index];
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: _GuideCard(
                 name: "${g.firstName} ${g.lastName}",
                 location: g.location,
-                languages: [], // optionally map g.languages here
+                rating: g.rating,
+                profilePicture: g.profilePicture,    
+                languages: g.languages ?? [],
               ),
             );
           },
@@ -477,11 +489,15 @@ class _GuideCard extends StatelessWidget {
   final String name;
   final String location;
   final List<String> languages;
+  final double? rating;
+  final String? profilePicture;
 
   const _GuideCard({
     required this.name,
     required this.location,
     required this.languages,
+    this.rating,
+    this.profilePicture,
   });
 
   @override
@@ -498,10 +514,13 @@ class _GuideCard extends StatelessWidget {
           CircleAvatar(
             radius: 26,
             backgroundColor: Colors.black12,
-            child: Text(
-              name.substring(0, 1),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            backgroundImage: profilePicture != null && profilePicture!.isNotEmpty
+                ? NetworkImage(profilePicture!)
+                : null,
+            child: profilePicture == null || profilePicture!.isEmpty
+                ? Text(name.substring(0, 1),
+                    style: const TextStyle(fontWeight: FontWeight.bold))
+                : null,
           ),
           const SizedBox(width: 12),
           Expanded(

@@ -38,9 +38,7 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
     });
 
     try {
-      final guides = await _savedGuidesService.getSavedGuides(
-        touristUid: _touristUid!,
-      );
+      final guides = await _savedGuidesService.getSavedGuides();
 
       setState(() {
         _savedGuides = guides;

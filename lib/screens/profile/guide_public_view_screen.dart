@@ -45,7 +45,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
 
     try {
       final isSaved = await _savedGuidesService.isGuideSaved(
-        touristUid: _touristUid!,
         guideUid: widget.guideId,
       );
       
@@ -76,7 +75,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
 
     try {
       final success = await _savedGuidesService.toggleSaveGuide(
-        touristUid: _touristUid!,
         guideUid: widget.guideId,
       );
 
