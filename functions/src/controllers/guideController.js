@@ -48,3 +48,57 @@ export const getGuideById = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch guide" });
   }
 };
+
+// GET guide profile
+export const getGuideProfile = async (req, res) => {
+  try {
+
+    const guideId = req.user.uid;
+
+    const doc = await db.collection("users").doc(guideId).get();
+
+    if (!doc.exists) {
+      return res.status(404).json({
+        success: false,
+        message: "Guide not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        uid: doc.id,
+        ...doc.data()
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching guide profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch guide profile"
+    });
+  }
+};
+
+// UPDATE guide profile
+export const updateGuideProfile = async (req, res) => {
+  try {
+
+    const guideId = req.user.uid;
+
+    await db.collection("users").doc(guideId).update(req.body);
+
+    res.json({
+      success: true,
+      message: "Guide profile updated successfully"
+    });
+
+  } catch (error) {
+    console.error("Error updating guide profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update guide profile"
+    });
+  }
+};
