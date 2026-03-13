@@ -18,6 +18,8 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   // DOB text editing controller
   final TextEditingController _dobController = TextEditingController();
 
+  final Color primaryColor = Colors.lightGreen;
+
   // array for country names
   final List<String> _countries = ListData.countryNames;
   final List<String> _genders = ListData.gender; // for gender dropdown menu
@@ -36,7 +38,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   // first name
   Widget firstNameFormField() {
     return TextFormField(
-      decoration: InputDecoration(hintText: "First Name"),
+      decoration: fieldStyle("First Name"),
       //validation
       validator: (text) {
         if (text == null || text == "") {
@@ -58,7 +60,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   // last name
   Widget lastNameFormField() {
     return TextFormField(
-      decoration: InputDecoration(hintText: "Last Name"),
+      decoration: fieldStyle("Last Name"),
       //validation
       validator: (text) {
         if (text == null || text == "") {
@@ -80,7 +82,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   Widget emailFormField() {
     return TextFormField(
       keyboardType: TextInputType.emailAddress,
-      decoration: InputDecoration(hintText: "Email Address"),
+      decoration: fieldStyle("Email Address"),
       validator: (mail) {
         final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
         if (mail == null || mail == "") {
@@ -102,7 +104,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   Widget passwordFormField() {
     return TextFormField(
       obscureText: true,
-      decoration: InputDecoration(hintText: "Password"),
+      decoration: fieldStyle("Password"),
       validator: (pass) {
         if (pass != null && pass != "") {
           if (pass.length >= 8 && pass.length <= 16) {
@@ -137,7 +139,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   Widget confirmPasswordFormField() {
     return TextFormField(
       obscureText: true,
-      decoration: InputDecoration(hintText: "Confirm Password"),
+      decoration: fieldStyle("Confirm Password"),
       validator: (cPass) {
         if (cPass != null && cPass != "") {
           if (rowPassword != cPass) {
@@ -156,10 +158,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   // gender dropdown
   Widget genderFormField() {
     return DropdownButtonFormField<String>(
-      decoration: const InputDecoration(
-        labelText: "Select Gender",
-        border: OutlineInputBorder(),
-      ),
+      decoration: fieldStyle("Select Gender"),
       items: _genders.map((gender) {
         return DropdownMenuItem(value: gender, child: Text(gender));
       }).toList(),
@@ -180,10 +179,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   // country dropdown
   Widget selectCountryFormField() {
     return DropdownButtonFormField<String>(
-      decoration: const InputDecoration(
-        labelText: "Select Your Country",
-        border: OutlineInputBorder(),
-      ),
+      decoration: fieldStyle("Select Your Country"),
       items: _countries.map((country) {
         return DropdownMenuItem(value: country, child: Text(country));
       }).toList(),
@@ -206,11 +202,9 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     return TextFormField(
       controller: _dobController,
       readOnly: true, // prevent manual typing
-      decoration: const InputDecoration(
-        labelText: "Date of Birth",
-        border: OutlineInputBorder(),
-        suffixIcon: Icon(Icons.calendar_today),
-      ),
+      decoration: fieldStyle(
+        "Date of Birth",
+      ).copyWith(suffixIcon: const Icon(Icons.calendar_month)),
       onTap: () async {
         DateTime? pickedDate = await showDatePicker(
           context: context,
@@ -243,11 +237,14 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.black),
         title: Text(
           'Welcome to Traamp',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
-        backgroundColor: Colors.green,
       ),
       body: Padding(
         padding: EdgeInsets.all(25.0),
@@ -256,82 +253,115 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
             key: _formKey,
             child: Container(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.asset('assets/images/logo.png'),
-                  SizedBox(height: 20.0),
-                  Text(
-                    "Please Register as a Tourist",
-                    style: TextStyle(fontSize: 20.0),
+                  Center(
+                    child: Image.asset('assets/images/logo.png', height: 90),
                   ),
+
                   SizedBox(height: 20.0),
-                  Container(
-                    child: Column(
-                      children: [
-                        firstNameFormField(),
-                        lastNameFormField(),
-                        emailFormField(),
-                        passwordFormField(),
-                        confirmPasswordFormField(),
-                        SizedBox(height: 15.0), // to reserve some space
-                        selectCountryFormField(),
-                        SizedBox(height: 15.0),
-                        genderFormField(),
-                        SizedBox(height: 15.0),
-                        dobFormField(),
-                      ],
+
+                  const Center(
+                    child: Text(
+                      "Please Register as a Tourist",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 30.0),
-                  OutlinedButton(
-                    onPressed: () async {
-                      // if validated save to global variables
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState?.save();
 
-                        final tourist = Tourist(
-                          firstName: firstName,
-                          lastName: lastName,
-                          email: email,
-                          password: password,
-                          gender: gender,
-                          dob: dob,
-                          country: selectedCountry,
-                          type: type,
-                        );
-                        try {
-                          final response = await http.post(
-                            Uri.parse(
-                              "${AppConfig.SERVER_URL}/api/users/register-tourist",
-                            ),
-                            headers: {
-                              "Content-Type": "application/json",
-                            }, //  tells the server the body is JSON
-                            body: jsonEncode(tourist.toMap()),
+                  const SizedBox(height: 6),
+
+                  const Center(
+                    child: Text(
+                      "Fill the details below to continue",
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Row(
+                    children: [
+                      Expanded(child: firstNameFormField()),
+                      const SizedBox(width: 15),
+                      Expanded(child: lastNameFormField()),
+                    ],
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  emailFormField(),
+
+                  const SizedBox(height: 15),
+
+                  Row(
+                    children: [
+                      Expanded(child: genderFormField()),
+                      const SizedBox(width: 15),
+                      Expanded(child: dobFormField()),
+                    ],
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  selectCountryFormField(),
+
+                  const SizedBox(height: 30),
+
+                  passwordFormField(),
+
+                  const SizedBox(height: 15),
+
+                  confirmPasswordFormField(),
+
+                  const SizedBox(height: 30),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () async {
+                        // if validated save to global variables
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState?.save();
+
+                          final tourist = Tourist(
+                            firstName: firstName,
+                            lastName: lastName,
+                            email: email,
+                            password: password,
+                            gender: gender,
+                            dob: dob,
+                            country: selectedCountry,
+                            type: type,
                           );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text("Connecting... "),
-                                  CircularProgressIndicator.adaptive(),
-                                ],
+                          try {
+                            final response = await http.post(
+                              Uri.parse(
+                                "${AppConfig.SERVER_URL}/api/users/register-tourist",
                               ),
-                              backgroundColor: const Color.fromARGB(
-                                180,
-                                76,
-                                175,
-                                79,
-                              ),
-                            ),
-                          );
-                          final data = jsonDecode(response.body);
-                          print(data);
-                          if (response.statusCode == 201) {
-                            Navigator.pop(context, LoginSetup());
+                              headers: {
+                                "Content-Type": "application/json",
+                              }, //  tells the server the body is JSON
+                              body: jsonEncode(tourist.toMap()),
+                            );
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('${data['msg']}'),
+                                content: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("Connecting... "),
+                                    CircularProgressIndicator.adaptive(),
+                                  ],
+                                ),
                                 backgroundColor: const Color.fromARGB(
                                   180,
                                   76,
@@ -340,11 +370,42 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                                 ),
                               ),
                             );
-                          } else {
+                            final data = jsonDecode(response.body);
+                            print(data);
+                            if (response.statusCode == 201) {
+                              Navigator.pop(context, LoginSetup());
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('${data['msg']}'),
+                                  backgroundColor: const Color.fromARGB(
+                                    180,
+                                    76,
+                                    175,
+                                    79,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '${data['msg']} : status code = ${response.statusCode}',
+                                  ),
+                                  backgroundColor: const Color.fromARGB(
+                                    180,
+                                    244,
+                                    67,
+                                    54,
+                                  ),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            print(e);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  '${data['msg']} : status code = ${response.statusCode}',
+                                  'Error while connecting to server...',
                                 ),
                                 backgroundColor: const Color.fromARGB(
                                   180,
@@ -355,34 +416,71 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                               ),
                             );
                           }
-                        } catch (e) {
-                          print(e);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Error while connecting to server...',
-                              ),
-                              backgroundColor: const Color.fromARGB(
-                                180,
-                                244,
-                                67,
-                                54,
-                              ),
-                            ),
-                          );
                         }
-                      }
-                    },
-                    child: Text(
-                      "Register",
-                      style: TextStyle(fontSize: 20.0, color: Colors.green),
+                      },
+
+                      child: Text(
+                        "Register",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
+
+                  const SizedBox(height: 15),
+
+                  Center(
+                    child: Text.rich(
+                      TextSpan(
+                        text: "By registering, you agree to Traamp's ",
+                        children: [
+                          TextSpan(
+                            text: "Terms & Conditions",
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration fieldStyle(String hint) {
+    return InputDecoration(
+      hintText: hint,
+
+      filled: true,
+      fillColor: Colors.white,
+
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.green),
       ),
     );
   }
