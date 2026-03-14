@@ -1,27 +1,23 @@
-import express from 'express';
-import { 
-  saveGuide, 
-  removeSavedGuide, 
-  checkIfGuideSaved, 
+import express from "express";
+import admin from "../config/firebaseAdmin.js";
+import {
+  saveGuide,
+  removeSavedGuide,
   getSavedGuides,
-  getSavedGuidesCount 
-} from '../controllers/savedGuidesController.js';
+} from "../controllers/savedGuidesController.js";
 
 const router = express.Router();
 
-// Save a guide to favorites
-router.post('/save', saveGuide);
+// Apply auth middleware to all saved guides routes
+router.use(admin.firebaseAuth);
 
-// Remove a saved guide
-router.post('/remove', removeSavedGuide);
+// GET /api/saved-guides - Get all saved guides for current user
+router.get("/", getSavedGuides);
 
-// Check if a guide is saved
-router.get('/check', checkIfGuideSaved);
+// POST /api/saved-guides - Save a guide
+router.post("/", saveGuide);
 
-// Get all saved guides for a tourist
-router.get('/:touristUid', getSavedGuides);
-
-// Get saved guides count for a tourist
-router.get('/:touristUid/count', getSavedGuidesCount);
+// DELETE /api/saved-guides/:guideId - Remove a saved guide
+router.delete("/:guideId", removeSavedGuide);
 
 export default router;

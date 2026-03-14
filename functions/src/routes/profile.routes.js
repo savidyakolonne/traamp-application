@@ -1,44 +1,46 @@
 import express from "express";
-import mockAuthMiddleware from "../middleware/mockAuth.middleware.js";
+import admin from "../config/firebaseAdmin.js";
+import { getTouristProfile } from "../controllers/tourist.controller.js";
+import { getGuideProfile } from "../controllers/guideController.js";
 
 const router = express.Router();
 
 // GET /api/profile - Get user profile (protected)
-router.get("/", mockAuthMiddleware, (req, res) => {
+router.get("/", admin.firebaseAuth, async (req, res) => { 
   try {
-    // Mock profile data based on role
-    const mockProfiles = {
-      guide: {
-        id: req.user.uid,
-        name: "Kasun Perera",
-        email: "kasun@example.com",
-        role: "guide",
-        bio: "Passionate about sharing the hidden gems of Sri Lanka.",
-        rating: 4.9,
-        totalTours: 250,
-        experience: "8 Years"
-      },
-      tourist: {
-        id: req.user.uid,
-        name: "Alex Chen",
-        email: "alex@example.com",
-        role: "tourist",
-        bio: "Travel enthusiast exploring Sri Lanka",
-        memberSince: "2023",
-        savedGuides: 3
-      }
-    };
+    const uid = req.user.uid;
 
-    const profile = mockProfiles[req.user.role];
+    // Fetch user from Firestore to check type
+    const userDoc = await admin.db.collection("users").doc(uid).get();
 
-    res.json({
-      success: true,
-      message: "Profile fetched successfully",
-      data: profile
+    if (!userDoc.exists) {
+      return res.status(404).json({
+        success: false,
+        error: "Not Found",
+        message: "User not found in database"
+      });
+    }
+
+    const userType = userDoc.data().type;
+
+    // Route to correct controller based on type
+    if (userType === "guide") {
+      return getGuideProfile(req, res);
+    }
+
+    if (userType === "tourist") {
+      return getTouristProfile(req, res);
+    }
+
+    // Unknown type
+    return res.status(400).json({
+      success: false,
+      error: "Bad Request",
+      message: `Unknown user type: ${userType}`
     });
 
   } catch (error) {
-    console.error('Profile fetch error:', error);
+    console.error("Profile fetch error:", error);
     res.status(500).json({
       success: false,
       error: "Server Error",

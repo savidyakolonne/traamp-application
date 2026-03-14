@@ -24,7 +24,9 @@ class GuideService {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
+        print("RESPONSE BODY: ${response.body}");
+        final body = jsonDecode(response.body);
+        final List<dynamic> data = body is List ? body : (body['data'] ?? []);
 
         // Map Firestore data to Guide model
         return data.map((e) {
@@ -53,7 +55,8 @@ class GuideService {
         headers: {"Content-Type": "application/json"},
       );
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final body = jsonDecode(response.body);  
+        final data = body['data']; 
         return Guide.fromMap({
           ...data,
           'rating': data['rating']?.toString() ?? '0',
