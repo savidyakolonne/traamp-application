@@ -20,17 +20,15 @@ class SavedGuidesService {
   }
 
   /// Add a guide to the tourist's saved guides list
-  Future<bool> saveGuide({
-    required String guideUid,
-  }) async {
+  Future<bool> saveGuide({required String guideUid}) async {
     try {
       final headers = await _getHeaders();
 
       final response = await http.post(
-        Uri.parse(_baseUrl),                  // POST /api/saved-guides
+        Uri.parse(_baseUrl), // POST /api/saved-guides
         headers: headers,
         body: jsonEncode({
-          'guideUid': guideUid,              // touristUid comes from token on backend
+          'guideUid': guideUid, // touristUid comes from token on backend
         }),
       );
 
@@ -51,14 +49,12 @@ class SavedGuidesService {
   }
 
   /// Remove a guide from the tourist's saved guides list
-  Future<bool> unsaveGuide({
-    required String guideUid,
-  }) async {
+  Future<bool> unsaveGuide({required String guideUid}) async {
     try {
       final headers = await _getHeaders();
 
       final response = await http.delete(
-        Uri.parse('$_baseUrl/$guideUid'),     // DELETE /api/saved-guides/:guideId
+        Uri.parse('$_baseUrl/$guideUid'), // DELETE /api/saved-guides/:guideId
         headers: headers,
       );
 
@@ -76,16 +72,13 @@ class SavedGuidesService {
   }
 
   /// Check if a guide is saved by the tourist
-  Future<bool> isGuideSaved({
-    required String guideUid,
-  }) async {
+  Future<bool> isGuideSaved({required String guideUid}) async {
     try {
-      final headers = await _getHeaders();
+      await _getHeaders();
 
       // Fetch all saved guides and check locally
       final guides = await getSavedGuides();
       return guides.any((guide) => guide['uid'] == guideUid);
-
     } catch (e) {
       print('Error checking if guide is saved: $e');
       return false;
@@ -98,7 +91,7 @@ class SavedGuidesService {
       final headers = await _getHeaders();
 
       final response = await http.get(
-        Uri.parse(_baseUrl),                  // GET /api/saved-guides
+        Uri.parse(_baseUrl), // GET /api/saved-guides
         headers: headers,
       );
 
@@ -119,9 +112,7 @@ class SavedGuidesService {
   }
 
   /// Toggle save status
-  Future<bool> toggleSaveGuide({
-    required String guideUid,
-  }) async {
+  Future<bool> toggleSaveGuide({required String guideUid}) async {
     try {
       final isSaved = await isGuideSaved(guideUid: guideUid);
 

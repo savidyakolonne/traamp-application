@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/saved_guides_service.dart';
 import '../profile/guide_public_view_screen.dart';
 
+// ignore: must_be_immutable
 class SavedGuidesScreen extends StatefulWidget {
-  const SavedGuidesScreen({Key? key}) : super(key: key);
+  String uid;
+  SavedGuidesScreen(this.uid, {super.key});
 
   @override
   State<SavedGuidesScreen> createState() => _SavedGuidesScreenState();
@@ -12,7 +14,6 @@ class SavedGuidesScreen extends StatefulWidget {
 
 class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
   final SavedGuidesService _savedGuidesService = SavedGuidesService();
-  String? _touristUid;
   List<Map<String, dynamic>> _savedGuides = [];
   bool _isLoading = false;
 
@@ -23,33 +24,32 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
   }
 
   void _initializeUser() {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    _touristUid = user.uid;
-    _loadSavedGuides(); // load guides after UID is ready
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _loadSavedGuides(); // load guides after UID is ready
+    }
   }
-}
 
   Future<void> _loadSavedGuides() async {
-  setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
-  try {
-    final guides = await _savedGuidesService.getSavedGuides();
-    setState(() => _savedGuides = guides);
-  } catch (e) {
-    print('Error loading saved guides: $e');
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to load saved guides'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    try {
+      final guides = await _savedGuidesService.getSavedGuides();
+      setState(() => _savedGuides = guides);
+    } catch (e) {
+      print('Error loading saved guides: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to load saved guides'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isLoading = false);
     }
-  } finally {
-    setState(() => _isLoading = false);
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -78,85 +78,75 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
                 child: CircularProgressIndicator(color: Colors.green),
               )
             : _savedGuides.isEmpty
-                ? _buildEmptyState()
-                : RefreshIndicator(
-                    onRefresh: _loadSavedGuides,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _savedGuides.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final guide = _savedGuides[index];
-                        return _buildGuideCard(guide);
-                      },
-                    ),
-                  ),
+            ? _buildEmptyState()
+            : RefreshIndicator(
+                onRefresh: _loadSavedGuides,
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _savedGuides.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final guide = _savedGuides[index];
+                    return _buildGuideCard(guide);
+                  },
+                ),
+              ),
       ),
     );
   }
 
   Widget _buildEmptyState() {
-  return Center(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.favorite_border,
-            size: 80,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No saved guides yet',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Start exploring and save your favorite guides',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () {
-              // For now just go back to previous screen
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 14,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              elevation: 0,
-            ),
-            child: const Text(
-              'Explore Guides',
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.favorite_border, size: 80, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'No saved guides yet',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'Start exploring and save your favorite guides',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                // For now just go back to previous screen
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Explore Guides',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildGuideCard(Map<String, dynamic> guide) {
     final String firstName = guide['firstName'] ?? 'Unknown';
@@ -173,9 +163,8 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => GuidePublicViewScreen(
-                  guideId: guideUid,
-                ),
+                builder: (context) =>
+                    GuidePublicViewScreen(guideId: guideUid, uid: widget.uid),
               ),
             ).then((_) {
               // Refresh the list when returning from guide profile
@@ -204,23 +193,17 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.grey[300]!,
-                    width: 2,
-                  ),
+                  border: Border.all(color: Colors.grey[300]!, width: 2),
                 ),
                 child: CircleAvatar(
                   radius: 30,
-                  backgroundImage: profilePicture != null && profilePicture.isNotEmpty
+                  backgroundImage:
+                      profilePicture != null && profilePicture.isNotEmpty
                       ? NetworkImage(profilePicture)
                       : null,
                   backgroundColor: Colors.grey[200],
                   child: profilePicture == null || profilePicture.isEmpty
-                      ? Icon(
-                          Icons.person,
-                          size: 30,
-                          color: Colors.grey[600],
-                        )
+                      ? Icon(Icons.person, size: 30, color: Colors.grey[600])
                       : null,
                 ),
               ),
@@ -240,11 +223,7 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                          size: 16,
-                        ),
+                        const Icon(Icons.star, color: Colors.amber, size: 16),
                         const SizedBox(width: 4),
                         Text(
                           rating.toStringAsFixed(1),
@@ -259,10 +238,7 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
                 ),
               ),
               // Arrow Icon
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.chevron_right, color: Colors.grey[400]),
             ],
           ),
         ),
