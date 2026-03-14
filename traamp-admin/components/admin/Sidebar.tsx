@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type NavItem = { href: string; icon: string; label: string; badge?: string };
 
@@ -9,11 +10,38 @@ const items: NavItem[] = [
   { href: "/admin/dashboard", icon: "dashboard", label: "Dashboard" },
   { href: "/admin/guides", icon: "map", label: "Guides Management" },
   { href: "/admin/tourists", icon: "people", label: "Tourist Management" },
-  { href: "/admin/verifications", icon: "verified_user", label: "Verification Queue", badge: "12" },
+  { href: "/admin/verifications", icon: "verified_user", label: "Verification Queue" },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [queueCount, setQueueCount] = useState(0);
+
+  useEffect(() => {
+  const loadCount = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/verifications`
+      );
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to fetch verification count");
+      }
+
+      if (Array.isArray(data)) {
+        setQueueCount(data.length);
+      } else {
+        setQueueCount(0);
+      }
+    } catch (err) {
+      console.error("Failed to load verification queue count:", err);
+      setQueueCount(0);
+    }
+  };
+
+  loadCount();
+}, []);
 
   return (
     <aside className="w-64 bg-white dark:bg-surface-dark border-r border-gray-200 dark:border-gray-800 flex flex-col h-screen fixed left-0 top-0 z-50">
@@ -25,10 +53,15 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-        <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Main Menu</p>
+        <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          Main Menu
+        </p>
 
         {items.map((it) => {
-          const active = pathname === it.href || (it.href !== "/dashboard" && pathname.startsWith(it.href));
+          const active =
+            pathname === it.href ||
+            (it.href !== "/admin/dashboard" && pathname.startsWith(it.href));
+
           return (
             <Link
               key={it.href}
@@ -45,14 +78,23 @@ export default function Sidebar() {
                 {it.label}
               </span>
 
-              {it.badge ? (
-                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{it.badge}</span>
+              {it.href === "/admin/verifications" ? (
+                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                  {queueCount}
+                </span>
+              ) : it.badge ? (
+                <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                  {it.badge}
+                </span>
               ) : null}
             </Link>
           );
         })}
 
-        <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-8">System</p>
+        <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-8">
+          System
+        </p>
+
         <Link
           href="#"
           className="flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-primary dark:hover:text-primary rounded-lg font-medium transition-colors"
@@ -60,6 +102,7 @@ export default function Sidebar() {
           <span className="material-icons text-xl">settings</span>
           Settings
         </Link>
+
         <Link
           href="#"
           className="flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-primary dark:hover:text-primary rounded-lg font-medium transition-colors"
@@ -75,8 +118,12 @@ export default function Sidebar() {
             A
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">Admin</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Super Admin</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+              Admin
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              Super Admin
+            </p>
           </div>
           <button className="text-gray-400 hover:text-primary" title="Logout">
             <span className="material-icons">logout</span>

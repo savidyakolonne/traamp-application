@@ -31,7 +31,7 @@ export default function GuidesPage() {
   useEffect(() => {
     async function fetchGuides() {
       try {
-        const res = await fetch("http://localhost:3000/api/admin/guides");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/guides`);
         const data = await res.json();
         setGuides(data);
       } catch (err) {
