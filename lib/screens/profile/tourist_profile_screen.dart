@@ -100,7 +100,6 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // ── Profile Header ──────────────────────────────
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -110,7 +109,10 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey[300]!, width: 2),
+                          border: Border.all(
+                            color: Colors.grey[300]!,
+                            width: 2,
+                          ),
                         ),
                         child: CircleAvatar(
                           radius: 45,
@@ -138,13 +140,17 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                               '${widget.userData['firstName'] ?? ''} ${widget.userData['lastName'] ?? ''}'
                                   .trim(),
                               style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'Traamp Explorer',
                               style: TextStyle(
-                                  fontSize: 13, color: Colors.grey[600]),
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ],
                         ),
@@ -171,7 +177,8 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         elevation: 0,
                       ),
                       child: _isLoading
@@ -179,11 +186,17 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator.adaptive(
-                                  backgroundColor: Colors.white, strokeWidth: 2),
+                                backgroundColor: Colors.white,
+                                strokeWidth: 2,
+                              ),
                             )
-                          : const Text('Edit Profile',
+                          : const Text(
+                              'Edit Profile',
                               style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600)),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -203,9 +216,13 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('About Me',
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w600)),
+                        const Text(
+                          'About Me',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         // email
                         if ((widget.userData['email'] ?? '').isNotEmpty)
@@ -257,22 +274,29 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Saved Guides',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          const Text(
+                            'Saved Guides',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           TextButton(
                             onPressed: () async {
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      const SavedGuidesScreen(),
+                                  builder: (context) => SavedGuidesScreen(
+                                    widget.userData['uid'].toString(),
+                                  ),
                                 ),
                               );
                               _loadSavedGuides();
                             },
-                            child: const Text('See All',
-                                style: TextStyle(color: Colors.green)),
+                            child: const Text(
+                              'See All',
+                              style: TextStyle(color: Colors.green),
+                            ),
                           ),
                         ],
                       ),
@@ -283,7 +307,8 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 24),
                             child: CircularProgressIndicator(
-                                color: Colors.green),
+                              color: Colors.green,
+                            ),
                           ),
                         )
                       else if (_savedGuides.isEmpty)
@@ -292,13 +317,19 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 24),
                             child: Column(
                               children: [
-                                Icon(Icons.favorite_border,
-                                    size: 48, color: Colors.grey[400]),
+                                Icon(
+                                  Icons.favorite_border,
+                                  size: 48,
+                                  color: Colors.grey[400],
+                                ),
                                 const SizedBox(height: 8),
-                                Text('No saved guides yet',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[600])),
+                                Text(
+                                  'No saved guides yet',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -340,12 +371,18 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                ),
                 const SizedBox(height: 2),
-                Text(value,
-                    style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w500)),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
@@ -363,9 +400,10 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
       height: 90,
       color: Colors.grey[200],
       child: Center(
-        child: Text(initial,
-            style: const TextStyle(
-                fontSize: 28, fontWeight: FontWeight.bold)),
+        child: Text(
+          initial,
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -386,8 +424,10 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    GuidePublicViewScreen(guideId: guideUid),
+                builder: (context) => GuidePublicViewScreen(
+                  guideId: guideUid,
+                  uid: widget.userData['uid'].toString(),
+                ),
               ),
             ).then((_) => _loadSavedGuides());
           }
@@ -417,13 +457,18 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('$firstName $lastName',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(
+                      '$firstName $lastName',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(guide['location'] ?? '',
-                        style: TextStyle(
-                            fontSize: 13, color: Colors.grey[600])),
+                    Text(
+                      guide['location'] ?? '',
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    ),
                   ],
                 ),
               ),
@@ -431,9 +476,13 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                 children: [
                   const Icon(Icons.star, color: Colors.amber, size: 16),
                   const SizedBox(width: 4),
-                  Text(rating.toStringAsFixed(1),
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.bold)),
+                  Text(
+                    rating.toStringAsFixed(1),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ],

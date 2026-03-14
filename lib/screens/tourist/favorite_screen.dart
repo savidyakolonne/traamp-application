@@ -1,9 +1,7 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/app_config.dart';
-
 import '../../widgets/package_card.dart';
 
 // ignore: must_be_immutable
