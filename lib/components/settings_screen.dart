@@ -182,7 +182,12 @@ class _SettingsState extends State<Settings> {
                 subtitle: "Secure your account with privacy",
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => SettingsPrivacy()),
+                    MaterialPageRoute(
+                      builder: (context) => SettingsPrivacy(
+                        widget.userData['uid'].toString(),
+                        widget.isTourist,
+                      ),
+                    ),
                   );
                 },
               ),

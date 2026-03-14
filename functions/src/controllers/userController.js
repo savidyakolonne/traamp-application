@@ -425,3 +425,166 @@ export const updateGuideCertificate = async (req, res) => {
     });
   }
 };
+
+// delete user
+export const deleteUser = async (req, res) => {
+  try {
+    const { uid, isTourist } = req.body;
+
+    if (isTourist) {
+      // remove all notifications belongs to user
+      const snapshot = await db
+        .collection("notifications")
+        .where("uid", "==", uid)
+        .get();
+
+      const batch = db.batch();
+      snapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+
+      // revoke the token
+      await auth.revokeRefreshTokens(uid);
+      // delete the document of the tourist from firebase
+      await db.collection("users").doc(uid).delete();
+      // delete email and password from firebase auth
+      await admin.auth().deleteUser(uid);
+    } else {
+      // remove all notifications belongs to user
+      const snapshotNotifications = await db
+        .collection("notifications")
+        .where("uid", "==", uid)
+        .get();
+
+      const batch = db.batch();
+      snapshotNotifications.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+
+      // get all packages belongs to guide
+      const guide_package_ref = db.collection("guide_packages");
+      const packageQuery = guide_package_ref.where("uid", "==", uid);
+
+      const snapshot = await packageQuery.get();
+      const packages = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log("All packages retrieved successfully");
+
+      // deleting each package from fireStore
+      for (let i = 0; i < packages.length; i++) {
+        const images = packages[i]["images"];
+        const coverImage = packages[i]["coverImage"];
+        const packageId = packages[i]["packageId"];
+
+        // Merge coverImage into images array safely
+        let allImages = [];
+        if (Array.isArray(images)) {
+          allImages = images;
+        } else if (typeof images === "string") {
+          try {
+            allImages = JSON.parse(images);
+          } catch {
+            allImages = [images];
+          }
+        }
+        if (coverImage) {
+          allImages.push(coverImage);
+        }
+
+        // Delete each image from Firebase Storage
+        for (const img of allImages) {
+          try {
+            const withoutQuery = img.split("?")[0];
+            let storagePath;
+            if (withoutQuery.includes("/o/")) {
+              storagePath = withoutQuery.split("/o/")[1];
+              storagePath = decodeURIComponent(storagePath);
+            } else {
+              const parts = withoutQuery.split("/");
+              storagePath = parts
+                .slice(parts.indexOf("guide_package_media"))
+                .join("/");
+            }
+
+            console.log("Deleting file:", storagePath);
+            const file = bucket.file(storagePath);
+            await file.delete();
+          } catch (err) {
+            console.log("Error deleting image:", err.message);
+          }
+        }
+
+        const id = db.collection("guide_packages").doc(packageId).get();
+
+        // deleting the package
+        await db.collection("guide_packages").doc(packageId).delete();
+        console.log("Successfully deleted the package.");
+      }
+
+      // delete all gallery belongs to guide from fireStore
+      const gallery_ref = db.collection("gallery");
+      const galleryQuery = gallery_ref.where("uid", "==", uid);
+
+      const snapshotGallery = await galleryQuery.get();
+      const galleries = snapshotGallery.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log("All Gallery retrieved successfully");
+
+      // delete each gallery from fireStore
+      for (let i = 0; i < galleries.length; i++) {
+        const galleryId = galleries[i]["galleryId"];
+        const images = galleries[i]["images"];
+
+        try {
+          for (let j = 0; j < images.length; j++) {
+            const withoutQuery = images[j].split("?")[0];
+            let storagePath;
+            if (withoutQuery.includes("/o/")) {
+              storagePath = withoutQuery.split("/o/")[1];
+              storagePath = decodeURIComponent(storagePath);
+            } else {
+              const parts = withoutQuery.split("/");
+              storagePath = parts.slice(parts.indexOf("gallery")).join("/");
+            }
+
+            console.log("Deleting file:", storagePath);
+            const file = bucket.file(storagePath);
+            await file.delete();
+          }
+        } catch (err) {
+          console.log("Error deleting image:", err.message);
+        }
+
+        // deleting the documents
+        await db.collection("gallery").doc(galleryId).delete();
+      }
+
+      // revoke the token
+      await auth.revokeRefreshTokens(uid);
+      // delete the document of the tourist from firebase
+      await db.collection("users").doc(uid).delete();
+      // delete email and password from firebase auth
+      await admin.auth().deleteUser(uid);
+    }
+
+    console.log("Successfully deleted user.");
+    res.status(200).json({
+      msg: "Successfully deleted user",
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      msg: "Error while deleting data",
+    });
+  }
+};
