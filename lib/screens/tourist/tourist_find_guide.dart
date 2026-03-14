@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../models/guide.dart';
 import '../../services/guide_service.dart';
-import '../profile/guide_public_view_screen.dart';
+import '../../widgets/guide_card.dart';
 
+// ignore: must_be_immutable
 class FindGuidesScreen extends StatefulWidget {
-  const FindGuidesScreen({super.key});
+  final String uid;
+  FindGuidesScreen(this.uid, {super.key});
 
   @override
   State<FindGuidesScreen> createState() => _FindGuidesScreenState();
@@ -17,9 +19,21 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
   final Set<String> selectedLanguages = {};
 
   final List<String> allLanguages = [
-    "Sinhala", "Tamil", "English", "Russian", "German", "French",
-    "Spanish", "Italian", "Chinese (Mandarin)", "Korean", "Japanese",
-    "Hindi", "Arabic", "Dutch", "Ukrainian",
+    "Sinhala",
+    "Tamil",
+    "English",
+    "Russian",
+    "German",
+    "French",
+    "Spanish",
+    "Italian",
+    "Chinese (Mandarin)",
+    "Korean",
+    "Japanese",
+    "Hindi",
+    "Arabic",
+    "Dutch",
+    "Ukrainian",
   ];
 
   void _openFilterSheet() {
@@ -41,8 +55,9 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                 return Container(
                   decoration: const BoxDecoration(
                     color: Colors.white,
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(22)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(22),
+                    ),
                   ),
                   child: ListView(
                     controller: scrollController,
@@ -59,12 +74,18 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text("Filter Guides",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w700)),
+                      const Text(
+                        "Filter Guides",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       const SizedBox(height: 16),
-                      const Text("Location",
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Text(
+                        "Location",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: tempLocation,
@@ -78,17 +99,31 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                           ),
                         ),
                         items: const [
-                          DropdownMenuItem(value: "Hikkaduwa", child: Text("Hikkaduwa")),
-                          DropdownMenuItem(value: "Galle", child: Text("Galle")),
+                          DropdownMenuItem(
+                            value: "Hikkaduwa",
+                            child: Text("Hikkaduwa"),
+                          ),
+                          DropdownMenuItem(
+                            value: "Galle",
+                            child: Text("Galle"),
+                          ),
                           DropdownMenuItem(value: "Ella", child: Text("Ella")),
-                          DropdownMenuItem(value: "Kandy", child: Text("Kandy")),
-                          DropdownMenuItem(value: "Colombo", child: Text("Colombo")),
+                          DropdownMenuItem(
+                            value: "Kandy",
+                            child: Text("Kandy"),
+                          ),
+                          DropdownMenuItem(
+                            value: "Colombo",
+                            child: Text("Colombo"),
+                          ),
                         ],
                         onChanged: (v) => setModalState(() => tempLocation = v),
                       ),
                       const SizedBox(height: 18),
-                      const Text("Languages",
-                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      const Text(
+                        "Languages",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       const SizedBox(height: 10),
                       Wrap(
                         spacing: 10,
@@ -125,10 +160,12 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                                 });
                               },
                               style: OutlinedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14)),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
                               child: const Text("Reset"),
                             ),
@@ -146,10 +183,12 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                                 Navigator.pop(context);
                               },
                               style: ElevatedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14)),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
                               child: const Text("Apply"),
                             ),
@@ -180,12 +219,14 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
   Widget build(BuildContext context) {
     final chips = <Widget>[];
     if (selectedLocation != null) {
-      chips.add(_chip(
-          selectedLocation!, () => setState(() => selectedLocation = null)));
+      chips.add(
+        _chip(selectedLocation!, () => setState(() => selectedLocation = null)),
+      );
     }
     for (final lang in selectedLanguages) {
-      chips.add(_chip(
-          lang, () => setState(() => selectedLanguages.remove(lang))));
+      chips.add(
+        _chip(lang, () => setState(() => selectedLanguages.remove(lang))),
+      );
     }
 
     return Scaffold(
@@ -195,18 +236,32 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
             // ── Header + Search + Filter chips ──────────────
             Container(
               color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+              padding: const EdgeInsets.fromLTRB(0, 16, 16, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Find a Guide",
-                    style: TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.w800),
+                  Row(
+                    children: [
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(Icons.arrow_back),
+                      ),
+                      Text(
+                        "Find a Guide",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
+                      SizedBox(width: 16),
                       Expanded(
                         child: TextField(
                           controller: _search,
@@ -247,10 +302,12 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                         scrollDirection: Axis.horizontal,
                         children: [
                           const SizedBox(width: 2),
-                          ...chips.map((c) => Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: c,
-                              )),
+                          ...chips.map(
+                            (c) => Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: c,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -265,6 +322,7 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                 search: _search.text,
                 location: selectedLocation,
                 languages: selectedLanguages,
+                uid: widget.uid,
               ),
             ),
           ],
@@ -277,6 +335,7 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
 /* ------------------ Guides list ------------------ */
 
 class _GuidesTab extends StatefulWidget {
+  final String uid;
   final String search;
   final String? location;
   final Set<String> languages;
@@ -285,6 +344,7 @@ class _GuidesTab extends StatefulWidget {
     required this.search,
     required this.location,
     required this.languages,
+    required this.uid,
   });
 
   @override
@@ -335,8 +395,10 @@ class _GuidesTabState extends State<_GuidesTab> {
               children: [
                 Icon(Icons.person_search, size: 48, color: Colors.black26),
                 SizedBox(height: 12),
-                Text("No guides found",
-                    style: TextStyle(color: Colors.black45, fontSize: 15)),
+                Text(
+                  "No guides found",
+                  style: TextStyle(color: Colors.black45, fontSize: 15),
+                ),
               ],
             ),
           );
@@ -359,7 +421,8 @@ class _GuidesTabState extends State<_GuidesTab> {
             final g = filtered[index];
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: _GuideCard(
+              child: GuideCard(
+                uid: widget.uid,
                 guideUid: g.uid ?? '',
                 name: "${g.firstName} ${g.lastName}",
                 location: g.location,
@@ -371,90 +434,6 @@ class _GuidesTabState extends State<_GuidesTab> {
           },
         );
       },
-    );
-  }
-}
-
-/* ------------------ Guide Card ------------------ */
-
-class _GuideCard extends StatelessWidget {
-  final String guideUid;
-  final String name;
-  final String location;
-  final List<String> languages;
-  final double? rating;
-  final String? profilePicture;
-
-  const _GuideCard({
-    required this.guideUid,
-    required this.name,
-    required this.location,
-    required this.languages,
-    this.rating,
-    this.profilePicture,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (guideUid.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => GuidePublicViewScreen(guideId: guideUid),
-            ),
-          );
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.black12),
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 26,
-              backgroundColor: Colors.black12,
-              backgroundImage: profilePicture != null &&
-                      profilePicture!.isNotEmpty
-                  ? NetworkImage(profilePicture!)
-                  : null,
-              child: profilePicture == null || profilePicture!.isEmpty
-                  ? Text(
-                      name.isNotEmpty ? name.substring(0, 1) : '?',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w800, fontSize: 15),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    languages.isNotEmpty
-                        ? "$location • ${languages.join(", ")}"
-                        : location,
-                    style: const TextStyle(
-                        fontSize: 12, color: Colors.black54),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: Colors.black38),
-          ],
-        ),
-      ),
     );
   }
 }

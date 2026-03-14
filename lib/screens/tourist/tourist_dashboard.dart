@@ -253,7 +253,9 @@ class _TouristDashboardState extends State<TouristDashboard> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const FindGuidesScreen(),
+                                builder: (_) => FindGuidesScreen(
+                                  widget.userData['uid'].toString(),
+                                ),
                               ),
                             );
                           },
