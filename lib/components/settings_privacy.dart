@@ -1,10 +1,34 @@
-// ignore_for_file: deprecated_member_use
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:traamp_frontend/app_config.dart';
+import '../screens/auth/login_screen.dart';
 
+// ignore: must_be_immutable
 class SettingsPrivacy extends StatelessWidget {
-  const SettingsPrivacy({super.key});
+  final String _uid;
+  final bool _isTourist;
+  const SettingsPrivacy(this._uid, this._isTourist, {super.key});
 
-  void deleteProfile() {}
+  Future<void> deleteProfile() async {
+    try {
+      final response = await http.delete(
+        Uri.parse("${AppConfig.SERVER_URL}/api/users/delete-user"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"uid": _uid, "isTourist": _isTourist}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        print(data['msg']);
+      } else {
+        print(data['msg']);
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +167,124 @@ class SettingsPrivacy extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    deleteProfile();
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Dialog(
+                          backgroundColor: Colors.transparent,
+                          child: SizedBox(
+                            width: 250,
+                            height: 180,
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color.fromARGB(28, 0, 0, 0),
+                                    blurRadius: 5,
+                                    spreadRadius: 5,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text(
+                                    "Are you sure you want to delete your profile?",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: const Color.fromARGB(
+                                        255,
+                                        71,
+                                        71,
+                                        71,
+                                      ),
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        icon: Container(
+                                          width: 100,
+                                          padding: EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: Color(0xFF6CD21F),
+                                            borderRadius: BorderRadius.circular(
+                                              24,
+                                            ),
+                                            border: BoxBorder.all(
+                                              color: const Color.fromARGB(
+                                                43,
+                                                0,
+                                                0,
+                                                0,
+                                              ),
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              "Close",
+                                              style: TextStyle(fontSize: 15),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      IconButton(
+                                        onPressed: () async {
+                                          await deleteProfile();
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) {
+                                                return LoginScreen();
+                                              },
+                                            ),
+                                          );
+                                        },
+                                        icon: Container(
+                                          width: 100,
+                                          padding: EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              24,
+                                            ),
+                                            border: BoxBorder.all(
+                                              color: Colors.red,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              "Delete",
+
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
                   },
                 ),
               ),
