@@ -22,7 +22,7 @@ export default function VerificationsPage() {
   useEffect(() => {
     const fetchVerificationRequests = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/admin/verifications");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/verifications`);
         const data = await res.json();
 
         if (!res.ok) {
