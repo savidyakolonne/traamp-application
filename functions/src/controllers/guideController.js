@@ -46,12 +46,16 @@ export const getGuideById = async (req, res) => {
       success: true,
       data: {
         uid: doc.id,
-        name: data.name || "",
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
         languages: data.languages || [],
         location: data.location || "",
         rating: data.rating || 0,
         bio: data.bio || "",
-        profileImage: data.profileImage || "",
+        profilePicture: data.profilePicture || "",   
+        isVerified: data.isVerified || false,
+        availability: data.availability || false,
+        guideCertificateType: data.guideCertificateType || "",
       } 
     });
 

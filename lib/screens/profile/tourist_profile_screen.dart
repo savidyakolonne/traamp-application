@@ -294,7 +294,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
   Widget _buildGuideListTile(Map<String, dynamic> guide) {
     final String firstName = guide['firstName'] ?? 'Unknown';
     final String lastName = guide['lastName'] ?? '';
-    final double rating = (guide['rating'] ?? 0.0).toDouble();
+    final double rating = double.tryParse(guide['rating']?.toString() ?? '0') ?? 0.0;
     final String guideUid = guide['uid'] ?? '';
     final String? profilePicture = guide['profilePicture'];
 
