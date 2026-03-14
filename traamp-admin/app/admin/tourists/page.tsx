@@ -28,7 +28,7 @@ export default function TouristsPage() {
   useEffect(() => {
     async function fetchTourists() {
       try {
-        const res = await fetch("http://localhost:3000/api/admin/tourists");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/tourists`);
         const data = await res.json();
         setTourists(data);
       } catch (err) {
