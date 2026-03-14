@@ -60,7 +60,7 @@ export default function Sidebar() {
         {items.map((it) => {
           const active =
             pathname === it.href ||
-            (it.href !== "/admin/dashboard" && pathname.startsWith(it.href));
+            (it.href !== "/admin/dashboard" && pathname?.startsWith(it.href));
 
           return (
             <Link
