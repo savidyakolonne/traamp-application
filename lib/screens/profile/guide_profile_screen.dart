@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../app_config.dart';
 import '../guide/guide_edit_profile.dart';
+import '../guide/guide packages/detailed_guide_package.dart';
 
 // ignore: must_be_immutable
 class GuideProfileScreen extends StatefulWidget {
@@ -22,7 +23,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
   List<dynamic> _packages = [];
   bool _packagesLoading = true;
 
-  // ── fetch user data ──────────────────────────────────────
   Future<void> _getUserData() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -50,8 +50,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
     }
   }
 
-  // ── fetch THIS guide's packages only ────────────────────
-  // ✅ uses POST /get-package-by-user-id with guide's own uid
   Future<void> _getPackages() async {
     if (mounted) setState(() => _packagesLoading = true);
     try {
@@ -88,7 +86,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
     _getUserData().then((_) => _getPackages());
   }
 
-  // ── helpers ──────────────────────────────────────────────
   List<String> get _languages {
     final raw = widget.userData['languages'];
     if (raw == null) return [];
@@ -126,13 +123,11 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border:
-                              Border.all(color: Colors.grey[300]!, width: 2),
+                          border: Border.all(color: Colors.grey[300]!, width: 2),
                         ),
                         child: CircleAvatar(
                           radius: 45,
                           backgroundColor: Colors.grey[200],
-                          // ✅ real profile picture
                           child: ClipOval(
                             child: profilePicture.isNotEmpty
                                 ? Image.network(
@@ -165,7 +160,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                                     color: Colors.amber, size: 16),
                                 const SizedBox(width: 4),
                                 Text(
-                                  // ✅ real rating
                                   '${widget.userData['rating'] ?? '0.0'}',
                                   style: const TextStyle(
                                       fontSize: 14,
@@ -174,7 +168,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                               ],
                             ),
                             const SizedBox(height: 4),
-                            // ✅ real location
                             if ((widget.userData['location'] ?? '').isNotEmpty)
                               Row(
                                 children: [
@@ -189,7 +182,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                                 ],
                               ),
                             const SizedBox(height: 4),
-                            // ✅ verified badge
                             if (widget.userData['isVerified'] == true)
                               Row(
                                 children: const [
@@ -219,7 +211,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                               fontSize: 15, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       Text(
-                        // ✅ real bio, no hardcoded fallback paragraph
                         (widget.userData['bio'] != null &&
                                 widget.userData['bio'].toString().isNotEmpty)
                             ? widget.userData['bio']
@@ -267,7 +258,7 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // ── Languages (real from DB) ──────────────────
+                // ── Languages ────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Container(
@@ -285,7 +276,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                             style: TextStyle(
                                 fontSize: 15, fontWeight: FontWeight.w600)),
                         const SizedBox(height: 12),
-                        // ✅ real languages from userData
                         _languages.isNotEmpty
                             ? Wrap(
                                 spacing: 8,
@@ -303,7 +293,7 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // ── Skills & Expertise (no DB yet, header only) ─
+                // ── Skills & Expertise ───────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Container(
@@ -330,7 +320,7 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // ── My Tour Packages (real from DB) ──────────
+                // ── My Tour Packages ─────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
@@ -369,7 +359,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
     );
   }
 
-  // ── avatar fallback ──────────────────────────────────────
   Widget _buildInitialAvatar() {
     final name = widget.userData['firstName']?.toString() ?? '';
     final initial = name.isNotEmpty ? name.substring(0, 1) : '?';
@@ -379,8 +368,7 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
       color: Colors.grey[200],
       child: Center(
         child: Text(initial,
-            style:
-                const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -397,7 +385,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
     );
   }
 
-  // ✅ uses exact field names from packageController.js
   Widget _buildPackageCard(Map<String, dynamic> pkg) {
     final title = pkg['packageTitle'] ?? 'Unnamed Package';
     final category = pkg['category'] ?? '';
@@ -410,7 +397,15 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => print('Package tapped: $title'),
+        // ✅ navigate to detailed package view on tap
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailedGuidePackage(pkg),
+            ),
+          );
+        },
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
@@ -428,7 +423,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // cover image
               if (coverImage != null && coverImage.isNotEmpty)
                 ClipRRect(
                   borderRadius:
@@ -452,7 +446,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // category chip
                     if (category.isNotEmpty)
                       Container(
                         margin: const EdgeInsets.only(bottom: 8),
