@@ -103,7 +103,7 @@ class _NotificationPackageRemovedTileState
                       ),
                     ),
                     Text(
-                      'You have successfully removed the "Sigiriya" package.',
+                      'You have successfully removed the "${widget.packageTitle}" package.',
                       style: TextStyle(fontSize: 16),
                     ),
                   ],

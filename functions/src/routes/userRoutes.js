@@ -11,6 +11,7 @@ import {
   updateTouristProfile,
   updateGuideProfile,
   updateGuideCertificate,
+  deleteUser,
 } from "../controllers/userController.js";
 
 const userRouter = Router();
@@ -38,5 +39,7 @@ userRouter.put("/update-guide-profile", updateGuideProfile);
 userRouter.put("/update-guide-availability", updateGuideAvailability);
 
 userRouter.post("/user-logout", logoutUser);
+
+userRouter.delete("/delete-user", deleteUser);
 
 export default userRouter;

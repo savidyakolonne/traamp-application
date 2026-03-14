@@ -4,6 +4,7 @@ TRAAMP is a Flutter-based tourism discovery application designed for Sri Lanka.
 The platform helps tourists discover **lesser-known and hidden places** using an interactive map and location-based suggestions.
 
 This repository contains:
+
 - **Flutter frontend** (Android, iOS, Web)
 - **Node.js + Express backend** for geo-based place search
 - **Firestore** as the database
@@ -12,7 +13,7 @@ This repository contains:
 
 ## 📁 Project Structure
 
-```text
+````text
 TRAAMP-MOBILE-FRONTEND/
 ├── lib/                      # Flutter frontend source code
 |   |── components/
@@ -21,7 +22,7 @@ TRAAMP-MOBILE-FRONTEND/
 |   |   |   weather/
 |   |   |   |── weather_card_element.dart
 |   |   |   |── weather_forecast.dart
-|   |   |   └── weather_screen.dart 
+|   |   |   └── weather_screen.dart
 |   |   |   main_tab_view.dart
 |   |   |   settings_screen.dart
 |   |   models/
@@ -57,13 +58,13 @@ TRAAMP-MOBILE-FRONTEND/
 |   |   |    |──place_detail_screen.dart
 |   |   |    |── place_list_screen.dart
 |   |   |── profile/
-|   |   |    |──guide_proflie_screen.dart
-|   |   |    |──tourist_proflie_screen.dart
+|   |   |    |──guide_profile_screen.dart
+|   |   |    |──tourist_profile_screen.dart
 |   |   |    |── guide_public_view_screen.dart
 |   |   |── tourist/
 │   ├── services/
 │   │   |──position.dart     # GPS logic and location permission handling
-|   |   |── activiies_service.dart
+|   |   |── activities_service.dart
 |   |   |── appUser.dart
 |   |   |── auth_service.dart
 |   |   |── gemini_service.dart
@@ -79,7 +80,7 @@ TRAAMP-MOBILE-FRONTEND/
 |   |── firebase_options.dart
 |   |── list-data.dart
 |   └── app_config.dart
-|   
+|
 ├── functions/  # Node.js (Firebase Functions) backend
 |   |── node_modules/
 |   |──src/
@@ -98,10 +99,10 @@ TRAAMP-MOBILE-FRONTEND/
 |   |   |     |──placeController.js
 |   |   |     └──userController.js
 │   |   |──app.js  # Express.js application configuration
-│   |   └──index.js # Backend entry point           
+│   |   └──index.js # Backend entry point
 │   ├── package.json          # Node.js dependencies
 │   └── package-lock.json
-| 
+|
 |──traamp-admin/
 |      |──.next # generate when run the npm run dev
 |      |──app/
@@ -175,14 +176,14 @@ flutter doctor
 
 ▶️ Running Order (IMPORTANT)
 
-dependecies check-
+dependencies check-
 Front end
   flutter clean
   flutter pub get
-backend 
+backend
   npm i
 
-Start Backend - 
+Start Backend -
 cd functions
 npm run dev
 //run on the 3000 port
@@ -193,8 +194,9 @@ make a file on the root .env.local and copy paste the configurations from .env.e
 npm run dev -- -p 3001
 // run on the 3001 port
 
-Start Flutter App - 
-flutter run 
+Start Flutter App -
+flutter run
 
 if using a web browser:
 flutter run -d chrome --dart-define=GEMINI_API_KEY=YOUR_KEY  for the running on the chrome .(to check the traamp assistant)
+````

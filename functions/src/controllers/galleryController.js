@@ -116,7 +116,7 @@ export const deleteGallery = async (req, res) => {
       console.log("Error deleting image:", err.message);
     }
 
-    // Remove specific images from Firestore array
+    // Remove specific images from FireStore array
     const docRef = db.collection("gallery").doc(galleryId);
     await docRef.update({
       images: FieldValue.arrayRemove(image),
