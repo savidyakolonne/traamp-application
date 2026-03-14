@@ -38,13 +38,97 @@ export const getGuideById = async (req, res) => {
     const doc = await db.collection("users").doc(req.params.uid).get();
 
     if (!doc.exists || doc.data().type !== "guide") {
-      return res.status(404).json({ error: "Guide not found" });
+      return res.status(404).json({ success: false, message: "Guide not found" });
     }
 
-    res.json({ uid: doc.id, ...doc.data() });
+    const data = doc.data();
+    res.json({
+      success: true,
+      data: {
+        uid: doc.id,
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        languages: data.languages || [],
+        location: data.location || "",
+        rating: data.rating || 0,
+        bio: data.bio || "",
+        profilePicture: data.profilePicture || "",   
+        isVerified: data.isVerified || false,
+        availability: data.availability || false,
+        guideCertificateType: data.guideCertificateType || "",
+      } 
+    });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch guide" });
+    res.status(500).json({ success: false, message: "Failed to fetch guide" });
+  }
+};
+
+// GET guide profile (authenticated)
+export const getGuideProfile = async (req, res) => {
+  try {
+    const uid = req.user.uid;
+
+    const doc = await db.collection("users").doc(uid).get();
+
+    if (!doc.exists) {
+      return res.status(404).json({
+        success: false,
+        message: "Guide not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        uid: doc.id,
+        ...doc.data()  // return full profile for authenticated user
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching guide profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch guide profile"
+    });
+  }
+};
+
+// UPDATE guide profile (authenticated)
+export const updateGuideProfile = async (req, res) => {
+  try {
+    const uid = req.user.uid;
+
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields provided to update"
+      });
+    }
+
+    await db.collection("users").doc(uid).update({
+      ...req.body,
+      updatedAt: new Date().toISOString()
+    });
+
+    const doc = await db.collection("users").doc(uid).get();
+
+    res.json({
+      success: true,
+      message: "Guide profile updated successfully",
+      data: {
+        uid: doc.id,
+        ...doc.data()
+      }
+    });
+
+  } catch (error) {
+    console.error("Error updating guide profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update guide profile"
+    });
   }
 };
