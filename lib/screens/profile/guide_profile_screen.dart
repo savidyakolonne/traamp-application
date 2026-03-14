@@ -19,10 +19,11 @@ class GuideProfileScreen extends StatefulWidget {
 class _GuideProfileScreenState extends State<GuideProfileScreen> {
   bool _isLoading = false;
   String profilePicture = "";
-  List<dynamic> packages = [];
+  List<dynamic> _packages = [];
+  bool _packagesLoading = true;
 
-  // get user data from DB
-  Future<void> _getUserDataAndPackages() async {
+  // ── fetch user data ──────────────────────────────────────
+  Future<void> _getUserData() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
@@ -32,55 +33,67 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
           body: jsonEncode({"idToken": widget.idToken}),
         );
 
-        final data = await jsonDecode(response.body);
+        final data = jsonDecode(response.body);
 
         if (response.statusCode == 200) {
           setState(() {
             widget.userData = data['data'];
-            if (widget.userData['profilePicture'] != null) {
-              profilePicture = widget.userData['profilePicture'];
-            }
+            profilePicture = widget.userData['profilePicture'] ?? '';
           });
           print(data['msg']);
         } else if (response.statusCode == 401) {
           print(data['msg']);
         }
-      } else {
-        print("Something wrong during creating instance from firebase");
       }
-      // calling guide packages
-      _getPackages();
     } catch (e) {
       print(e.toString());
     }
   }
 
-  // to get guide packages
+  // ── fetch THIS guide's packages only ────────────────────
+  // ✅ uses POST /get-package-by-user-id with guide's own uid
   Future<void> _getPackages() async {
+    if (mounted) setState(() => _packagesLoading = true);
     try {
-      final response = await http.get(
-        Uri.parse("${AppConfig.SERVER_URL}/api/guidePackage/get-all-packages"),
+      final uid = widget.userData['uid'] ??
+          FirebaseAuth.instance.currentUser?.uid ?? '';
+
+      final response = await http.post(
+        Uri.parse(
+            "${AppConfig.SERVER_URL}/api/guidePackage/get-package-by-user-id"),
         headers: {"Content-Type": "application/json"},
+        body: jsonEncode({'uid': uid}),
       );
-      final data = await jsonDecode(response.body);
+      final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        setState(() {
-          packages = data['packages'];
-        });
+        if (mounted) setState(() => _packages = data['packages'] ?? []);
       } else {
-        print(data['msg']);
-        print('Error while fetching packages');
+        print('Error fetching packages: ${data['msg']}');
       }
     } catch (e) {
-      print(e.toString());
-      print("error while connecting to server when retrieving packages");
+      print('Error fetching packages: $e');
+    } finally {
+      if (mounted) setState(() => _packagesLoading = false);
     }
+  }
+
+  Future<void> _refreshAll() async {
+    await _getUserData();
+    await _getPackages();
   }
 
   @override
   void initState() {
     super.initState();
-    _getUserDataAndPackages();
+    _getUserData().then((_) => _getPackages());
+  }
+
+  // ── helpers ──────────────────────────────────────────────
+  List<String> get _languages {
+    final raw = widget.userData['languages'];
+    if (raw == null) return [];
+    if (raw is List) return List<String>.from(raw);
+    return [];
   }
 
   @override
@@ -97,75 +110,97 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: _getUserDataAndPackages,
+          onRefresh: _refreshAll,
           child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Profile Header Section
+
+                // ── Profile Header ──────────────────────────
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Profile Picture with Edit Button
-                      Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.grey[300]!,
-                                width: 2,
-                              ),
-                            ),
-                            child: CircleAvatar(
-                              radius: 45,
-                              backgroundImage: (profilePicture.isNotEmpty)
-                                  ? NetworkImage(profilePicture)
-                                  : (widget.userData['gender'] == "Female"
-                                        ? AssetImage(
-                                            'assets/images/avatar-female.avif',
-                                          )
-                                        : AssetImage(
-                                            'assets/images/avatar-male.avif',
-                                          )),
-                            ),
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border:
+                              Border.all(color: Colors.grey[300]!, width: 2),
+                        ),
+                        child: CircleAvatar(
+                          radius: 45,
+                          backgroundColor: Colors.grey[200],
+                          // ✅ real profile picture
+                          child: ClipOval(
+                            child: profilePicture.isNotEmpty
+                                ? Image.network(
+                                    profilePicture,
+                                    width: 90,
+                                    height: 90,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) =>
+                                        _buildInitialAvatar(),
+                                  )
+                                : _buildInitialAvatar(),
                           ),
-                        ],
+                        ),
                       ),
                       const SizedBox(width: 16),
-                      // Name, Rating, Stats
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${widget.userData['firstName'].toString()} ${widget.userData['lastName'].toString()}',
+                              '${widget.userData['firstName'] ?? ''} ${widget.userData['lastName'] ?? ''}'
+                                  .trim(),
                               style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                  fontSize: 20, fontWeight: FontWeight.bold),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 6),
                             Row(
                               children: [
-                                const Icon(
-                                  Icons.star,
-                                  color: Colors.amber,
-                                  size: 16,
-                                ),
+                                const Icon(Icons.star,
+                                    color: Colors.amber, size: 16),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '${widget.userData['rating']}',
+                                  // ✅ real rating
+                                  '${widget.userData['rating'] ?? '0.0'}',
                                   style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600),
                                 ),
-                                const SizedBox(width: 16),
                               ],
                             ),
+                            const SizedBox(height: 4),
+                            // ✅ real location
+                            if ((widget.userData['location'] ?? '').isNotEmpty)
+                              Row(
+                                children: [
+                                  const Icon(Icons.location_on,
+                                      size: 14, color: Colors.black54),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    widget.userData['location'],
+                                    style: const TextStyle(
+                                        fontSize: 13, color: Colors.black54),
+                                  ),
+                                ],
+                              ),
+                            const SizedBox(height: 4),
+                            // ✅ verified badge
+                            if (widget.userData['isVerified'] == true)
+                              Row(
+                                children: const [
+                                  Icon(Icons.verified,
+                                      color: Colors.green, size: 16),
+                                  SizedBox(width: 4),
+                                  Text('Verified Guide',
+                                      style: TextStyle(
+                                          fontSize: 12, color: Colors.green)),
+                                ],
+                              ),
                           ],
                         ),
                       ),
@@ -173,80 +208,66 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                   ),
                 ),
 
-                // Bio Section
+                // ── Bio ──────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Bio',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      const Text('Bio',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       Text(
-                        widget.userData['bio'] ??
-                            'Passionate about sharing the hidden gems of Sri Lanka. Specializing in ancient history and tea plantation tours with a focus on sustainable travel.',
+                        // ✅ real bio, no hardcoded fallback paragraph
+                        (widget.userData['bio'] != null &&
+                                widget.userData['bio'].toString().isNotEmpty)
+                            ? widget.userData['bio']
+                            : 'No bio available.',
                         style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          height: 1.4,
-                        ),
+                            fontSize: 14, color: Colors.black87, height: 1.4),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // Action Buttons
+                // ── Edit Profile Button ───────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return EditGuideProfile();
-                                },
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 0,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => EditGuideProfile(),
                           ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Edit Profile',
-                                  style: TextStyle(fontWeight: FontWeight.w600),
-                                ),
-                        ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        elevation: 0,
                       ),
-                    ],
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2),
+                            )
+                          : const Text('Edit Profile',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
 
-                // Languages Section
+                // ── Languages (real from DB) ──────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Container(
@@ -260,35 +281,29 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Languages',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                        const Text('Languages',
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w600)),
                         const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            _buildChip('English (Fluent)'),
-                            _buildChip('Sinhala (Native)'),
-                            _buildChip('French (Basic)'),
-                          ],
-                        ),
+                        // ✅ real languages from userData
+                        _languages.isNotEmpty
+                            ? Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _languages
+                                    .map((lang) => _buildChip(lang))
+                                    .toList(),
+                              )
+                            : Text('No languages listed.',
+                                style: TextStyle(
+                                    fontSize: 13, color: Colors.grey[500])),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
 
-                // Skills Section
+                // ── Skills & Expertise (no DB yet, header only) ─
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Container(
@@ -302,138 +317,70 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Skills & Expertise',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                        const Text('Skills & Expertise',
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w600)),
                         const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            _buildChip('Cultural Heritage'),
-                            _buildChip('Wildlife Tours'),
-                            _buildChip('Photography'),
-                            _buildChip('History'),
-                            _buildChip('Tea Plantations'),
-                          ],
-                        ),
+                        Text('Not listed yet.',
+                            style: TextStyle(
+                                fontSize: 13, color: Colors.grey[500])),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
 
-                // Tour Packages Section
+                // ── My Tour Packages (real from DB) ──────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'My Tour Packages',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      const Text('My Tour Packages',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 12),
+                      if (_packagesLoading)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: CircularProgressIndicator(
+                                color: Colors.green),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      _buildPackageCard(
-                        'Cultural Kandy Experience',
-                        '3 Days',
-                        '\$450',
-                        'Temple of the Tooth, Royal Botanical Gardens, Traditional Dance',
-                      ),
-                      const SizedBox(height: 12),
-                      _buildPackageCard(
-                        'Yala Wildlife Safari',
-                        '2 Days',
-                        '\$350',
-                        'Leopard tracking, Elephant herds, Bird watching',
-                      ),
-                      const SizedBox(height: 12),
-                      _buildPackageCard(
-                        'Ella Hill Country',
-                        '4 Days',
-                        '\$550',
-                        'Nine Arch Bridge, Tea estates, Little Adam\'s Peak hiking',
-                      ),
+                        )
+                      else if (_packages.isEmpty)
+                        Text('No packages added yet.',
+                            style: TextStyle(
+                                fontSize: 13, color: Colors.grey[500]))
+                      else
+                        ..._packages.map((pkg) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _buildPackageCard(pkg),
+                            )),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                // My Posts Gallery
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'My Gallery',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    'https://images.unsplash.com/photo-1656159625990-8cd23231c218?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                                    height: 150,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    'https://plus.unsplash.com/premium_photo-1663089942980-b817c683b40f?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                                    height: 150,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                const SizedBox(height: 32),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ── avatar fallback ──────────────────────────────────────
+  Widget _buildInitialAvatar() {
+    final name = widget.userData['firstName']?.toString() ?? '';
+    final initial = name.isNotEmpty ? name.substring(0, 1) : '?';
+    return Container(
+      width: 90,
+      height: 90,
+      color: Colors.grey[200],
+      child: Center(
+        child: Text(initial,
+            style:
+                const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -445,29 +392,27 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 12, color: Colors.black87),
-      ),
+      child: Text(label,
+          style: const TextStyle(fontSize: 12, color: Colors.black87)),
     );
   }
 
-  Widget _buildPackageCard(
-    String title,
-    String duration,
-    String price,
-    String description,
-  ) {
+  // ✅ uses exact field names from packageController.js
+  Widget _buildPackageCard(Map<String, dynamic> pkg) {
+    final title = pkg['packageTitle'] ?? 'Unnamed Package';
+    final category = pkg['category'] ?? '';
+    final duration = pkg['duration']?.toString() ?? '';
+    final price = pkg['price']?.toString() ?? '';
+    final location = pkg['location'] ?? '';
+    final shortDescription = pkg['shortDescription'] ?? '';
+    final coverImage = pkg['coverImage'] as String?;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
-          // View/Edit package
-          print('Package tapped: $title');
-        },
+        onTap: () => print('Package tapped: $title'),
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -483,63 +428,100 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+              // cover image
+              if (coverImage != null && coverImage.isNotEmpty)
+                ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: Image.network(
+                    coverImage,
+                    height: 140,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 140,
+                      color: Colors.grey[200],
+                      child: const Center(
+                          child: Icon(Icons.image_not_supported,
+                              color: Colors.grey)),
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // category chip
+                    if (category.isNotEmpty)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE5F6D3),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(category,
+                            style: const TextStyle(
+                                color: Color(0xFF7DD421),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12)),
                       ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(title,
+                              style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                        Icon(Icons.more_vert,
+                            color: Colors.grey[600], size: 20),
+                      ],
                     ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      // Package options
-                      print('Package options tapped: $title');
-                    },
-                    borderRadius: BorderRadius.circular(50),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Icon(
-                        Icons.more_vert,
-                        color: Colors.grey[600],
-                        size: 20,
-                      ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        if (location.isNotEmpty) ...[
+                          const Icon(Icons.location_on,
+                              size: 13, color: Colors.black45),
+                          const SizedBox(width: 3),
+                          Text(location,
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.black45)),
+                          const SizedBox(width: 12),
+                        ],
+                        if (duration.isNotEmpty) ...[
+                          const Icon(Icons.access_time,
+                              size: 13, color: Colors.black45),
+                          const SizedBox(width: 3),
+                          Text(duration,
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.black45)),
+                        ],
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
-                  const SizedBox(width: 4),
-                  Text(
-                    duration,
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(width: 16),
-                  Icon(Icons.attach_money, size: 14, color: Colors.green[700]),
-                  Text(
-                    price,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green[700],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[700],
-                  height: 1.4,
+                    if (shortDescription.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(shortDescription,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                              height: 1.4)),
+                    ],
+                    if (price.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text('$price LKR',
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green[700])),
+                    ],
+                  ],
                 ),
               ),
             ],
