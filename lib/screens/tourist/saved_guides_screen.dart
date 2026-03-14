@@ -31,34 +31,25 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
 }
 
   Future<void> _loadSavedGuides() async {
-    if (_touristUid == null) return;
+  setState(() => _isLoading = true);
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final guides = await _savedGuidesService.getSavedGuides(
-        touristUid: _touristUid!,
-      );
-
-      setState(() {
-        _savedGuides = guides;
-      });
-    } catch (e) {
-      print('Error loading saved guides: $e');
+  try {
+    final guides = await _savedGuidesService.getSavedGuides();
+    setState(() => _savedGuides = guides);
+  } catch (e) {
+    print('Error loading saved guides: $e');
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to load saved guides'),
           backgroundColor: Colors.red,
         ),
       );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
+  } finally {
+    setState(() => _isLoading = false);
   }
+}
 
   @override
   Widget build(BuildContext context) {

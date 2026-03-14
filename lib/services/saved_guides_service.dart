@@ -1,23 +1,36 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../app_config.dart';
 
 class SavedGuidesService {
-  // Use AppConfig.SERVER_URL instead of hardcoded localhost
   final String _baseUrl = '${AppConfig.SERVER_URL}/api/saved-guides';
+
+  // Helper to get auth headers with Firebase token
+  Future<Map<String, String>> _getHeaders() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('User not logged in');
+    }
+    final token = await user.getIdToken();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
 
   /// Add a guide to the tourist's saved guides list
   Future<bool> saveGuide({
-    required String touristUid,
     required String guideUid,
   }) async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.post(
-        Uri.parse('$_baseUrl/save'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse(_baseUrl),                  // POST /api/saved-guides
+        headers: headers,
         body: jsonEncode({
-          'touristUid': touristUid,
-          'guideUid': guideUid,
+          'guideUid': guideUid,              // touristUid comes from token on backend
         }),
       );
 
@@ -25,7 +38,6 @@ class SavedGuidesService {
         final data = jsonDecode(response.body);
         return data['success'] == true;
       } else if (response.statusCode == 409) {
-        // Guide already saved - treat as success
         print('Guide already saved');
         return true;
       } else {
@@ -40,17 +52,14 @@ class SavedGuidesService {
 
   /// Remove a guide from the tourist's saved guides list
   Future<bool> unsaveGuide({
-    required String touristUid,
     required String guideUid,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/remove'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'touristUid': touristUid,
-          'guideUid': guideUid,
-        }),
+      final headers = await _getHeaders();
+
+      final response = await http.delete(
+        Uri.parse('$_baseUrl/$guideUid'),     // DELETE /api/saved-guides/:guideId
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -68,41 +77,29 @@ class SavedGuidesService {
 
   /// Check if a guide is saved by the tourist
   Future<bool> isGuideSaved({
-    required String touristUid,
     required String guideUid,
   }) async {
     try {
-      final uri = Uri.parse('$_baseUrl/check').replace(queryParameters: {
-        'touristUid': touristUid,
-        'guideUid': guideUid,
-      });
+      final headers = await _getHeaders();
 
-      final response = await http.get(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-      );
+      // Fetch all saved guides and check locally
+      final guides = await getSavedGuides();
+      return guides.any((guide) => guide['uid'] == guideUid);
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['isSaved'] == true;
-      } else {
-        print('Error checking if guide is saved: ${response.statusCode}');
-        return false;
-      }
     } catch (e) {
       print('Error checking if guide is saved: $e');
       return false;
     }
   }
 
-  /// Get all saved guides for a tourist
-  Future<List<Map<String, dynamic>>> getSavedGuides({
-    required String touristUid,
-  }) async {
+  /// Get all saved guides for current user
+  Future<List<Map<String, dynamic>>> getSavedGuides() async {
     try {
+      final headers = await _getHeaders();
+
       final response = await http.get(
-        Uri.parse('$_baseUrl/$touristUid'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse(_baseUrl),                  // GET /api/saved-guides
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -121,27 +118,17 @@ class SavedGuidesService {
     }
   }
 
-  /// Toggle save status (save if not saved, unsave if saved)
+  /// Toggle save status
   Future<bool> toggleSaveGuide({
-    required String touristUid,
     required String guideUid,
   }) async {
     try {
-      final isSaved = await isGuideSaved(
-        touristUid: touristUid,
-        guideUid: guideUid,
-      );
+      final isSaved = await isGuideSaved(guideUid: guideUid);
 
       if (isSaved) {
-        return await unsaveGuide(
-          touristUid: touristUid,
-          guideUid: guideUid,
-        );
+        return await unsaveGuide(guideUid: guideUid);
       } else {
-        return await saveGuide(
-          touristUid: touristUid,
-          guideUid: guideUid,
-        );
+        return await saveGuide(guideUid: guideUid);
       }
     } catch (e) {
       print('Error toggling save guide: $e');
@@ -149,35 +136,10 @@ class SavedGuidesService {
     }
   }
 
-  /// Get count of saved guides
-  Future<int> getSavedGuidesCount({
-    required String touristUid,
-  }) async {
+  /// Get all saved guide IDs
+  Future<List<String>> getSavedGuideIds() async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/$touristUid/count'),
-        headers: {'Content-Type': 'application/json'},
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['count'] ?? 0;
-      } else {
-        print('Error getting saved guides count: ${response.statusCode}');
-        return 0;
-      }
-    } catch (e) {
-      print('Error getting saved guides count: $e');
-      return 0;
-    }
-  }
-
-  /// Get all saved guide IDs for a tourist (helper method for compatibility)
-  Future<List<String>> getSavedGuideIds({
-    required String touristUid,
-  }) async {
-    try {
-      final guides = await getSavedGuides(touristUid: touristUid);
+      final guides = await getSavedGuides();
       return guides.map((guide) => guide['uid'] as String).toList();
     } catch (e) {
       print('Error fetching saved guide IDs: $e');

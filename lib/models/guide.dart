@@ -12,6 +12,11 @@ class Guide extends AppUser {
   final String country;
   final double rating;
   final bool availability;
+  final bool isVerified;
+  final String? profilePicture;   
+  final List<String>? languages;
+  final String? bio;
+  final String? uid;
 
   Guide({
     required super.firstName,
@@ -31,6 +36,11 @@ class Guide extends AppUser {
     required this.country,
     required this.rating,
     required this.availability,
+    this.isVerified = false, 
+    this.profilePicture,            
+    this.languages,
+    this.bio,
+    this.uid,
   });
 
   // ------------------------------------------------------------------------------------------------------ for the find guide - savidyakolonne
@@ -53,7 +63,14 @@ class Guide extends AppUser {
       address: map['address'] ?? '',
       country: map['country'] ?? '',
       rating: double.tryParse(map['rating']?.toString() ?? '0') ?? 0,
-      availability: map['availability'] ?? false,
+      availability: map['availability'] == true || map['availability'] == 'true',
+      isVerified: map['isVerified'] == true || map['isVerified'] == 'true',
+      profilePicture: map['profilePicture'],
+      languages: map['languages'] != null
+          ? List<String>.from(map['languages'])
+          : [],
+      bio: map['bio'],
+      uid: map['uid'],
     );
   }
 
@@ -72,7 +89,12 @@ class Guide extends AppUser {
       'address': address,
       'country': country,
       'rating': rating,
-      'availability': availability,
+      'availability': availability, 
+      'isVerified': isVerified,
+      'profilePicture': profilePicture,  
+      'languages': languages, 
+      'bio': bio, 
+      'uid': uid,                      
     };
   }
 }
