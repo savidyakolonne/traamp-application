@@ -6,6 +6,7 @@ import 'package:traamp_frontend/app_config.dart';
 import '../tourist/tourist_edit_profile.dart';
 import '../tourist/saved_guides_screen.dart';
 import '../../services/saved_guides_service.dart';
+import '../profile/guide_public_view_screen.dart';
 
 // ignore: must_be_immutable
 class TouristProfileScreen extends StatefulWidget {
@@ -21,10 +22,10 @@ class TouristProfileScreen extends StatefulWidget {
 class _TouristProfileScreenState extends State<TouristProfileScreen> {
   bool _isLoading = false;
   String profilePicture = "";
-  int _savedGuidesCount = 0;
+  List<Map<String, dynamic>> _savedGuides = [];
+  bool _isLoadingSavedGuides = false;
   final SavedGuidesService _savedGuidesService = SavedGuidesService();
 
-  // get user data from DB
   Future<void> _getUserData() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -45,9 +46,6 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
             }
           });
           print(data['msg']);
-          
-          // Fetch saved guides count after user data is loaded
-          await _loadSavedGuidesCount();
         } else if (response.statusCode == 401) {
           print(data['msg']);
         }
@@ -59,27 +57,28 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
     }
   }
 
-  Future<void> _loadSavedGuidesCount() async {
+  Future<void> _loadSavedGuides() async {
+    setState(() => _isLoadingSavedGuides = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final count = await _savedGuidesService.getSavedGuidesCount(
-          touristUid: user.uid,
-        );
-        
-        setState(() {
-          _savedGuidesCount = count;
-        });
-      }
+      final guides = await _savedGuidesService.getSavedGuides();
+      setState(() => _savedGuides = guides);
     } catch (e) {
-      print('Error loading saved guides count: $e');
+      print('Error loading saved guides: $e');
+    } finally {
+      setState(() => _isLoadingSavedGuides = false);
     }
+  }
+
+  Future<void> _refreshAll() async {
+    await _getUserData();
+    await _loadSavedGuides();
   }
 
   @override
   void initState() {
     super.initState();
     _getUserData();
+    _loadSavedGuides();
   }
 
   @override
@@ -99,18 +98,17 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: _getUserData,
+          onRefresh: _refreshAll,
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Profile Header Section (Instagram-like)
+                // Profile Header Section
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Profile Picture
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -124,16 +122,15 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                           backgroundImage: (profilePicture.isNotEmpty)
                               ? NetworkImage(profilePicture)
                               : (widget.userData['gender'] == "Female"
-                                    ? const AssetImage(
-                                        'assets/images/avatar-female.avif',
-                                      )
-                                    : const AssetImage(
-                                        'assets/images/avatar-male.avif',
-                                      )),
+                                  ? const AssetImage(
+                                      'assets/images/avatar-female.avif',
+                                    )
+                                  : const AssetImage(
+                                      'assets/images/avatar-male.avif',
+                                    )),
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // Name and Info
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,88 +157,45 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                   ),
                 ),
 
-                // Action Buttons Row
+                // Edit Profile Button
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      // Edit Profile Button
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return EditTouristProfile();
-                                },
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 0,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => EditTouristProfile(),
                           ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator.adaptive(
-                                    backgroundColor: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text(
-                                  'Edit Profile',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
+                        elevation: 0,
                       ),
-                      const SizedBox(width: 12),
-                      // Saved Guides Button
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SavedGuidesScreen(),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator.adaptive(
+                                backgroundColor: Colors.white,
+                                strokeWidth: 2,
                               ),
-                            );
-                            // Refresh count when returning from SavedGuidesScreen
-                            _loadSavedGuidesCount();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.green,
-                            side: const BorderSide(color: Colors.green),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                            )
+                          : const Text(
+                              'Edit Profile',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          icon: const Icon(
-                            Icons.favorite,
-                            size: 18,
-                          ),
-                          label: Text(
-                            _savedGuidesCount > 0
-                                ? 'Saved ($_savedGuidesCount)'
-                                : 'Saved',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -267,11 +221,11 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const SavedGuidesScreen(),
+                                  builder: (context) =>
+                                      const SavedGuidesScreen(),
                                 ),
                               );
-                              // Refresh count when returning from SavedGuidesScreen
-                              _loadSavedGuidesCount();
+                              _loadSavedGuides();
                             },
                             child: const Text(
                               'See All',
@@ -281,29 +235,50 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      _buildGuideListTile(
-                        'Amara J.',
-                        'Cultural Heritage Expert',
-                        4.9,
-                        124,
-                        'https://plus.unsplash.com/premium_photo-1682142702814-5999525b4346?q=80&w=883&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                      ),
-                      const SizedBox(height: 12),
-                      _buildGuideListTile(
-                        'Ruwan K.',
-                        'Wildlife & Safari Specialist',
-                        4.8,
-                        89,
-                        'https://plus.unsplash.com/premium_photo-1663089942980-b817c683b40f?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                      ),
-                      const SizedBox(height: 12),
-                      _buildGuideListTile(
-                        'Priya M.',
-                        'Adventure & Trekking Guide',
-                        4.7,
-                        56,
-                        'https://plus.unsplash.com/premium_photo-1682097908465-398bf580bf81?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                      ),
+
+                      // Loading state
+                      if (_isLoadingSavedGuides)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: CircularProgressIndicator(color: Colors.green),
+                          ),
+                        )
+
+                      // Empty state
+                      else if (_savedGuides.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.favorite_border,
+                                  size: 48,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'No saved guides yet',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+
+                      // Real saved guides from backend
+                      else
+                        ...List.generate(_savedGuides.length, (index) {
+                          final guide = _savedGuides[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _buildGuideListTile(guide),
+                          );
+                        }),
                     ],
                   ),
                 ),
@@ -316,18 +291,25 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
     );
   }
 
-  Widget _buildGuideListTile(
-    String name,
-    String specialty,
-    double rating,
-    int reviews,
-    String imageUrl,
-  ) {
+  Widget _buildGuideListTile(Map<String, dynamic> guide) {
+    final String firstName = guide['firstName'] ?? 'Unknown';
+    final String lastName = guide['lastName'] ?? '';
+    final double rating = double.tryParse(guide['rating']?.toString() ?? '0') ?? 0.0;
+    final String guideUid = guide['uid'] ?? '';
+    final String? profilePicture = guide['profilePicture'];
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          print('Guide tapped: $name');
+          if (guideUid.isNotEmpty) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GuidePublicViewScreen(guideId: guideUid),
+              ),
+            ).then((_) => _loadSavedGuides());
+          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -341,8 +323,13 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundImage: NetworkImage(imageUrl),
                 backgroundColor: Colors.grey[200],
+                backgroundImage: profilePicture != null && profilePicture.isNotEmpty
+                    ? NetworkImage(profilePicture)
+                    : null,
+                child: profilePicture == null || profilePicture.isEmpty
+                    ? Icon(Icons.person, size: 24, color: Colors.grey[600])
+                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -350,7 +337,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      '$firstName $lastName',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -358,32 +345,22 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      specialty,
+                      guide['location'] ?? '',
                       style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                     ),
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        rating.toString(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
+                  const Icon(Icons.star, color: Colors.amber, size: 16),
+                  const SizedBox(width: 4),
                   Text(
-                    '$reviews tours',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    rating.toStringAsFixed(1),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),

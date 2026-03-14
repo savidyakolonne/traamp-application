@@ -126,6 +126,8 @@ TRAAMP-MOBILE-FRONTEND/
 |      |     |──firebaseAdmin.ts
 |      |── public/
 |      |── nodemodules # generate, wehn run the npm intall
+|      |── .env.local
+|      |── .env.example
 |      |── .gitignore
 |      |── eslint.config.mjs
 |      |──package-lock.json
@@ -188,6 +190,7 @@ npm run dev
 
 Start traamp-admin
 cd traamp-admin
+make a file on the root .env.local and copy paste the configurations from .env.example
 npm run dev -- -p 3001
 // run on the 3001 port
 

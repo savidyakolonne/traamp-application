@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/guide.dart';
 import '../../services/guide_service.dart';
+import '../profile/guide_public_view_screen.dart';
 
 class FindGuidesScreen extends StatefulWidget {
   const FindGuidesScreen({super.key});
@@ -15,7 +16,6 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
   String? selectedLocation;
   final Set<String> selectedLanguages = {};
 
-  // demo languages (replace with your real list)
   final List<String> allLanguages = [
     "Sinhala",
     "Tamil",
@@ -35,7 +35,6 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
   ];
 
   void _openFilterSheet() {
-    // local temp state inside the sheet (so Apply/Cancel works clean)
     String? tempLocation = selectedLocation;
     final tempLanguages = {...selectedLanguages};
 
@@ -74,8 +73,6 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 16),
-
-                  // Location
                   const Text(
                     "Location",
                     style: TextStyle(fontWeight: FontWeight.w600),
@@ -93,24 +90,15 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                       ),
                     ),
                     items: const [
-                      DropdownMenuItem(
-                        value: "Hikkaduwa",
-                        child: Text("Hikkaduwa"),
-                      ),
+                      DropdownMenuItem(value: "Hikkaduwa", child: Text("Hikkaduwa")),
                       DropdownMenuItem(value: "Galle", child: Text("Galle")),
                       DropdownMenuItem(value: "Ella", child: Text("Ella")),
                       DropdownMenuItem(value: "Kandy", child: Text("Kandy")),
-                      DropdownMenuItem(
-                        value: "Colombo",
-                        child: Text("Colombo"),
-                      ),
+                      DropdownMenuItem(value: "Colombo", child: Text("Colombo")),
                     ],
                     onChanged: (v) => tempLocation = v,
                   ),
-
                   const SizedBox(height: 18),
-
-                  // Languages
                   const Text(
                     "Languages",
                     style: TextStyle(fontWeight: FontWeight.w600),
@@ -130,7 +118,7 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                           } else {
                             tempLanguages.remove(lang);
                           }
-                          setState(() {}); // just to refresh chip visuals
+                          setState(() {});
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
@@ -138,9 +126,7 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                       );
                     }).toList(),
                   ),
-
                   const SizedBox(height: 22),
-
                   Row(
                     children: [
                       Expanded(
@@ -269,7 +255,6 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                               ),
                             ],
                           ),
-
                           if (chips.isNotEmpty) ...[
                             const SizedBox(height: 10),
                             SizedBox(
@@ -288,7 +273,6 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
                               ),
                             ),
                           ],
-
                           const SizedBox(height: 8),
                           const TabBar(
                             isScrollable: true,
@@ -370,8 +354,7 @@ class _GuidesTabState extends State<_GuidesTab> {
     if (oldWidget.search != widget.search ||
         oldWidget.location != widget.location ||
         oldWidget.languages != widget.languages) {
-      _fetchGuides();
-      setState(() {});
+      setState(() => _fetchGuides());
     }
   }
 
@@ -387,29 +370,43 @@ class _GuidesTabState extends State<_GuidesTab> {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("No guides found"));
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.person_search, size: 48, color: Colors.black26),
+                SizedBox(height: 12),
+                Text("No guides found",
+                    style: TextStyle(color: Colors.black45, fontSize: 15)),
+              ],
+            ),
+          );
         }
 
         final searchLower = widget.search.toLowerCase();
-        final filteredGuides = snapshot.data!
-            .where(
-              (g) =>
-                  g.firstName.toLowerCase().contains(searchLower) ||
-                  g.lastName.toLowerCase().contains(searchLower),
-            )
-            .toList();
+        final filtered = snapshot.data!.where((g) {
+          final fullName = "${g.firstName} ${g.lastName}".toLowerCase();
+          return fullName.contains(searchLower);
+        }).toList();
+
+        if (filtered.isEmpty) {
+          return const Center(child: Text("No guides match your search"));
+        }
 
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          itemCount: filteredGuides.length,
+          itemCount: filtered.length,
           itemBuilder: (context, index) {
-            final g = filteredGuides[index];
+            final g = filtered[index];
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: _GuideCard(
+                guideUid: g.uid ?? '',        // ✅ pass uid
                 name: "${g.firstName} ${g.lastName}",
                 location: g.location,
-                languages: [], // optionally map g.languages here
+                rating: g.rating,
+                profilePicture: g.profilePicture,
+                languages: g.languages ?? [],
               ),
             );
           },
@@ -438,6 +435,7 @@ class _AllTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       children: const [
         _GuideCard(
+          guideUid: '',
           name: "Demo Guide",
           location: "Hikkaduwa",
           languages: ["English"],
@@ -474,68 +472,83 @@ class _PostsTab extends StatelessWidget {
 /* ------------------ Cards ------------------ */
 
 class _GuideCard extends StatelessWidget {
+  final String guideUid;        // ✅ added
   final String name;
   final String location;
   final List<String> languages;
+  final double? rating;
+  final String? profilePicture;
 
   const _GuideCard({
+    required this.guideUid,     // ✅ added
     required this.name,
     required this.location,
     required this.languages,
+    this.rating,
+    this.profilePicture,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: Colors.black12,
-            child: Text(
-              name.substring(0, 1),
-              style: const TextStyle(fontWeight: FontWeight.bold),
+    return GestureDetector(
+      onTap: () {
+        // ✅ navigate to guide public profile on tap
+        if (guideUid.isNotEmpty) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GuidePublicViewScreen(guideId: guideUid),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
+          );
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.black12),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 26,
+              backgroundColor: Colors.black12,
+              backgroundImage: profilePicture != null && profilePicture!.isNotEmpty
+                  ? NetworkImage(profilePicture!)
+                  : null,
+              // ✅ crash fix — safe fallback if name is empty
+              child: profilePicture == null || profilePicture!.isEmpty
+                  ? Text(
+                      name.isNotEmpty ? name.substring(0, 1) : '?',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "$location • ${languages.join(", ")}",
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
-                ),
-              ],
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE8F5E9),
-              foregroundColor: Colors.green,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+                  const SizedBox(height: 4),
+                  Text(
+                    "$location • ${languages.join(", ")}",
+                    style: const TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                ],
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             ),
-            child: const Text("Message"),
-          ),
-        ],
+            // ✅ replaced Message button with arrow to indicate tappable
+            const Icon(Icons.chevron_right, color: Colors.black38),
+          ],
+        ),
       ),
     );
   }
@@ -561,11 +574,9 @@ class _PostCard extends StatelessWidget {
           Container(
             height: 160,
             width: double.infinity,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.black12,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
-              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
             ),
             child: const Center(child: Icon(Icons.image_outlined, size: 34)),
           ),
