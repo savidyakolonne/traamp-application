@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import '../models/guide.dart';
 import '../app_config.dart';
@@ -6,7 +7,6 @@ import '../app_config.dart';
 class GuideService {
   final String baseUrl = "${AppConfig.SERVER_URL}/api/guides";
 
-  /// Fetch all guides, with optional filters for location and languages
   Future<List<Guide>> fetchGuides({
     String? location,
     List<String>? languages,
@@ -24,19 +24,20 @@ class GuideService {
       );
 
       if (response.statusCode == 200) {
-        print("RESPONSE BODY: ${response.body}");
         final body = jsonDecode(response.body);
         final List<dynamic> data = body is List ? body : (body['data'] ?? []);
 
-        // Map Firestore data to Guide model
-        return data.map((e) {
+        final guides = data.map((e) {
           return Guide.fromMap({
             ...e,
-            'rating':
-                e['rating']?.toString() ??
-                '0', // ensure rating is string/double safe
+            'rating': e['rating']?.toString() ?? '0',
           });
         }).toList();
+
+        //shuffle on client side too so each refresh looks different
+        guides.shuffle(Random());
+
+        return guides;
       } else {
         print("Error fetching guides: ${response.body}");
         return [];
@@ -47,7 +48,6 @@ class GuideService {
     }
   }
 
-  /// Fetch single guide by UID
   Future<Guide?> getGuideByUid(String uid) async {
     try {
       final response = await http.get(
@@ -55,8 +55,8 @@ class GuideService {
         headers: {"Content-Type": "application/json"},
       );
       if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);  
-        final data = body['data']; 
+        final body = jsonDecode(response.body);
+        final data = body['data'];
         return Guide.fromMap({
           ...data,
           'rating': data['rating']?.toString() ?? '0',

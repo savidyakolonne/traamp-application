@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 
 import '../../models/guide.dart';
 import '../../services/guide_service.dart';
 import '../../services/saved_guides_service.dart';
 import '../../app_config.dart';
+import '../tourist/deatailed_package_view_tourist.dart';
 
 class GuidePublicViewScreen extends StatefulWidget {
   final String guideId;
@@ -64,22 +66,18 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     }
   }
 
-  // ✅ Uses POST /api/guidePackage/get-package-by-user-id with { uid }
   Future<void> _loadPackages() async {
     if (mounted) setState(() => _packagesLoading = true);
     try {
       final response = await http.post(
-        Uri.parse('${AppConfig.SERVER_URL}/api/guidePackage/get-package-by-user-id'),
+        Uri.parse(
+            '${AppConfig.SERVER_URL}/api/guidePackage/get-package-by-user-id'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'uid': widget.guideId}),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (mounted) {
-          setState(() => _packages = data['packages'] ?? []);
-        }
-      } else {
-        print('Error loading packages: ${response.statusCode}');
+        if (mounted) setState(() => _packages = data['packages'] ?? []);
       }
     } catch (e) {
       print('Error loading packages: $e');
@@ -91,8 +89,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   Future<void> _checkIfGuideSaved() async {
     try {
       final isSaved = await _savedGuidesService.isGuideSaved(
-        guideUid: widget.guideId,
-      );
+          guideUid: widget.guideId);
       if (mounted) setState(() => _isGuideSaved = isSaved);
     } catch (e) {
       print('Error checking if guide is saved: $e');
@@ -104,16 +101,13 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please log in to save guides'),
-          backgroundColor: Colors.red,
-        ),
+            content: Text('Please log in to save guides'),
+            backgroundColor: Colors.red),
       );
       return;
     }
 
     if (_isSaving) return;
-
-    // ✅ optimistic update
     setState(() {
       _isSaving = true;
       _isGuideSaved = !_isGuideSaved;
@@ -121,28 +115,23 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
 
     try {
       final success = await _savedGuidesService.toggleSaveGuide(
-        guideUid: widget.guideId,
-      );
-
+          guideUid: widget.guideId);
       if (!success) {
-        setState(() => _isGuideSaved = !_isGuideSaved); // revert
+        setState(() => _isGuideSaved = !_isGuideSaved);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Failed to update favorites'),
-              backgroundColor: Colors.red,
-            ),
+                content: Text('Failed to update favorites'),
+                backgroundColor: Colors.red),
           );
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                _isGuideSaved
-                    ? 'Guide added to favorites'
-                    : 'Guide removed from favorites',
-              ),
+              content: Text(_isGuideSaved
+                  ? 'Guide added to favorites'
+                  : 'Guide removed from favorites'),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
             ),
@@ -150,10 +139,54 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
         }
       }
     } catch (e) {
-      setState(() => _isGuideSaved = !_isGuideSaved); // revert
+      setState(() => _isGuideSaved = !_isGuideSaved);
       print('Error toggling save guide: $e');
     } finally {
       if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  // open email app
+  Future<void> _launchEmail() async {
+    final email = _guide?.email ?? '';
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No email address available')),
+      );
+      return;
+    }
+    final uri = Uri(scheme: 'mailto', path: email);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open email app')),
+        );
+      }
+    }
+  }
+
+  // open WhatsApp with guide's phone number
+  Future<void> _launchWhatsApp() async {
+    final phone = _guide?.phoneNumber ?? '';
+    if (phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No phone number available')),
+      );
+      return;
+    }
+    // strip non-digits and ensure + prefix handled
+    final cleaned = phone.replaceAll(RegExp(r'[^\d]'), ''); // strip everything except digits
+    final uri = Uri.parse('https://wa.me/$cleaned');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open WhatsApp')),
+        );
+      }
     }
   }
 
@@ -189,7 +222,8 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
               Text(_errorMessage!,
                   style: const TextStyle(fontSize: 16, color: Colors.black54)),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _loadAll, child: const Text('Retry')),
+              ElevatedButton(
+                  onPressed: _loadAll, child: const Text('Retry')),
             ],
           ),
         ),
@@ -206,7 +240,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          // ✅ heart button with spinner while saving
           _isSaving
               ? const Padding(
                   padding: EdgeInsets.all(14),
@@ -245,11 +278,11 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ✅ profile picture — Image.network with fallback initial
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey[300]!, width: 2),
+                          border:
+                              Border.all(color: Colors.grey[300]!, width: 2),
                         ),
                         child: CircleAvatar(
                           radius: 45,
@@ -350,14 +383,18 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // ── Action Buttons ───────────────────────────────
+                // ── Email + WhatsApp Buttons ─────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
+                      // ✅ Email button
                       Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => print('Book Now tapped'),
+                        child: ElevatedButton.icon(
+                          onPressed: _launchEmail,
+                          icon: const Icon(Icons.email_outlined, size: 18),
+                          label: const Text('Email',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
@@ -366,14 +403,16 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                                 borderRadius: BorderRadius.circular(8)),
                             elevation: 0,
                           ),
-                          child: const Text('Book Now',
-                              style: TextStyle(fontWeight: FontWeight.w600)),
                         ),
                       ),
                       const SizedBox(width: 12),
+                      // ✅ WhatsApp button
                       Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => print('Message tapped'),
+                        child: OutlinedButton.icon(
+                          onPressed: _launchWhatsApp,
+                          icon: const Icon(Icons.chat_outlined, size: 18),
+                          label: const Text('WhatsApp',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.green,
                             side: const BorderSide(color: Colors.green),
@@ -381,8 +420,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: const Text('Message',
-                              style: TextStyle(fontWeight: FontWeight.w600)),
                         ),
                       ),
                     ],
@@ -426,7 +463,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // ── Skills & Expertise (always shown, no DB data yet) ──
+                // ── Skills & Expertise ───────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Container(
@@ -467,8 +504,8 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                         const Center(
                           child: Padding(
                             padding: EdgeInsets.all(16),
-                            child:
-                                CircularProgressIndicator(color: Colors.green),
+                            child: CircularProgressIndicator(
+                                color: Colors.green),
                           ),
                         )
                       else if (_packages.isEmpty)
@@ -485,7 +522,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // ── Reviews (header always shown, no DB yet) ──────
+                // ── Reviews ───────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
@@ -506,8 +543,8 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text('No reviews yet.',
-                          style:
-                              TextStyle(fontSize: 13, color: Colors.grey[500])),
+                          style: TextStyle(
+                              fontSize: 13, color: Colors.grey[500])),
                     ],
                   ),
                 ),
@@ -526,10 +563,9 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
       height: 90,
       color: Colors.grey[200],
       child: Center(
-        child: Text(
-          _getInitial(),
-          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-        ),
+        child: Text(_getInitial(),
+            style:
+                const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -546,7 +582,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     );
   }
 
-  // ✅ uses exact field names from packageController.js
   Widget _buildPackageCard(Map<String, dynamic> pkg) {
     final title = pkg['packageTitle'] ?? 'Unnamed Package';
     final category = pkg['category'] ?? '';
@@ -559,7 +594,18 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => print('Package tapped: $title'),
+        // ✅ navigate to detailed package view on tap
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailedPackageViewTourist(
+                pkg,
+                widget.guideId,
+              ),
+            ),
+          );
+        },
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
@@ -577,11 +623,10 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // cover image
               if (coverImage != null && coverImage.isNotEmpty)
                 ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12)),
                   child: Image.network(
                     coverImage,
                     height: 140,
@@ -601,7 +646,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // category chip
                     if (category.isNotEmpty)
                       Container(
                         margin: const EdgeInsets.only(bottom: 8),
