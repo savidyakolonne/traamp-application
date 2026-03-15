@@ -139,7 +139,7 @@ class _GuideDashboardState extends State<GuideDashboard> {
                       color: const Color.fromARGB(255, 234, 210, 0),
                     ),
                     Text(
-                      "${widget.userData['rating']}",
+                      "${widget.userData['rating'].toStringAsFixed(1)}",
                       style: TextStyle(
                         color: const Color.fromARGB(255, 100, 116, 139),
                         fontSize: 16,
