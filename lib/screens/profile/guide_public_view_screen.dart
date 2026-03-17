@@ -601,13 +601,21 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'Not listed yet.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[500],
-                          ),
-                        ),
+                        (_guide?.skills != null && _guide!.skills!.isNotEmpty)
+                            ? Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _guide!.skills!
+                                    .map((skill) => _buildChip(skill))
+                                    .toList(),
+                              )
+                            : Text(
+                                'Not listed yet.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
                       ],
                     ),
                   ),
