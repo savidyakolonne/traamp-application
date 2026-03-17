@@ -257,7 +257,9 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                           _buildDetailRow(
                             icon: Icons.cake_outlined,
                             label: 'Date of Birth',
-                            value: widget.userData['dob'],
+                            value: widget.userData['dob'].toString().split(
+                              'T',
+                            )[0],
                           ),
                       ],
                     ),
