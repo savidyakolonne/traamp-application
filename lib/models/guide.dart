@@ -13,10 +13,11 @@ class Guide extends AppUser {
   final double rating;
   final bool availability;
   final bool isVerified;
-  final String? profilePicture;   
+  final String? profilePicture;
   final List<String>? languages;
   final String? bio;
   final String? uid;
+  final List<String>? skills;
 
   Guide({
     required super.firstName,
@@ -29,18 +30,19 @@ class Guide extends AppUser {
     required this.phoneNumber,
     this.guideCertificateType,
     this.certificateNumber,
-    required this.uploadedCertificatePath, // optional
+    this.uploadedCertificatePath, // optional
     required this.nic,
     required this.location,
     required this.address,
     required this.country,
     required this.rating,
     required this.availability,
-    this.isVerified = false, 
-    this.profilePicture,            
+    this.isVerified = false,
+    this.profilePicture,
     this.languages,
     this.bio,
     this.uid,
+    this.skills,
   });
 
   // ------------------------------------------------------------------------------------------------------ for the find guide - savidyakolonne
@@ -63,7 +65,8 @@ class Guide extends AppUser {
       address: map['address'] ?? '',
       country: map['country'] ?? '',
       rating: double.tryParse(map['rating']?.toString() ?? '0') ?? 0,
-      availability: map['availability'] == true || map['availability'] == 'true',
+      availability:
+          map['availability'] == true || map['availability'] == 'true',
       isVerified: map['isVerified'] == true || map['isVerified'] == 'true',
       profilePicture: map['profilePicture'],
       languages: map['languages'] != null
@@ -71,6 +74,7 @@ class Guide extends AppUser {
           : [],
       bio: map['bio'],
       uid: map['uid'],
+      skills: map['skills'] != null ? List<String>.from(map['skills']) : [],
     );
   }
 
@@ -89,12 +93,12 @@ class Guide extends AppUser {
       'address': address,
       'country': country,
       'rating': rating,
-      'availability': availability, 
+      'availability': availability,
       'isVerified': isVerified,
-      'profilePicture': profilePicture,  
-      'languages': languages, 
-      'bio': bio, 
-      'uid': uid,                      
+      'profilePicture': profilePicture,
+      'languages': languages,
+      'bio': bio,
+      'uid': uid,
     };
   }
 }

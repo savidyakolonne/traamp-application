@@ -135,6 +135,7 @@ class _LoginSetupState extends State<LoginSetup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 254, 254),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.only(top: 100, left: 24, right: 24),

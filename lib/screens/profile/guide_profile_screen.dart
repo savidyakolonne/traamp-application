@@ -6,6 +6,7 @@ import '../../app_config.dart';
 import '../guide/guide_edit_profile.dart';
 import '../guide/guide packages/detailed_guide_package.dart';
 import '../profile/guide_verification_form.dart';
+import 'rating_list_screen.dart';
 
 // ignore: must_be_immutable
 class GuideProfileScreen extends StatefulWidget {
@@ -99,10 +100,11 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final skills = widget.userData['skills'];
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -161,7 +163,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 6),
                             Row(
                               children: [
                                 const Icon(
@@ -170,11 +171,46 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                                   size: 16,
                                 ),
                                 const SizedBox(width: 4),
-                                Text(
-                                  '${widget.userData['rating'] ?? '0.0'}',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                                widget.userData['rating'].runtimeType == String
+                                    ? Text(
+                                        '${widget.userData['rating']}',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      )
+                                    : Text(
+                                        '${widget.userData['rating'].toStringAsFixed(1)}',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return RatingListScreen(
+                                            widget.userData['uid'].toString(),
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  icon: Text(
+                                    "View All",
+                                    style: TextStyle(
+                                      color: const Color.fromARGB(
+                                        255,
+                                        55,
+                                        123,
+                                        57,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -368,13 +404,21 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'Not listed yet.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[500],
-                          ),
-                        ),
+                        (skills != null && skills is List && skills.isNotEmpty)
+                            ? Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: skills.map<Widget>((skill) {
+                                  return _buildChip(skill.toString());
+                                }).toList(),
+                              )
+                            : Text(
+                                'Not listed yet.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
                       ],
                     ),
                   ),
