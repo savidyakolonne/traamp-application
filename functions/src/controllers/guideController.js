@@ -62,6 +62,7 @@ export const getGuideById = async (req, res) => {
         isVerified: data.isVerified || false,
         availability: data.availability || false,
         guideCertificateType: data.guideCertificateType || "",
+        skills: data.skills || [],
       }
     });
 
