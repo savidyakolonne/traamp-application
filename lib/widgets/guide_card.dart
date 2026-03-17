@@ -73,12 +73,25 @@ class _GuideCardState extends State<GuideCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15,
-                    ),
+                  Row(
+                    spacing: 10,
+                    children: [
+                      Text(
+                        widget.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.star, color: Colors.amber, size: 20),
+                          widget.rating.runtimeType == String
+                              ? Text(widget.rating.toString())
+                              : Text(widget.rating!.toStringAsFixed(1)),
+                        ],
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(

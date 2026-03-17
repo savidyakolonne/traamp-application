@@ -8,15 +8,16 @@ import '../../services/guide_service.dart';
 import '../../services/saved_guides_service.dart';
 import '../../app_config.dart';
 import '../tourist/deatailed_package_view_tourist.dart';
+import 'rating_list_screen.dart';
 
 class GuidePublicViewScreen extends StatefulWidget {
   final String guideId;
   final String uid;
   const GuidePublicViewScreen({
-    Key? key,
+    super.key,
     required this.guideId,
     required this.uid,
-  }) : super(key: key);
+  });
 
   @override
   State<GuidePublicViewScreen> createState() => _GuidePublicViewScreenState();
@@ -28,16 +29,38 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   String? _errorMessage;
   List<dynamic> _packages = [];
   bool _packagesLoading = true;
+  int rating = 0;
+  String review = "";
 
   final SavedGuidesService _savedGuidesService = SavedGuidesService();
   final GuideService _guideService = GuideService();
   bool _isGuideSaved = false;
   bool _isSaving = false;
+  final TextEditingController _controller = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _loadAll();
+  Future<void> submitReview() async {
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConfig.SERVER_URL}/api/reviews/add-reviews'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'rating': rating,
+          'review': review,
+          'reviewerId': widget.uid,
+          'guideId': widget.guideId,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        print(data['msg']);
+      } else {
+        print(data['msg']);
+      }
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   Future<void> _loadAll() async {
@@ -205,6 +228,12 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadAll();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
@@ -241,9 +270,9 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -266,10 +295,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                   ),
                   onPressed: _toggleSaveGuide,
                 ),
-          IconButton(
-            icon: const Icon(Icons.share, color: Colors.black),
-            onPressed: () => print('Share tapped'),
-          ),
         ],
       ),
       body: SafeArea(
@@ -383,6 +408,47 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                                   ),
                                 ],
                               ),
+
+                            SizedBox(height: 5),
+
+                            // availability status
+                            _guide!.availability
+                                ? Row(
+                                    spacing: 10,
+                                    children: [
+                                      Icon(
+                                        Icons.thumb_up,
+                                        color: Colors.green,
+                                        size: 20,
+                                      ),
+                                      Text(
+                                        "Currently Available",
+                                        style: TextStyle(
+                                          color: Colors.green,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    spacing: 10,
+                                    children: [
+                                      Icon(
+                                        Icons.warning_amber,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                      Text(
+                                        "Currently Not Available",
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ],
                         ),
                       ),
@@ -535,13 +601,21 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'Not listed yet.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[500],
-                          ),
-                        ),
+                        (_guide?.skills != null && _guide!.skills!.isNotEmpty)
+                            ? Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _guide!.skills!
+                                    .map((skill) => _buildChip(skill))
+                                    .toList(),
+                              )
+                            : Text(
+                                'Not listed yet.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
                       ],
                     ),
                   ),
@@ -599,14 +673,22 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            'Reviews',
+                            'Reviews & Ratings',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           TextButton(
-                            onPressed: () => print('See All tapped'),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return RatingListScreen(widget.guideId);
+                                  },
+                                ),
+                              );
+                            },
                             child: const Text(
                               'See All',
                               style: TextStyle(color: Colors.green),
@@ -615,9 +697,189 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        'No reviews yet.',
-                        style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                      Row(
+                        children: [
+                          // #1
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (rating == 1) {
+                                  rating = 0;
+                                } else {
+                                  rating = 1;
+                                }
+                                print(rating);
+                              });
+                            },
+                            icon: rating > 0
+                                ? Icon(Icons.star, color: Colors.amber)
+                                : Icon(Icons.star_outline),
+                          ),
+                          // #2
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (rating == 2) {
+                                  rating = 0;
+                                } else {
+                                  rating = 2;
+                                }
+                                print(rating);
+                              });
+                            },
+                            icon: rating > 1
+                                ? Icon(Icons.star, color: Colors.amber)
+                                : Icon(Icons.star_outline),
+                          ),
+                          // #3
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (rating == 3) {
+                                  rating = 0;
+                                } else {
+                                  rating = 3;
+                                }
+                                print(rating);
+                              });
+                            },
+                            icon: rating > 2
+                                ? Icon(Icons.star, color: Colors.amber)
+                                : Icon(Icons.star_outline),
+                          ),
+                          // #4
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (rating == 4) {
+                                  rating = 0;
+                                } else {
+                                  rating = 4;
+                                }
+                                print(rating);
+                              });
+                            },
+                            icon: rating > 3
+                                ? Icon(Icons.star, color: Colors.amber)
+                                : Icon(Icons.star_outline),
+                          ),
+                          // #5
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (rating == 5) {
+                                  rating = 0;
+                                } else {
+                                  rating = 5;
+                                }
+                                print(rating);
+                              });
+                            },
+                            icon: rating > 4
+                                ? Icon(Icons.star, color: Colors.amber)
+                                : Icon(Icons.star_outline),
+                          ),
+                        ],
+                      ),
+
+                      // review section
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        width: double.infinity,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          border: Border.all(width: 2, color: Colors.green),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Center(
+                          child: TextFormField(
+                            controller: _controller,
+                            maxLines: 8,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Write your review here...",
+                              hintStyle: TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            onChanged: (text) {
+                              setState(() {
+                                review = text;
+                              });
+                              print(review);
+                            },
+                          ),
+                        ),
+                      ),
+
+                      // submit button
+                      Container(
+                        padding: EdgeInsets.only(right: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                if (rating > 0) {
+                                  submitReview();
+                                  _controller.text = "";
+                                  setState(() {
+                                    review = "";
+                                    rating = 0;
+                                  });
+                                } else {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        content: SizedBox(
+                                          width: 200,
+                                          height: 120,
+                                          child: Center(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              spacing: 10,
+                                              children: [
+                                                Text(
+                                                  "Please give a rating before submit.",
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                ElevatedButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text(
+                                                    "Close",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                              icon: Center(
+                                child: Text(
+                                  "Submit",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

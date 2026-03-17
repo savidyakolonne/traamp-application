@@ -115,7 +115,7 @@ class _AssistantHomeState extends State<AssistantHome> {
     final showLanding = _messages.isEmpty;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       body: SafeArea(
         child: Column(
           children: [

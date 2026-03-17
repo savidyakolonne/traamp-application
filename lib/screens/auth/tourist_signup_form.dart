@@ -236,7 +236,9 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 254, 254),
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 255, 254, 254),
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
