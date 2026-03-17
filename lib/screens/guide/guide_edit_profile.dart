@@ -31,6 +31,8 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   late TextEditingController _phoneController;
   late TextEditingController _addressController;
   late TextEditingController _dobController;
+  late TextEditingController _bioController;
+  late TextEditingController _skillsController;
 
   // Read-only Controllers for Credentials
   late TextEditingController _nicController;
@@ -69,6 +71,8 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     _nicController = TextEditingController();
     _certTypeController = TextEditingController();
     _certNumController = TextEditingController();
+    _bioController = TextEditingController();
+    _skillsController = TextEditingController();
     _loadUserData();
   }
 
@@ -86,6 +90,8 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     _dobController.dispose();
+    _bioController.dispose();
+    _skillsController.dispose();
     super.dispose();
   }
 
@@ -117,6 +123,8 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
           _profileImageUrl = data['profilePicture'];
           _certificateUrl = data['certificate'];
           _selectedLanguages = List<String>.from(data['languages'] ?? []);
+          _bioController.text = data['bio'] ?? "";
+          _skillsController.text = (data['skills'] ?? []).join(", ");
 
           // Read-only fields
           _nicController.text = data['nic'] ?? "";
@@ -318,6 +326,11 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
           "dob": _selectedDate?.toIso8601String(),
           "languages": _selectedLanguages,
           "profilePicture": imageUrl,
+          "bio": _bioController.text.trim(),
+          "skills": _skillsController.text
+              .split(',')
+              .map((e) => e.trim())
+              .toList(),
         }),
       );
 
@@ -721,6 +734,21 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
                     ),
                   ),
                 ],
+              ),
+
+              const SizedBox(height: 20),
+              _buildLabel("Bio"),
+              TextFormField(
+                controller: _bioController,
+                maxLines: 3,
+                decoration: _inputDecoration("Tell about yourself"),
+              ),
+
+              const SizedBox(height: 15),
+              _buildLabel("Skills & Expertise"),
+              TextFormField(
+                controller: _skillsController,
+                decoration: _inputDecoration("e.g. Hiking, History, Culture"),
               ),
 
               const SizedBox(height: 15),
