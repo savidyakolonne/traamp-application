@@ -11,6 +11,7 @@ export const addReviews = async (req, res) => {
     const userDocRef = await db.collection("users").doc(reviewerId).get();
     const userData = userDocRef.data();
     const reviewerName = userData["firstName"] + " " + userData["lastName"];
+    const profPic = userData["profilePicture"];
 
     // create document for rating
     const reviewDocRef = db.collection("reviews").doc();
@@ -21,6 +22,7 @@ export const addReviews = async (req, res) => {
       guideId,
       reviewerId,
       reviewerName: reviewerName,
+      profPic: profPic,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -67,5 +69,31 @@ export const addReviews = async (req, res) => {
     // send response
   } catch (e) {
     console.log(e);
+  }
+};
+
+export const getReviewsById = async (req, res) => {
+  try {
+    const { guideId } = req.body;
+
+    const reviewDocRef = db.collection("reviews");
+    const reviewQuarry = reviewDocRef.where("guideId", "==", guideId);
+    const snapshot = await reviewQuarry.get();
+    const reviews = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    console.log(reviews);
+
+    res.status(200).json({
+      msg: "Successfully retrieved data.",
+      data: reviews,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(400).json({
+      msg: "Error while fetching reviews.",
+    });
   }
 };

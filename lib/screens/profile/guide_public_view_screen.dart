@@ -8,6 +8,7 @@ import '../../services/guide_service.dart';
 import '../../services/saved_guides_service.dart';
 import '../../app_config.dart';
 import '../tourist/deatailed_package_view_tourist.dart';
+import 'rating_list_screen.dart';
 
 class GuidePublicViewScreen extends StatefulWidget {
   final String guideId;
@@ -269,9 +270,9 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -294,10 +295,6 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                   ),
                   onPressed: _toggleSaveGuide,
                 ),
-          IconButton(
-            icon: const Icon(Icons.share, color: Colors.black),
-            onPressed: () => print('Share tapped'),
-          ),
         ],
       ),
       body: SafeArea(
@@ -411,6 +408,47 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                                   ),
                                 ],
                               ),
+
+                            SizedBox(height: 5),
+
+                            // availability status
+                            _guide!.availability
+                                ? Row(
+                                    spacing: 10,
+                                    children: [
+                                      Icon(
+                                        Icons.thumb_up,
+                                        color: Colors.green,
+                                        size: 20,
+                                      ),
+                                      Text(
+                                        "Currently Available",
+                                        style: TextStyle(
+                                          color: Colors.green,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    spacing: 10,
+                                    children: [
+                                      Icon(
+                                        Icons.warning_amber,
+                                        color: Colors.red,
+                                        size: 20,
+                                      ),
+                                      Text(
+                                        "Currently Not Available",
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ],
                         ),
                       ),
@@ -634,7 +672,15 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                             ),
                           ),
                           TextButton(
-                            onPressed: () => print('See All tapped'),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return RatingListScreen(widget.guideId);
+                                  },
+                                ),
+                              );
+                            },
                             child: const Text(
                               'See All',
                               style: TextStyle(color: Colors.green),
@@ -734,7 +780,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                         width: double.infinity,
                         height: 100,
                         decoration: BoxDecoration(
-                          border: Border.all(width: 2),
+                          border: Border.all(width: 2, color: Colors.green),
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: Center(
@@ -744,6 +790,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               hintText: "Write your review here...",
+                              hintStyle: TextStyle(fontWeight: FontWeight.w500),
                             ),
                             onChanged: (text) {
                               setState(() {
@@ -765,6 +812,11 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                               onPressed: () {
                                 if (rating > 0) {
                                   submitReview();
+                                  _controller.text = "";
+                                  setState(() {
+                                    review = "";
+                                    rating = 0;
+                                  });
                                 } else {
                                   showDialog(
                                     context: context,

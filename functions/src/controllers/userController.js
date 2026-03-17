@@ -59,8 +59,6 @@ export const registerGuide = async (req, res) => {
       dob,
       type,
       phoneNumber,
-      guideCertificateType,
-      certificateNumber,
       nic,
       location,
       address,
@@ -74,30 +72,6 @@ export const registerGuide = async (req, res) => {
       password,
     });
 
-    let certificateUrl = null;
-
-    if (req.file) {
-      const blob = bucket.file(
-        `guide_certificates/${userRecord.uid}_${req.file.originalname}`,
-      );
-      const blobStream = blob.createWriteStream({
-        metadata: { contentType: req.file.mimetype },
-      });
-
-      await new Promise((resolve, reject) => {
-        blobStream.on("error", reject);
-        blobStream.on("finish", resolve);
-        blobStream.end(req.file.buffer);
-      });
-
-      const [url] = await blob.getSignedUrl({
-        action: "read",
-        expires: "03-09-2491",
-      });
-
-      certificateUrl = url;
-    }
-
     await db.collection("users").doc(userRecord.uid).set({
       uid: userRecord.uid,
       firstName,
@@ -107,8 +81,8 @@ export const registerGuide = async (req, res) => {
       dob,
       type,
       phoneNumber,
-      guideCertificateType,
-      certificateNumber,
+      guideCertificateType: null,
+      certificateNumber: null,
       nic,
       location,
       address,
@@ -117,7 +91,7 @@ export const registerGuide = async (req, res) => {
       availability,
       languages: [],
       profilePicture: "",
-      certificate: certificateUrl,
+      certificate: null,
       createdAt,
     });
 
@@ -445,6 +419,39 @@ export const deleteUser = async (req, res) => {
 
       await batch.commit();
 
+      // remove favorites
+      const favoriteDocRef = db.collection("favorites");
+      const favoriteQuarry = favoriteDocRef.where("uid", "==", uid);
+      const favoriteSnapshot = await favoriteQuarry.get();
+      const favorites = favoriteSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      for (let i = 0; i < favorites.length; i++) {
+        const favId = favorites[i]["favoriteId"];
+        await db.collection("favorites").doc(favId).delete();
+      }
+      console.log("Successfully deleted favorites.");
+
+      // remove saved guides
+      const savedGuidesDocRef = db.collection("saved_guides");
+      const savedGuidesQuarry = savedGuidesDocRef.where(
+        "touristUid",
+        "==",
+        uid,
+      );
+      const savedGuidesSnapshot = await savedGuidesQuarry.get();
+      const savedGuides = savedGuidesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      for (let i = 0; i < savedGuides.length; i++) {
+        const savedGuidesId = savedGuides[i]["id"];
+        await db.collection("saved_guides").doc(savedGuidesId).delete();
+      }
+      console.log("Successfully deleted saved_guides.");
+
       // revoke the token
       await auth.revokeRefreshTokens(uid);
       // delete the document of the tourist from firebase
@@ -465,6 +472,24 @@ export const deleteUser = async (req, res) => {
 
       await batch.commit();
 
+      // remove all ratings
+      await db.collection("ratings").doc(uid).delete();
+
+      //remove all reviews
+      const reviewDocRef = db.collection("reviews");
+      const reviewQuarry = reviewDocRef.where("guideId", "==", uid);
+      const reviewSnapshot = await reviewQuarry.get();
+      const reviews = reviewSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      for (let i = 0; i < reviews.length; i++) {
+        const reviewId = reviews[i]["reviewDocId"];
+        await db.collection("reviews").doc(reviewId).delete();
+      }
+      console.log("Reviews deleted successfully.");
+
       // get all packages belongs to guide
       const guide_package_ref = db.collection("guide_packages");
       const packageQuery = guide_package_ref.where("uid", "==", uid);
@@ -474,8 +499,6 @@ export const deleteUser = async (req, res) => {
         id: doc.id,
         ...doc.data(),
       }));
-
-      console.log("All packages retrieved successfully");
 
       // deleting each package from fireStore
       for (let i = 0; i < packages.length; i++) {
@@ -520,8 +543,6 @@ export const deleteUser = async (req, res) => {
             console.log("Error deleting image:", err.message);
           }
         }
-
-        const id = db.collection("guide_packages").doc(packageId).get();
 
         // deleting the package
         await db.collection("guide_packages").doc(packageId).delete();

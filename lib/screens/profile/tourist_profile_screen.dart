@@ -80,9 +80,9 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -411,8 +411,12 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
   Widget _buildGuideListTile(Map<String, dynamic> guide) {
     final String firstName = guide['firstName'] ?? 'Unknown';
     final String lastName = guide['lastName'] ?? '';
-    final double rating =
-        double.tryParse(guide['rating']?.toString() ?? '0') ?? 0.0;
+    final String rating;
+    if (guide['rating'].runtimeType == String) {
+      rating = guide['rating'];
+    } else {
+      rating = guide['rating'].toStringAsFixed(1);
+    }
     final String guideUid = guide['uid'] ?? '';
     final String? profilePic = guide['profilePicture'];
 
@@ -477,7 +481,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                   const Icon(Icons.star, color: Colors.amber, size: 16),
                   const SizedBox(width: 4),
                   Text(
-                    rating.toStringAsFixed(1),
+                    rating,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
