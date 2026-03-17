@@ -12,6 +12,7 @@ import notificationRouter from "./routes/notificationRoute.js";
 import savedGuidesRoutes from "./routes/savedGuidesRoutes.js";
 import favoriteRouter from "./routes/favoriteRouter.js";
 import profileRoutes from "./routes/profile.routes.js";
+import reviewRouter from "./routes/reviewRouter.js";
 
 const app = express();
 
@@ -29,12 +30,13 @@ app.use("/api/gallery", galleryRouter);
 app.use("/api/news", newsRoutes);
 app.use("/api/notification", notificationRouter);
 app.use("/api/favorite", favoriteRouter);
+app.use("/api/reviews", reviewRouter);
 
 //profiles
 app.use("/api/profile", profileRoutes);
 
 //guides
-app.use("/api/guides", guideRoutes) ;
+app.use("/api/guides", guideRoutes);
 
 // saved guides
 app.use("/api/saved-guides", savedGuidesRoutes);
