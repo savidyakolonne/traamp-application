@@ -111,3 +111,120 @@ export const updateGuideProfile = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to update guide profile" });
   }
 };
+
+
+// guide verification
+export const submitGuideVerification = async (req, res) => {
+  try {
+    const uid = req.user.uid;
+
+    const userRef = db.collection("users").doc(uid);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({
+        success: false,
+        message: "Guide not found",
+      });
+    }
+
+    const userData = userDoc.data();
+
+    if (userData.type !== "guide") {
+      return res.status(400).json({
+        success: false,
+        message: "Only guides can submit verification requests",
+      });
+    }
+
+    let certificateUrl =
+      userData.certificate || userData.sltdaCertificateUrl || "";
+    let nicImageUrl = userData.nicImageUrl || "";
+
+    const certificateFile = req.files?.certificate?.[0] || null;
+    const nicFile = req.files?.nicDocument?.[0] || null;
+
+    if (certificateFile) {
+      const certificateBlob = bucket.file(
+        `guide_verification/certificates/${uid}_${Date.now()}_${certificateFile.originalname}`
+      );
+
+      const certificateBlobStream = certificateBlob.createWriteStream({
+        metadata: { contentType: certificateFile.mimetype },
+      });
+
+      await new Promise((resolve, reject) => {
+        certificateBlobStream.on("error", reject);
+        certificateBlobStream.on("finish", resolve);
+        certificateBlobStream.end(certificateFile.buffer);
+      });
+
+      const [certificateSignedUrl] = await certificateBlob.getSignedUrl({
+        action: "read",
+        expires: "03-09-2491",
+      });
+
+      certificateUrl = certificateSignedUrl;
+    }
+
+    if (!certificateUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "Guide certificate is required before submitting verification",
+      });
+    }
+
+    if (!nicFile) {
+      return res.status(400).json({
+        success: false,
+        message: "NIC document is required",
+      });
+    }
+
+    const nicBlob = bucket.file(
+      `guide_verification/nic/${uid}_${Date.now()}_${nicFile.originalname}`
+    );
+
+    const nicBlobStream = nicBlob.createWriteStream({
+      metadata: { contentType: nicFile.mimetype },
+    });
+
+    await new Promise((resolve, reject) => {
+      nicBlobStream.on("error", reject);
+      nicBlobStream.on("finish", resolve);
+      nicBlobStream.end(nicFile.buffer);
+    });
+
+    const [nicSignedUrl] = await nicBlob.getSignedUrl({
+      action: "read",
+      expires: "03-09-2491",
+    });
+
+    nicImageUrl = nicSignedUrl;
+
+    await userRef.update({
+      certificate: certificateUrl,
+      sltdaCertificateUrl: certificateUrl,
+      nicImageUrl,
+      nicNumber: userData.nic || "",
+      verificationStatus: "pending",
+      isVerified: false,
+      verificationRequestedAt: new Date().toISOString(),
+      verifiedAt: null,
+      rejectedAt: null,
+      verificationNote: null,
+      updatedAt: new Date().toISOString(),
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Verification request submitted successfully",
+    });
+  } catch (error) {
+    console.error("Error submitting guide verification:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to submit verification request",
+    });
+  }
+};
