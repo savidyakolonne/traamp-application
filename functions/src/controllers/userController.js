@@ -309,6 +309,8 @@ export const updateGuideProfile = async (req, res) => {
       dob,
       languages,
       profilePicture,
+      bio,
+      skills
     } = req.body;
 
     const decoded = await auth.verifyIdToken(idToken);
@@ -328,6 +330,8 @@ export const updateGuideProfile = async (req, res) => {
     if (languages !== undefined) updateData.languages = languages;
     if (profilePicture !== undefined)
       updateData.profilePicture = profilePicture;
+    if (bio !== undefined) updateData.bio = bio;
+    if (skills !== undefined) updateData.skills = skills;
 
     await userRef.update(updateData);
 
