@@ -135,7 +135,7 @@ export default function VerificationDetailPage() {
       setActionLoading(true);
 
       const res = await fetch(
-        `http://localhost:3000/api/admin/verifications/${id}/reject`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/verifications/${id}/reject`,
         {
           method: "PUT",
           headers: {
