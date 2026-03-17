@@ -30,7 +30,7 @@ class Guide extends AppUser {
     required this.phoneNumber,
     this.guideCertificateType,
     this.certificateNumber,
-    required this.uploadedCertificatePath, // optional
+    this.uploadedCertificatePath, // optional
     required this.nic,
     required this.location,
     required this.address,

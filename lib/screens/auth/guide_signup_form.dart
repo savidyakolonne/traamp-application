@@ -6,7 +6,6 @@ import '../../app_config.dart';
 import '../../list-data.dart';
 import '../../models/guide.dart';
 import 'login_setup.dart';
-import 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
@@ -25,7 +24,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   final Color primaryColor = Colors.lightGreen;
 
   final List<String> _genders = ListData.gender;
-  final List<String> _certificateType = ListData.guideCertificates;
   final List<String> _districts = ListData.districts;
 
   // global variables to store data coming from form
@@ -59,7 +57,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
           return "Name cannot be empty";
         }
         if (text.length <= 2) {
-          return "Must be more than 2 charactors";
+          return "Must be more than 2 characters";
         }
         return null;
       },
@@ -114,7 +112,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
     );
   }
 
-  // passowrd
+  // password
   Widget passwordFormField() {
     return TextFormField(
       obscureText: true,
@@ -255,30 +253,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
     );
   }
 
-  //certificate type
-  Widget certificateTypeFormField() {
-    return DropdownButtonFormField<String>(
-      decoration: fieldStyle("Select Certificate Type"),
-      items: _certificateType.map((certificateType) {
-        return DropdownMenuItem(
-          value: certificateType,
-          child: Text(certificateType),
-        );
-      }).toList(),
-      onChanged: (certificate) {
-        setState(() {
-          guideCertificateType = certificate;
-        });
-      },
-      validator: (certificate) {
-        return null;
-      },
-      onSaved: (certificate) {
-        guideCertificateType = certificate;
-      },
-    );
-  }
-
   //NIC
   Widget NICFormField() {
     return TextFormField(
@@ -296,25 +270,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       //save global variable
       onSaved: (number) {
         nic = number!.toLowerCase().trim();
-      },
-    );
-  }
-
-  // certificate number
-  Widget certificateNumberField() {
-    return TextFormField(
-      decoration: fieldStyle("Certificate Number"),
-      //validation
-      validator: (number) {
-        return null;
-      },
-      //save global variable
-      onSaved: (number) {
-        if (number == "" || number == null) {
-          certificateNumber = null;
-        } else {
-          certificateNumber = number;
-        }
       },
     );
   }
@@ -340,64 +295,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
     );
   }
 
-  // upload certificate section
-  String hint = "";
-  Widget uploadCertificateBox() {
-    return GestureDetector(
-      onTap: () async {
-        FilePickerResult? result = await FilePicker.platform.pickFiles(
-          type: FileType.custom,
-          allowedExtensions: ['jpg', 'pdf', 'doc', 'heif', 'png', 'jpeg'],
-          withData: true,
-        );
-
-        if (result != null) {
-          PlatformFile file = result.files.single;
-
-          setState(() {
-            hint = file.name;
-          });
-
-          if (kIsWeb) {
-            uploadedCertificateBytes = file.bytes;
-          } else {
-            uploadedCertificatePath = File(file.path!);
-          }
-        }
-      },
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Upload Guide Certificate",
-            style: TextStyle(fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            height: 120,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade400),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.cloud_upload, color: primaryColor, size: 32),
-                const SizedBox(height: 8),
-                Text(
-                  hint.isEmpty ? "Tap to upload certificate" : hint,
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -420,7 +317,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
           return "Address cannot be empty";
         }
         if (text.length <= 5) {
-          return "Must be more than 5 charactors";
+          return "Must be more than 5 characters";
         }
         return null;
       },
@@ -437,6 +334,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 254, 254),
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 255, 254, 254),
         scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
@@ -518,21 +416,9 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
 
               const SizedBox(height: 15),
 
-              certificateTypeFormField(),
-
-              const SizedBox(height: 15),
-
-              certificateNumberField(),
-
-              const SizedBox(height: 15),
-
-              uploadCertificateBox(),
-
-              const SizedBox(height: 15),
-
               locationFormField(),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 15),
 
               passwordFormField(),
 
@@ -565,9 +451,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                         gender: gender,
                         dob: dob,
                         phoneNumber: phoneNumber,
-                        guideCertificateType: guideCertificateType,
-                        certificateNumber: certificateNumber,
-                        uploadedCertificatePath: uploadedCertificatePath,
                         nic: nic,
                         location: location,
                         address: address,
@@ -578,36 +461,13 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                       );
                       // save to database after validation
                       try {
-                        var uri = Uri.parse(
-                          "${AppConfig.SERVER_URL}/api/users/register-guide",
+                        final response = await http.post(
+                          Uri.parse(
+                            '${AppConfig.SERVER_URL}/api/users/register-guide',
+                          ),
+                          headers: {'Content-Type': 'application/json'},
+                          body: jsonEncode(guide.toMap()),
                         );
-
-                        var request = http.MultipartRequest("POST", uri);
-
-                        // Add JSON fields
-                        guide.toMap().forEach((key, value) {
-                          if (value != null) {
-                            request.fields[key] = value.toString();
-                          }
-                        });
-
-                        // Add certificate file (web + mobile)
-                        if (uploadedCertificateBytes != null) {
-                          request.files.add(
-                            http.MultipartFile.fromBytes(
-                              "certificate",
-                              uploadedCertificateBytes!,
-                              filename: hint,
-                            ),
-                          );
-                        } else if (uploadedCertificatePath != null) {
-                          request.files.add(
-                            await http.MultipartFile.fromPath(
-                              "certificate",
-                              uploadedCertificatePath!.path,
-                            ),
-                          );
-                        }
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -627,9 +487,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
                           ),
                         );
 
-                        var response = await request.send();
-                        var resp = await http.Response.fromStream(response);
-                        final data = jsonDecode(resp.body);
+                        final data = jsonDecode(response.body);
 
                         if (response.statusCode == 201) {
                           print("Guide registered successfully");

@@ -151,7 +151,12 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
   Widget _buildGuideCard(Map<String, dynamic> guide) {
     final String firstName = guide['firstName'] ?? 'Unknown';
     final String lastName = guide['lastName'] ?? '';
-    final double rating = (guide['rating'] ?? 0.0).toDouble();
+    final String rating;
+    if (guide['rating'].runtimeType == String) {
+      rating = guide['rating'];
+    } else {
+      rating = guide['rating'].toStringAsFixed(1);
+    }
     final String guideUid = guide['uid'] ?? '';
     final String? profilePicture = guide['profilePicture'];
 
@@ -226,7 +231,7 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
                         const Icon(Icons.star, color: Colors.amber, size: 16),
                         const SizedBox(width: 4),
                         Text(
-                          rating.toStringAsFixed(1),
+                          rating,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
