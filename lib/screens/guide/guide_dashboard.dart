@@ -41,7 +41,13 @@ class _GuideDashboardState extends State<GuideDashboard> {
         if (response.statusCode == 200) {
           setState(() {
             widget.userData = data['data'];
-            availability = widget.userData['availability'];
+            if (widget.userData['availability'] == "false" ||
+                widget.userData['availability'] == false) {
+              availability = false;
+            } else {
+              availability = true;
+            }
+
             if (widget.userData['profilePicture'] != null) {
               profilePicture = widget.userData['profilePicture'];
             }
@@ -138,13 +144,21 @@ class _GuideDashboardState extends State<GuideDashboard> {
                       size: 16,
                       color: const Color.fromARGB(255, 234, 210, 0),
                     ),
-                    Text(
-                      "${widget.userData['rating'].toStringAsFixed(1)}",
-                      style: TextStyle(
-                        color: const Color.fromARGB(255, 100, 116, 139),
-                        fontSize: 16,
-                      ),
-                    ),
+                    widget.userData['rating'].runtimeType == String
+                        ? Text(
+                            "${widget.userData['rating']}",
+                            style: TextStyle(
+                              color: const Color.fromARGB(255, 100, 116, 139),
+                              fontSize: 16,
+                            ),
+                          )
+                        : Text(
+                            "${widget.userData['rating'].toStringAsFixed(1)}",
+                            style: TextStyle(
+                              color: const Color.fromARGB(255, 100, 116, 139),
+                              fontSize: 16,
+                            ),
+                          ),
                   ],
                 ),
               ],

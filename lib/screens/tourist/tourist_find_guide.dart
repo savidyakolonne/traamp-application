@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../models/guide.dart';
-import '../../services/guide_service.dart';
-import '../../widgets/guide_card.dart';
+import '../../widgets/guides_tab.dart';
 
 // ignore: must_be_immutable
 class FindGuidesScreen extends StatefulWidget {
   final String uid;
-  FindGuidesScreen(this.uid, {super.key});
+  const FindGuidesScreen(this.uid, {super.key});
 
   @override
   State<FindGuidesScreen> createState() => _FindGuidesScreenState();
@@ -230,6 +228,7 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
     }
 
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       body: SafeArea(
         child: Column(
           children: [
@@ -318,7 +317,7 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
 
             // ── Guides list ──────────────────────────────────
             Expanded(
-              child: _GuidesTab(
+              child: GuidesTab(
                 search: _search.text,
                 location: selectedLocation,
                 languages: selectedLanguages,
@@ -328,112 +327,6 @@ class _FindGuidesScreenState extends State<FindGuidesScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-/* ------------------ Guides list ------------------ */
-
-class _GuidesTab extends StatefulWidget {
-  final String uid;
-  final String search;
-  final String? location;
-  final Set<String> languages;
-
-  const _GuidesTab({
-    required this.search,
-    required this.location,
-    required this.languages,
-    required this.uid,
-  });
-
-  @override
-  State<_GuidesTab> createState() => _GuidesTabState();
-}
-
-class _GuidesTabState extends State<_GuidesTab> {
-  late Future<List<Guide>> _guidesFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchGuides();
-  }
-
-  void _fetchGuides() {
-    _guidesFuture = GuideService().fetchGuides(
-      location: widget.location,
-      languages: widget.languages.toList(),
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant _GuidesTab oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.search != widget.search ||
-        oldWidget.location != widget.location ||
-        oldWidget.languages != widget.languages) {
-      setState(() => _fetchGuides());
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<Guide>>(
-      future: _guidesFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.person_search, size: 48, color: Colors.black26),
-                SizedBox(height: 12),
-                Text(
-                  "No guides found",
-                  style: TextStyle(color: Colors.black45, fontSize: 15),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final searchLower = widget.search.toLowerCase();
-        final filtered = snapshot.data!.where((g) {
-          final fullName = "${g.firstName} ${g.lastName}".toLowerCase();
-          return fullName.contains(searchLower);
-        }).toList();
-
-        if (filtered.isEmpty) {
-          return const Center(child: Text("No guides match your search"));
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            final g = filtered[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: GuideCard(
-                uid: widget.uid,
-                guideUid: g.uid ?? '',
-                name: "${g.firstName} ${g.lastName}",
-                location: g.location,
-                rating: g.rating,
-                profilePicture: g.profilePicture,
-                languages: g.languages ?? [],
-              ),
-            );
-          },
-        );
-      },
     );
   }
 }
