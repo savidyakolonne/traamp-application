@@ -53,12 +53,15 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
   Future<void> _getPackages() async {
     if (mounted) setState(() => _packagesLoading = true);
     try {
-      final uid = widget.userData['uid'] ??
-          FirebaseAuth.instance.currentUser?.uid ?? '';
+      final uid =
+          widget.userData['uid'] ??
+          FirebaseAuth.instance.currentUser?.uid ??
+          '';
 
       final response = await http.post(
         Uri.parse(
-            "${AppConfig.SERVER_URL}/api/guidePackage/get-package-by-user-id"),
+          "${AppConfig.SERVER_URL}/api/guidePackage/get-package-by-user-id",
+        ),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({'uid': uid}),
       );
@@ -95,6 +98,7 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final skills = widget.userData['skills'];
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -113,7 +117,6 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // ── Profile Header ──────────────────────────
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -123,7 +126,10 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey[300]!, width: 2),
+                          border: Border.all(
+                            color: Colors.grey[300]!,
+                            width: 2,
+                          ),
                         ),
                         child: CircleAvatar(
                           radius: 45,
@@ -151,19 +157,25 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                               '${widget.userData['firstName'] ?? ''} ${widget.userData['lastName'] ?? ''}'
                                   .trim(),
                               style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Row(
                               children: [
-                                const Icon(Icons.star,
-                                    color: Colors.amber, size: 16),
+                                const Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: 16,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${widget.userData['rating'] ?? '0.0'}',
                                   style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ],
                             ),
@@ -171,13 +183,18 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                             if ((widget.userData['location'] ?? '').isNotEmpty)
                               Row(
                                 children: [
-                                  const Icon(Icons.location_on,
-                                      size: 14, color: Colors.black54),
+                                  const Icon(
+                                    Icons.location_on,
+                                    size: 14,
+                                    color: Colors.black54,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     widget.userData['location'],
                                     style: const TextStyle(
-                                        fontSize: 13, color: Colors.black54),
+                                      fontSize: 13,
+                                      color: Colors.black54,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -185,12 +202,19 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                             if (widget.userData['isVerified'] == true)
                               Row(
                                 children: const [
-                                  Icon(Icons.verified,
-                                      color: Colors.green, size: 16),
+                                  Icon(
+                                    Icons.verified,
+                                    color: Colors.green,
+                                    size: 16,
+                                  ),
                                   SizedBox(width: 4),
-                                  Text('Verified Guide',
-                                      style: TextStyle(
-                                          fontSize: 12, color: Colors.green)),
+                                  Text(
+                                    'Verified Guide',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.green,
+                                    ),
+                                  ),
                                 ],
                               ),
                           ],
@@ -206,9 +230,13 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Bio',
-                          style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w600)),
+                      const Text(
+                        'Bio',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         (widget.userData['bio'] != null &&
@@ -216,7 +244,10 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                             ? widget.userData['bio']
                             : 'No bio available.',
                         style: const TextStyle(
-                            fontSize: 14, color: Colors.black87, height: 1.4),
+                          fontSize: 14,
+                          color: Colors.black87,
+                          height: 1.4,
+                        ),
                       ),
                     ],
                   ),
@@ -241,7 +272,8 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         elevation: 0,
                       ),
                       child: _isLoading
@@ -249,10 +281,14 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2),
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
                             )
-                          : const Text('Edit Profile',
-                              style: TextStyle(fontWeight: FontWeight.w600)),
+                          : const Text(
+                              'Edit Profile',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
                     ),
                   ),
                 ),
@@ -272,9 +308,13 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Languages',
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w600)),
+                        const Text(
+                          'Languages',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         _languages.isNotEmpty
                             ? Wrap(
@@ -284,9 +324,13 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                                     .map((lang) => _buildChip(lang))
                                     .toList(),
                               )
-                            : Text('No languages listed.',
+                            : Text(
+                                'No languages listed.',
                                 style: TextStyle(
-                                    fontSize: 13, color: Colors.grey[500])),
+                                  fontSize: 13,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
                       ],
                     ),
                   ),
@@ -307,13 +351,29 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Skills & Expertise',
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w600)),
+                        const Text(
+                          'Skills & Expertise',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         const SizedBox(height: 12),
-                        Text('Not listed yet.',
-                            style: TextStyle(
-                                fontSize: 13, color: Colors.grey[500])),
+                        (skills != null && skills is List && skills.isNotEmpty)
+                            ? Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: skills.map<Widget>((skill) {
+                                  return _buildChip(skill.toString());
+                                }).toList(),
+                              )
+                            : Text(
+                                'Not listed yet.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
                       ],
                     ),
                   ),
@@ -326,27 +386,38 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('My Tour Packages',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Text(
+                        'My Tour Packages',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       if (_packagesLoading)
                         const Center(
                           child: Padding(
                             padding: EdgeInsets.all(16),
                             child: CircularProgressIndicator(
-                                color: Colors.green),
+                              color: Colors.green,
+                            ),
                           ),
                         )
                       else if (_packages.isEmpty)
-                        Text('No packages added yet.',
-                            style: TextStyle(
-                                fontSize: 13, color: Colors.grey[500]))
+                        Text(
+                          'No packages added yet.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[500],
+                          ),
+                        )
                       else
-                        ..._packages.map((pkg) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _buildPackageCard(pkg),
-                            )),
+                        ..._packages.map(
+                          (pkg) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _buildPackageCard(pkg),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -367,8 +438,10 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
       height: 90,
       color: Colors.grey[200],
       child: Center(
-        child: Text(initial,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        child: Text(
+          initial,
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -380,8 +453,10 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(label,
-          style: const TextStyle(fontSize: 12, color: Colors.black87)),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 12, color: Colors.black87),
+      ),
     );
   }
 
@@ -401,9 +476,7 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => DetailedGuidePackage(pkg),
-            ),
+            MaterialPageRoute(builder: (context) => DetailedGuidePackage(pkg)),
           );
         },
         borderRadius: BorderRadius.circular(12),
@@ -425,8 +498,9 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
             children: [
               if (coverImage != null && coverImage.isNotEmpty)
                 ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
                   child: Image.network(
                     coverImage,
                     height: 140,
@@ -436,8 +510,11 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                       height: 140,
                       color: Colors.grey[200],
                       child: const Center(
-                          child: Icon(Icons.image_not_supported,
-                              color: Colors.grey)),
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -450,69 +527,100 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                       Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFE5F6D3),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(category,
-                            style: const TextStyle(
-                                color: Color(0xFF7DD421),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12)),
+                        child: Text(
+                          category,
+                          style: const TextStyle(
+                            color: Color(0xFF7DD421),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text(title,
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold)),
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        Icon(Icons.more_vert,
-                            color: Colors.grey[600], size: 20),
+                        Icon(
+                          Icons.more_vert,
+                          color: Colors.grey[600],
+                          size: 20,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     Row(
                       children: [
                         if (location.isNotEmpty) ...[
-                          const Icon(Icons.location_on,
-                              size: 13, color: Colors.black45),
+                          const Icon(
+                            Icons.location_on,
+                            size: 13,
+                            color: Colors.black45,
+                          ),
                           const SizedBox(width: 3),
-                          Text(location,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.black45)),
+                          Text(
+                            location,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black45,
+                            ),
+                          ),
                           const SizedBox(width: 12),
                         ],
                         if (duration.isNotEmpty) ...[
-                          const Icon(Icons.access_time,
-                              size: 13, color: Colors.black45),
+                          const Icon(
+                            Icons.access_time,
+                            size: 13,
+                            color: Colors.black45,
+                          ),
                           const SizedBox(width: 3),
-                          Text(duration,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.black45)),
+                          Text(
+                            duration,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black45,
+                            ),
+                          ),
                         ],
                       ],
                     ),
                     if (shortDescription.isNotEmpty) ...[
                       const SizedBox(height: 6),
-                      Text(shortDescription,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                              height: 1.4)),
+                      Text(
+                        shortDescription,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                          height: 1.4,
+                        ),
+                      ),
                     ],
                     if (price.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      Text('$price LKR',
-                          style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green[700])),
+                      Text(
+                        '$price LKR',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[700],
+                        ),
+                      ),
                     ],
                   ],
                 ),
