@@ -17,6 +17,7 @@ class Guide extends AppUser {
   final List<String>? languages;
   final String? bio;
   final String? uid;
+  final List<String>? skills;
 
   Guide({
     required super.firstName,
@@ -41,6 +42,7 @@ class Guide extends AppUser {
     this.languages,
     this.bio,
     this.uid,
+    this.skills,
   });
 
   // ------------------------------------------------------------------------------------------------------ for the find guide - savidyakolonne
@@ -72,6 +74,7 @@ class Guide extends AppUser {
           : [],
       bio: map['bio'],
       uid: map['uid'],
+      skills: map['skills'] != null ? List<String>.from(map['skills']) : [],
     );
   }
 

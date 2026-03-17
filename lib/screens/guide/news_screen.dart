@@ -22,7 +22,21 @@ class _NewsScreenState extends State<NewsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Tourism News"), centerTitle: true),
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
+        title: const Text(
+          "Tourism News",
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
+        centerTitle: true,
+      ),
 
       body: FutureBuilder<List<News>>(
         future: newsFuture,

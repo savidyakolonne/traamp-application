@@ -99,6 +99,7 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final skills = widget.userData['skills'];
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
@@ -393,13 +394,21 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'Not listed yet.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[500],
-                          ),
-                        ),
+                        (skills != null && skills is List && skills.isNotEmpty)
+                            ? Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: skills.map<Widget>((skill) {
+                                  return _buildChip(skill.toString());
+                                }).toList(),
+                              )
+                            : Text(
+                                'Not listed yet.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
                       ],
                     ),
                   ),

@@ -317,7 +317,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
           return "Address cannot be empty";
         }
         if (text.length <= 5) {
-          return "Must be more than 5 charactors";
+          return "Must be more than 5 characters";
         }
         return null;
       },
@@ -334,6 +334,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 254, 254),
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 255, 254, 254),
         scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
