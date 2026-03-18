@@ -5,6 +5,7 @@ import 'dart:convert';
 import '../../app_config.dart';
 import '../guide/guide_edit_profile.dart';
 import '../guide/guide packages/detailed_guide_package.dart';
+import '../profile/guide_verification_form.dart';
 import 'rating_list_screen.dart';
 
 // ignore: must_be_immutable
@@ -328,6 +329,15 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
+
+                // button for the verification form -----------------------------------
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _buildVerificationButton(),
+                ),
+                const SizedBox(height: 16),
+
+                // ------------------------------------------------------------------------
 
                 // ── Languages ────────────────────────────────
                 Padding(
@@ -662,6 +672,87 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // button for verification form -------------------------------
+
+  Widget _buildVerificationButton() {
+    final bool isVerified = widget.userData['isVerified'] == true;
+    final String verificationStatus =
+        widget.userData['verificationStatus']?.toString() ?? 'not_submitted';
+
+    if (isVerified) {
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: null,
+          icon: const Icon(Icons.verified, color: Colors.green, size: 18),
+          label: const Text(
+            'Verified',
+            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.green),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Colors.green),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+        ),
+      );
+    }
+
+    if (verificationStatus == "pending") {
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    GuideVerificationForm(userData: widget.userData),
+              ),
+            );
+          },
+          icon: const Icon(Icons.hourglass_top, color: Colors.orange, size: 18),
+          label: const Text(
+            'Verification Pending',
+            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.orange),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Colors.orange),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  GuideVerificationForm(userData: widget.userData),
+            ),
+          );
+        },
+        icon: const Icon(Icons.verified_user, color: Colors.green, size: 18),
+        label: const Text(
+          'Get Verified',
+          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.green),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Colors.green),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
         ),
       ),
     );

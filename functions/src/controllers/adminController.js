@@ -5,29 +5,26 @@ const db = admin.firestore();
 // Get dashboard stats
 export const getDashboardStats = async (req, res) => {
   try {
-    const snapshot = await db.collection("users").get();
+    const usersRef = db.collection("users");
+    const verificationsRef = db.collection("verifications");
 
-    let totalUsers = 0;
-    let guides = 0;
-    let tourists = 0;
-    let pending = 0;
+    const [usersSnapshot, guidesSnapshot, touristsSnapshot, pendingSnapshot] =
+      await Promise.all([
+        usersRef.get(),
+        usersRef.where("type", "==", "guide").get(),
+        usersRef.where("type", "==", "tourist").get(),
+        verificationsRef.where("status", "==", "pending").get(),
+      ]);
 
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      totalUsers++;
-
-      if (data.type === "guide") {
-        guides++;
-        if (data.verificationStatus === "pending") pending++;
-      }
-
-      if (data.type === "tourist") tourists++;
+    return res.json({
+      totalUsers: usersSnapshot.size,
+      guides: guidesSnapshot.size,
+      tourists: touristsSnapshot.size,
+      pending: pendingSnapshot.size,
     });
-
-    res.json({ totalUsers, guides, tourists, pending });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Something went wrong" });
+    return res.status(500).json({ error: "Something went wrong" });
   }
 };
 

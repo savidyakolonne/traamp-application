@@ -4,15 +4,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type VerificationRequest = {
+  verificationId: string;
   uid: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  verificationStatus: string;
-  verificationRequestedAt?: {
+  status: string;
+  submittedAt?: {
     _seconds?: number;
     _nanoseconds?: number;
   } | string | null;
+  guideSnapshot?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    location?: string;
+  };
 };
 
 export default function VerificationsPage() {
@@ -29,7 +33,7 @@ export default function VerificationsPage() {
           throw new Error(data.error || "Failed to fetch verification requests");
         }
 
-        setRequests(data);
+        setRequests(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error(error);
       } finally {
@@ -47,8 +51,12 @@ export default function VerificationsPage() {
       return new Date(timestamp).toLocaleDateString();
     }
 
-    if (timestamp._seconds) {
+    if (timestamp?._seconds) {
       return new Date(timestamp._seconds * 1000).toLocaleDateString();
+    }
+
+    if (timestamp?.seconds) {
+      return new Date(timestamp.seconds * 1000).toLocaleDateString();
     }
 
     return "N/A";
@@ -112,21 +120,21 @@ export default function VerificationsPage() {
               ) : (
                 requests.map((r) => (
                   <tr
-                    key={r.uid}
+                    key={r.verificationId}
                     className="hover:bg-gray-50 dark:hover:bg-surface-darker/50 transition-colors"
                   >
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                          {r.firstName?.[0]}
-                          {r.lastName?.[0]}
+                          {r.guideSnapshot?.firstName?.[0] ?? ""}
+                          {r.guideSnapshot?.lastName?.[0] ?? ""}
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {r.firstName} {r.lastName}
+                            {r.guideSnapshot?.firstName ?? "Unknown"} {r.guideSnapshot?.lastName ?? ""}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {r.email}
+                            {r.guideSnapshot?.email ?? "No email"}
                           </p>
                         </div>
                       </div>
@@ -139,21 +147,21 @@ export default function VerificationsPage() {
                     </td>
 
                     <td className="py-4 px-6 text-sm text-gray-500 dark:text-gray-400">
-                      {formatDate(r.verificationRequestedAt)}
+                      {formatDate(r.submittedAt)}
                     </td>
 
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
                         <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400 capitalize">
-                          {r.verificationStatus}
+                          {r.status}
                         </span>
                       </div>
                     </td>
 
                     <td className="py-4 px-6 text-right">
                       <Link
-                        href={`/admin/verifications/${r.uid}`}
+                        href={`/admin/verifications/${r.verificationId}`}
                         className="inline-flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-lg transition-colors"
                       >
                         Review
@@ -164,27 +172,6 @@ export default function VerificationsPage() {
               )}
             </tbody>
           </table>
-        </div>
-
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-surface-darker/30">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Showing {requests.length} pending request{requests.length !== 1 ? "s" : ""}
-          </p>
-
-          <div className="flex gap-2">
-            <button
-              className="px-3 py-1 text-xs font-medium text-gray-500 bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-md disabled:opacity-50"
-              disabled
-            >
-              Previous
-            </button>
-            <button
-              className="px-3 py-1 text-xs font-medium text-gray-500 bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-md disabled:opacity-50"
-              disabled
-            >
-              Next
-            </button>
-          </div>
         </div>
       </div>
     </div>
