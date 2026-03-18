@@ -1,0 +1,23 @@
+# ======================
+# Backend (Node / Firebase)
+# ======================
+functions/node_modules/
+functions/src/config/serviceAccountKey.json
+functions/.env
+
+# ADDED (Firebase local & debug)
+.firebase/
+firebase-debug.log
+
+# ADDED (Firebase local & debug)
+.firebase/
+firebase-debug.log
+
+# Safety net (any nested node project)
+**/node_modules/
+
+# Next.js admin app
+traamp-admin/node_modules/
+traamp-admin/.next/
+traamp-admin/.env
+traamp-admin/config/serviceAccountKey.json
