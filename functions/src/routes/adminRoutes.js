@@ -1,6 +1,12 @@
 import express from "express";
-import { getDashboardStats ,getTouristStats, getAllTourists, getPendingVerificationRequests,  getVerificationRequestById, approveGuideVerification, rejectGuideVerification} from "../controllers/adminController.js";
+import { getDashboardStats ,getTouristStats, getAllTourists} from "../controllers/adminController.js";
 import { getAllGuides} from "../controllers/guideController.js"
+import {
+  getPendingVerifications,
+  getVerificationById,
+  approveVerification,
+  rejectVerification,
+} from "../controllers/adminVerificationController.js";
 const router = express.Router();
 
 // Dashboard stats
@@ -14,9 +20,9 @@ router.get("/guides", getAllGuides)
 router.get("/tourists", getAllTourists);
 router.get("/tourists-stats", getTouristStats);
 
-router.get("/verifications", getPendingVerificationRequests);
-router.get("/verifications/:uid", getVerificationRequestById);
-router.put("/verifications/:uid/approve", approveGuideVerification);
-router.put("/verifications/:uid/reject", rejectGuideVerification);
+router.get("/verifications", getPendingVerifications);
+router.get("/verifications/:id", getVerificationById);
+router.put("/verifications/:id/approve", approveVerification);
+router.put("/verifications/:id/reject", rejectVerification);
 
 export default router;
