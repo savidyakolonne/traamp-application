@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/place_model.dart';
 import '../../services/places_service.dart';
-import '../../screens/map/map_screen.dart';
+import '../map/map_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PlaceDetailScreen extends StatefulWidget {
