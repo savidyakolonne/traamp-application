@@ -1,40 +1,59 @@
-import express from 'express' ; 
-import multer from "multer" ; 
+import express from "express";
+import multer from "multer";
 
-import { getAllGuides, getGuideById } from '../controllers/guideController.js';
-import {getGuideProfile,updateGuideProfile, submitGuideVerification} from "../controllers/guideController.js";
-import admin from "../config/firebaseAdmin.js";
+import {
+  getAllGuides,
+  getGuideById,
+  getGuideProfile,
+  updateGuideProfile,
+  submitGuideVerification,
+} from "../controllers/guideController.js";
+import firebaseAdmin from "../config/firebaseAdmin.js";
+
+const { db } = firebaseAdmin;
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.get("/", getAllGuides) ; 
-router.get("/:uid", getGuideById); 
+const checkGuideRole = async (req, res, next) => {
+  try {
+    const userDoc = await db.collection("users").doc(req.user.uid).get();
 
-// GUIDE ROUTES
-const checkGuideRole = (req, res, next) => {
-  if (req.user.role !== "guide") {
-    return res.status(403).json({
+    if (!userDoc.exists || userDoc.data().type !== "guide") {
+      return res.status(403).json({
+        success: false,
+        message: "Guide role required",
+      });
+    }
+
+    next();
+  } catch (error) {
+    return res.status(500).json({
       success: false,
-      message: "Guide role required"
+      message: "Failed to verify guide role",
     });
   }
-  next();
 };
 
-router.use(admin.firebaseAuth);
-router.use(checkGuideRole);
+// Public routes
+router.get("/", getAllGuides);
 
-router.get("/profile", getGuideProfile);
-router.put("/profile", updateGuideProfile);
+// Protected routes
+router.get("/profile", firebaseAdmin.firebaseAuth, checkGuideRole, getGuideProfile);
+router.put("/profile", firebaseAdmin.firebaseAuth, checkGuideRole, updateGuideProfile);
 
 router.post(
-  "/submit-verification",
+  "/verification/submit",
+  firebaseAdmin.firebaseAuth,
+  checkGuideRole,
   upload.fields([
-    { name: "certificate", maxCount: 1 },
     { name: "nicDocument", maxCount: 1 },
+    { name: "sltdaCertificate", maxCount: 1 },
   ]),
   submitGuideVerification
 );
 
-export default router ; 
+// Keep last
+router.get("/:uid", getGuideById);
+
+export default router;
