@@ -7,6 +7,7 @@ import '../../models/guide.dart';
 import '../../services/guide_service.dart';
 import '../../services/saved_guides_service.dart';
 import '../../app_config.dart';
+import '../../widgets/guide_public_image_card.dart';
 import '../tourist/deatailed_package_view_tourist.dart';
 import 'rating_list_screen.dart';
 
@@ -31,6 +32,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   bool _packagesLoading = true;
   int rating = 0;
   String review = "";
+  List<String> _imageList = [];
 
   final SavedGuidesService _savedGuidesService = SavedGuidesService();
   final GuideService _guideService = GuideService();
@@ -38,7 +40,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   bool _isSaving = false;
   final TextEditingController _controller = TextEditingController();
 
-  Future<void> submitReview() async {
+  Future<void> _submitReview() async {
     try {
       final response = await http.post(
         Uri.parse('${AppConfig.SERVER_URL}/api/reviews/add-reviews'),
@@ -55,6 +57,35 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
 
       if (response.statusCode == 200) {
         print(data['msg']);
+      } else {
+        print(data['msg']);
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<void> _getGalleries() async {
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConfig.SERVER_URL}/api/gallery/get-gallery-by-uid'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'uid': widget.guideId}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        print(data['msg']);
+        List<dynamic> dataList = data['data'];
+        for (int i = 0; i < dataList.length; i++) {
+          List<dynamic> temp = dataList[i]['images'];
+          for (int j = 0; j < temp.length; j++) {
+            setState(() {
+              _imageList.add(temp[j]);
+            });
+          }
+        }
       } else {
         print(data['msg']);
       }
@@ -231,6 +262,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   void initState() {
     super.initState();
     _loadAll();
+    _getGalleries();
   }
 
   @override
@@ -661,7 +693,40 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+
+                // Gallery
+                if (_imageList.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.only(left: 16, top: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 20,
+                      children: [
+                        Text(
+                          'Gallery',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        // image cards
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            spacing: 10,
+                            children: [
+                              for (int i = 0; i < _imageList.length; i++)
+                                GuidePublicImageCard(_imageList[i].toString()),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                SizedBox(height: 30),
 
                 // ── Reviews ───────────────────────────────────────
                 Padding(
@@ -819,7 +884,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                             IconButton(
                               onPressed: () {
                                 if (rating > 0) {
-                                  submitReview();
+                                  _submitReview();
                                   _controller.text = "";
                                   setState(() {
                                     review = "";
