@@ -5,21 +5,37 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 type GuideVerification = {
+  verificationId: string;
   uid: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phoneNumber?: string;
-  website?: string;
-  location?: string;
-  createdAt?: any;
-  bio?: string;
-  verificationStatus?: string;
-  nicImageUrl?: string;
+  status?: string;
+  submittedAt?: any;
+  reviewedAt?: any;
+  adminNote?: string;
+  reviewedBy?: string | null;
+  nicDocumentUrl?: string;
   sltdaCertificateUrl?: string;
   nicNumber?: string;
   certificateNumber?: string;
-  verificationRequestedAt?: any;
+  guideCertificateType?: string;
+  guideSnapshot?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+    location?: string;
+    profilePicture?: string;
+  };
+  guide?: {
+    uid?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+    location?: string;
+    bio?: string;
+    createdAt?: any;
+    profilePicture?: string;
+  };
 };
 
 export default function VerificationDetailPage() {
@@ -27,7 +43,7 @@ export default function VerificationDetailPage() {
   const router = useRouter();
   const id = params?.id as string;
 
-  const [guide, setGuide] = useState<GuideVerification | null>(null);
+  const [verification, setVerification] = useState<GuideVerification | null>(null);
   const [activeTab, setActiveTab] = useState<"nic" | "certificate">("nic");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(true);
@@ -35,19 +51,22 @@ export default function VerificationDetailPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchGuide = async () => {
+    const fetchVerification = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/verifications/${id}`);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/admin/verifications/${id}`
+        );
         const data = await res.json();
 
         if (!res.ok) {
           throw new Error(data.error || "Failed to fetch verification request");
         }
 
-        setGuide(data);
+        setVerification(data);
+        setNote(data.adminNote || "");
       } catch (err: any) {
         console.error(err);
         setError(err.message || "Something went wrong");
@@ -56,7 +75,7 @@ export default function VerificationDetailPage() {
       }
     };
 
-    if (id) fetchGuide();
+    if (id) fetchVerification();
   }, [id]);
 
   const formatDate = (timestamp: any) => {
@@ -78,9 +97,9 @@ export default function VerificationDetailPage() {
   };
 
   const guideName = useMemo(() => {
-    if (!guide) return "";
-    return `${guide.firstName || ""} ${guide.lastName || ""}`.trim();
-  }, [guide]);
+    if (!verification) return "";
+    return `${verification.guideSnapshot?.firstName || ""} ${verification.guideSnapshot?.lastName || ""}`.trim();
+  }, [verification]);
 
   const initials = useMemo(() => {
     if (!guideName) return "GD";
@@ -93,17 +112,22 @@ export default function VerificationDetailPage() {
   }, [guideName]);
 
   const currentDocumentUrl =
-    activeTab === "nic" ? guide?.nicImageUrl : guide?.sltdaCertificateUrl;
+    activeTab === "nic"
+      ? verification?.nicDocumentUrl
+      : verification?.sltdaCertificateUrl;
 
   const currentFileLabel =
     activeTab === "nic" ? "NIC Document" : "SLTDA Certificate";
+
+  const isPdf =
+    currentDocumentUrl?.toLowerCase().includes(".pdf") ?? false;
 
   const handleApprove = async () => {
     try {
       setActionLoading(true);
 
       const res = await fetch(
-        `http://localhost:3000/api/admin/verifications/${id}/approve`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/verifications/${id}/approve`,
         {
           method: "PUT",
           headers: {
@@ -135,7 +159,7 @@ export default function VerificationDetailPage() {
       setActionLoading(true);
 
       const res = await fetch(
-        `http://localhost:3000/api/admin/verifications/${id}/reject`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/verifications/${id}/reject`,
         {
           method: "PUT",
           headers: {
@@ -166,8 +190,8 @@ export default function VerificationDetailPage() {
     switch (status) {
       case "pending":
         return "Pending";
-      case "verified":
-        return "Verified";
+      case "approved":
+        return "Approved";
       case "rejected":
         return "Rejected";
       default:
@@ -179,7 +203,7 @@ export default function VerificationDetailPage() {
     switch (status) {
       case "pending":
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-900/50";
-      case "verified":
+      case "approved":
         return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-900/50";
       case "rejected":
         return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-900/50";
@@ -196,7 +220,7 @@ export default function VerificationDetailPage() {
     );
   }
 
-  if (error || !guide) {
+  if (error || !verification) {
     return (
       <div className="max-w-7xl mx-auto py-10 space-y-4">
         <p className="text-sm text-red-600 dark:text-red-400">
@@ -224,18 +248,20 @@ export default function VerificationDetailPage() {
           </Link>
 
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Guide UID</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Verification ID
+            </p>
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              {id}
+              {verification.verificationId}
             </h1>
           </div>
 
           <span
             className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(
-              guide.verificationStatus
+              verification.status
             )}`}
           >
-            {getStatusLabel(guide.verificationStatus)}
+            {getStatusLabel(verification.status)}
           </span>
         </div>
 
@@ -248,7 +274,6 @@ export default function VerificationDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* LEFT */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white dark:bg-surface-darker rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
             <div className="flex flex-col items-center text-center">
@@ -270,7 +295,16 @@ export default function VerificationDetailPage() {
                     NIC Number
                   </span>
                   <span className="text-sm font-mono font-medium">
-                    {guide.nicNumber || "N/A"}
+                    {verification.nicNumber || "N/A"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-800">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Certificate Type
+                  </span>
+                  <span className="text-sm font-medium">
+                    {verification.guideCertificateType || "N/A"}
                   </span>
                 </div>
 
@@ -279,7 +313,7 @@ export default function VerificationDetailPage() {
                     Certificate Number
                   </span>
                   <span className="text-sm font-medium">
-                    {guide.certificateNumber || "N/A"}
+                    {verification.certificateNumber || "N/A"}
                   </span>
                 </div>
 
@@ -291,7 +325,9 @@ export default function VerificationDetailPage() {
                     <span className="material-icons text-xs text-primary">
                       location_on
                     </span>
-                    {guide.location || "N/A"}
+                    {verification.guideSnapshot?.location ||
+                      verification.guide?.location ||
+                      "N/A"}
                   </span>
                 </div>
 
@@ -300,7 +336,7 @@ export default function VerificationDetailPage() {
                     Joined
                   </span>
                   <span className="text-sm font-medium">
-                    {formatDate(guide.createdAt)}
+                    {formatDate(verification.guide?.createdAt)}
                   </span>
                 </div>
 
@@ -309,7 +345,7 @@ export default function VerificationDetailPage() {
                     Requested
                   </span>
                   <span className="text-sm font-medium">
-                    {formatDate(guide.verificationRequestedAt)}
+                    {formatDate(verification.submittedAt)}
                   </span>
                 </div>
 
@@ -318,7 +354,7 @@ export default function VerificationDetailPage() {
                     Bio
                   </span>
                   <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-left">
-                    {guide.bio || "No bio available."}
+                    {verification.guide?.bio || "No bio available."}
                   </p>
                 </div>
               </div>
@@ -369,27 +405,30 @@ export default function VerificationDetailPage() {
                 <span className="material-icons text-gray-400 text-lg">
                   email
                 </span>
-                {guide.email || "N/A"}
+                {verification.guideSnapshot?.email ||
+                  verification.guide?.email ||
+                  "N/A"}
               </li>
 
               <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
                 <span className="material-icons text-gray-400 text-lg">
                   phone
                 </span>
-                {guide.phoneNumber || "N/A"}
+                {verification.guideSnapshot?.phoneNumber ||
+                  verification.guide?.phoneNumber ||
+                  "N/A"}
               </li>
 
               <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
                 <span className="material-icons text-gray-400 text-lg">
                   badge
                 </span>
-                {guide.nicNumber || "N/A"}
+                {verification.nicNumber || "N/A"}
               </li>
             </ul>
           </div>
         </div>
 
-        {/* RIGHT */}
         <div className="lg:col-span-8 space-y-6">
           <div className="bg-white dark:bg-surface-darker rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden min-h-[600px] flex flex-col">
             <div className="flex border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-surface-dark">
@@ -429,11 +468,19 @@ export default function VerificationDetailPage() {
 
               {currentDocumentUrl ? (
                 <div className="relative shadow-2xl rounded bg-white max-w-full max-h-full transition-transform duration-200 ease-in-out hover:scale-[1.02]">
-                  <img
-                    alt={currentFileLabel}
-                    className="max-h-[500px] w-auto object-contain rounded border border-gray-200 dark:border-gray-700"
-                    src={currentDocumentUrl}
-                  />
+                  {isPdf ? (
+                    <iframe
+                      src={currentDocumentUrl}
+                      className="w-[800px] max-w-full h-[500px] rounded border border-gray-200 dark:border-gray-700"
+                      title={currentFileLabel}
+                    />
+                  ) : (
+                    <img
+                      alt={currentFileLabel}
+                      className="max-h-[500px] w-auto object-contain rounded border border-gray-200 dark:border-gray-700"
+                      src={currentDocumentUrl}
+                    />
+                  )}
                 </div>
               ) : (
                 <div className="relative z-10 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -448,8 +495,7 @@ export default function VerificationDetailPage() {
                   Document: <strong>{currentFileLabel}</strong>
                 </span>
                 <span>
-                  Submitted:{" "}
-                  <strong>{formatDate(guide.verificationRequestedAt)}</strong>
+                  Submitted: <strong>{formatDate(verification.submittedAt)}</strong>
                 </span>
               </div>
 
