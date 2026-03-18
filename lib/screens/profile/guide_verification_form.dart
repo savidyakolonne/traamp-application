@@ -1,8 +1,15 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+
+import '../../app_config.dart';
 
 class GuideVerificationForm extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -16,6 +23,11 @@ class GuideVerificationForm extends StatefulWidget {
 class _GuideVerificationFormState extends State<GuideVerificationForm> {
   int _currentStep = 0;
 
+  final TextEditingController _certificateTypeController =
+      TextEditingController();
+  final TextEditingController _certificateNumberController =
+      TextEditingController();
+
   File? _certificateFile;
   Uint8List? _certificateBytes;
   String _certificateFileName = "";
@@ -26,23 +38,35 @@ class _GuideVerificationFormState extends State<GuideVerificationForm> {
 
   bool _isSubmitting = false;
 
-  bool get _hasExistingCertificate {
-    final certificate = widget.userData['certificate'];
-    return certificate != null && certificate.toString().trim().isNotEmpty;
-  }
-
-  String get _existingCertificateUrl {
-    return widget.userData['certificate']?.toString() ?? "";
-  }
-
   bool get _canContinueCertificateStep {
-    return _hasExistingCertificate ||
-        _certificateFile != null ||
-        _certificateBytes != null;
+    return (_certificateFile != null || _certificateBytes != null) &&
+        _certificateTypeController.text.trim().isNotEmpty &&
+        _certificateNumberController.text.trim().isNotEmpty;
   }
 
   bool get _canContinueNicStep {
     return _nicFile != null || _nicBytes != null;
+  }
+
+  @override
+  void dispose() {
+    _certificateTypeController.dispose();
+    _certificateNumberController.dispose();
+    super.dispose();
+  }
+
+  MediaType _getMediaType(String fileName) {
+    final lower = fileName.toLowerCase();
+
+    if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+      return MediaType("image", "jpeg");
+    } else if (lower.endsWith(".png")) {
+      return MediaType("image", "png");
+    } else if (lower.endsWith(".pdf")) {
+      return MediaType("application", "pdf");
+    }
+
+    return MediaType("application", "octet-stream");
   }
 
   Future<void> _pickCertificate() async {
@@ -95,7 +119,9 @@ class _GuideVerificationFormState extends State<GuideVerificationForm> {
     if (_currentStep == 0 && !_canContinueCertificateStep) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Please upload a certificate or use the existing one."),
+          content: Text(
+            "Please enter certificate type, certificate number, and upload the certificate.",
+          ),
         ),
       );
       return;
@@ -129,25 +155,102 @@ class _GuideVerificationFormState extends State<GuideVerificationForm> {
     });
 
     try {
-      // TODO:
-      // connect backend API here
-      // send existing certificate or new uploaded certificate
-      // send NIC file
-      // then update verificationStatus to pending
+      final user = FirebaseAuth.instance.currentUser;
 
-      await Future.delayed(const Duration(seconds: 1));
+      if (user == null) {
+        throw Exception("User is not logged in");
+      }
 
-      if (!mounted) return;
+      final idToken = await user.getIdToken(true);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Verification request submitted successfully."),
-          backgroundColor: Colors.green,
-        ),
+      final uri = Uri.parse(
+        "${AppConfig.SERVER_URL}/api/guides/verification/submit",
       );
 
-      Navigator.pop(context, true);
+      final request = http.MultipartRequest("POST", uri);
+
+      request.headers["Authorization"] = "Bearer $idToken";
+
+      request.fields["guideCertificateType"] = _certificateTypeController.text
+          .trim();
+      request.fields["certificateNumber"] = _certificateNumberController.text
+          .trim();
+
+      if (_nicBytes != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            "nicDocument",
+            _nicBytes!,
+            filename: _nicFileName,
+            contentType: _getMediaType(_nicFileName),
+          ),
+        );
+      } else if (_nicFile != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            "nicDocument",
+            _nicFile!.path,
+            filename: _nicFileName,
+            contentType: _getMediaType(_nicFileName),
+          ),
+        );
+      } else {
+        throw Exception("NIC document is required");
+      }
+
+      if (_certificateBytes != null) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            "sltdaCertificate",
+            _certificateBytes!,
+            filename: _certificateFileName,
+            contentType: _getMediaType(_certificateFileName),
+          ),
+        );
+      } else if (_certificateFile != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            "sltdaCertificate",
+            _certificateFile!.path,
+            filename: _certificateFileName,
+            contentType: _getMediaType(_certificateFileName),
+          ),
+        );
+      } else {
+        throw Exception("Certificate file is required");
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      final responseData = response.body.isNotEmpty
+          ? jsonDecode(response.body)
+          : null;
+
+      if (response.statusCode == 201) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              responseData?["msg"] ??
+                  "Verification request submitted successfully.",
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pop(context, true);
+      } else {
+        throw Exception(
+          responseData?["msg"] ??
+              responseData?["error"] ??
+              "Failed to submit verification request",
+        );
+      }
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Failed to submit verification request: $e"),
@@ -203,7 +306,11 @@ class _GuideVerificationFormState extends State<GuideVerificationForm> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              fontWeight: isActive
+                  ? FontWeight.w600
+                  : Colors.black54 == null
+                  ? FontWeight.w500
+                  : FontWeight.w500,
               color: isActive ? Colors.green : Colors.black54,
             ),
           ),
@@ -226,71 +333,41 @@ class _GuideVerificationFormState extends State<GuideVerificationForm> {
         ),
         const SizedBox(height: 10),
         const Text(
-          "Upload your guide certificate. If you already uploaded one before, you can keep it or replace it.",
+          "Upload your SLTDA guide certificate and enter the certificate details.",
           style: TextStyle(fontSize: 14, color: Colors.black54, height: 1.5),
         ),
         const SizedBox(height: 20),
-
-        if (_hasExistingCertificate)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.green.shade200),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.insert_drive_file, color: Colors.green),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        "Existing certificate found",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _existingCertificateUrl,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12, color: Colors.black54),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: _pickCertificate,
-                  icon: const Icon(Icons.upload_file),
-                  label: const Text("Replace Certificate"),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.green,
-                    side: const BorderSide(color: Colors.green),
-                  ),
-                ),
-              ],
-            ),
-          )
-        else
-          _buildUploadBox(
-            title: "Upload Guide Certificate",
-            subtitle: _certificateFileName.isEmpty
-                ? "Tap to upload certificate"
-                : _certificateFileName,
-            onTap: _pickCertificate,
+        TextField(
+          controller: _certificateTypeController,
+          decoration: InputDecoration(
+            labelText: "Certificate Type",
+            hintText: "Ex: SLTDA",
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
-
+          onChanged: (_) => setState(() {}),
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: _certificateNumberController,
+          decoration: InputDecoration(
+            labelText: "Certificate Number",
+            hintText: "Ex: SLTDA-00123",
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          onChanged: (_) => setState(() {}),
+        ),
+        const SizedBox(height: 20),
+        _buildUploadBox(
+          title: "Upload Guide Certificate",
+          subtitle: _certificateFileName.isEmpty
+              ? "Tap to upload certificate"
+              : _certificateFileName,
+          onTap: _pickCertificate,
+        ),
         if (_certificateFileName.isNotEmpty) ...[
           const SizedBox(height: 12),
           _buildSelectedFileCard(
-            title: "New certificate selected",
+            title: "Certificate selected",
             fileName: _certificateFileName,
           ),
         ],
@@ -326,14 +403,9 @@ class _GuideVerificationFormState extends State<GuideVerificationForm> {
   }
 
   Widget _buildSubmitStep() {
-    final bool usingExistingCertificate =
-        _hasExistingCertificate && _certificateFileName.isEmpty;
-
-    final String certificateText = usingExistingCertificate
-        ? "Using existing uploaded certificate"
-        : (_certificateFileName.isNotEmpty
-              ? _certificateFileName
-              : "No certificate selected");
+    final String certificateText = _certificateFileName.isNotEmpty
+        ? _certificateFileName
+        : "No certificate selected";
 
     final String nicText = _nicFileName.isNotEmpty
         ? _nicFileName
@@ -356,6 +428,22 @@ class _GuideVerificationFormState extends State<GuideVerificationForm> {
           icon: Icons.badge_outlined,
           title: "Certificate",
           value: certificateText,
+        ),
+        const SizedBox(height: 12),
+        _buildReviewCard(
+          icon: Icons.school_outlined,
+          title: "Certificate Type",
+          value: _certificateTypeController.text.trim().isNotEmpty
+              ? _certificateTypeController.text.trim()
+              : "Not entered",
+        ),
+        const SizedBox(height: 12),
+        _buildReviewCard(
+          icon: Icons.confirmation_number_outlined,
+          title: "Certificate Number",
+          value: _certificateNumberController.text.trim().isNotEmpty
+              ? _certificateNumberController.text.trim()
+              : "Not entered",
         ),
         const SizedBox(height: 12),
         _buildReviewCard(
@@ -591,7 +679,8 @@ class _GuideVerificationFormState extends State<GuideVerificationForm> {
   Widget build(BuildContext context) {
     final bool isVerified = widget.userData['isVerified'] == true;
     final String verificationStatus =
-        widget.userData['verificationStatus']?.toString() ?? 'not_submitted';
+        widget.userData['currentVerificationStatus']?.toString() ??
+        'not_submitted';
 
     return Scaffold(
       appBar: AppBar(
