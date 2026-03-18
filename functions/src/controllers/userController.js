@@ -81,9 +81,7 @@ export const registerGuide = async (req, res) => {
       dob,
       type,
       phoneNumber,
-      guideCertificateType: null,
-      certificateNumber: null,
-      nic,
+      nicNumber: nic,
       location,
       address,
       country,
@@ -91,7 +89,18 @@ export const registerGuide = async (req, res) => {
       availability,
       languages: [],
       profilePicture: "",
-      certificate: null,
+      bio: "" ,
+      skills: [] ,
+
+      guideCertificateType: null,
+      certificateNumber: null,
+
+      //verification
+      isVerified: false,
+      badgeIssued: false,
+      currentVerificationStatus: "not_submitted",
+      activeVerificationId: null,
+
       createdAt,
     });
 
