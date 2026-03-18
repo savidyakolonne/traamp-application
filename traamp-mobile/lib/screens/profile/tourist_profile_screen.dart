@@ -6,7 +6,7 @@ import 'package:traamp_frontend/app_config.dart';
 import '../tourist/tourist_edit_profile.dart';
 import '../tourist/saved_guides_screen.dart';
 import '../../services/saved_guides_service.dart';
-import '../profile/guide_public_view_screen.dart';
+import 'guide_public_view_screen.dart';
 
 // ignore: must_be_immutable
 class TouristProfileScreen extends StatefulWidget {
