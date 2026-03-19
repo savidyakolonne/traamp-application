@@ -1,10 +1,8 @@
-import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/models/tourist.dart';
-import '../../app_config.dart';
 import '../../list-data.dart';
-import 'login_setup.dart';
+import 'verify_email_screen.dart';
 
 class TouristSignupForm extends StatefulWidget {
   const TouristSignupForm({super.key});
@@ -13,18 +11,14 @@ class TouristSignupForm extends StatefulWidget {
 }
 
 class _TouristSignupFormState extends State<TouristSignupForm> {
-  // global key object for Form
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  // DOB text editing controller
   final TextEditingController _dobController = TextEditingController();
 
   final Color primaryColor = Colors.lightGreen;
 
-  // array for country names
   final List<String> _countries = ListData.countryNames;
-  final List<String> _genders = ListData.gender; // for gender dropdown menu
+  final List<String> _genders = ListData.gender;
 
-  // global variables to store data coming from form
   String firstName = "";
   String lastName = "";
   String gender = "";
@@ -35,11 +29,9 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   String dob = "";
   String type = "tourist";
 
-  // first name
   Widget firstNameFormField() {
     return TextFormField(
       decoration: fieldStyle("First Name"),
-      //validation
       validator: (text) {
         if (text == null || text == "") {
           return "Name cannot be empty";
@@ -49,7 +41,6 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
         }
         return null;
       },
-      //save global variable
       onSaved: (text) {
         firstName = text!.trim();
       },
@@ -57,11 +48,9 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
-  // last name
   Widget lastNameFormField() {
     return TextFormField(
       decoration: fieldStyle("Last Name"),
-      //validation
       validator: (text) {
         if (text == null || text == "") {
           return "Name cannot be empty";
@@ -71,14 +60,12 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
         }
         return null;
       },
-      //save global variable
       onSaved: (text) {
         lastName = text!.trim();
       },
     );
   }
 
-  // email
   Widget emailFormField() {
     return TextFormField(
       keyboardType: TextInputType.emailAddress,
@@ -100,7 +87,6 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
-  // passowrd
   Widget passwordFormField() {
     return TextFormField(
       obscureText: true,
@@ -135,7 +121,6 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
-  // confirm password
   Widget confirmPasswordFormField() {
     return TextFormField(
       obscureText: true,
@@ -155,7 +140,6 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
-  // gender dropdown
   Widget genderFormField() {
     return DropdownButtonFormField<String>(
       decoration: fieldStyle("Select Gender"),
@@ -176,7 +160,6 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
-  // country dropdown
   Widget selectCountryFormField() {
     return DropdownButtonFormField<String>(
       decoration: fieldStyle("Select Your Country"),
@@ -197,20 +180,19 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
-  // calender for DOB
   Widget dobFormField() {
     return TextFormField(
       controller: _dobController,
-      readOnly: true, // prevent manual typing
+      readOnly: true,
       decoration: fieldStyle(
         "Date of Birth",
       ).copyWith(suffixIcon: const Icon(Icons.calendar_month)),
       onTap: () async {
         DateTime? pickedDate = await showDatePicker(
           context: context,
-          initialDate: DateTime(2000), // default date
-          firstDate: DateTime(1900), // earliest allowed DOB
-          lastDate: DateTime.now(), // latest allowed DOB
+          initialDate: DateTime(2000),
+          firstDate: DateTime(1900),
+          lastDate: DateTime.now(),
         );
 
         if (pickedDate != null) {
@@ -232,7 +214,64 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
     );
   }
 
-  // build method
+  Future<void> _registerTourist() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    _formKey.currentState?.save();
+
+    final tourist = Tourist(
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: password,
+      gender: gender,
+      dob: dob,
+      country: selectedCountry,
+      type: type,
+    );
+
+    try {
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      await credential.user!.sendEmailVerification();
+
+      if (!mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => VerifyEmailScreen(
+            endpoint: "/api/users/register-tourist",
+            profileData: tourist.toMap()
+              ..remove("email")
+              ..remove("password"),
+          ),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? "Registration failed"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error while connecting: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _dobController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -243,13 +282,13 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
         scrolledUnderElevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
-        title: Text(
+        title: const Text(
           'Welcome to Traamp',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(25.0),
+        padding: const EdgeInsets.all(25.0),
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
@@ -260,9 +299,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                   Center(
                     child: Image.asset('assets/images/logo.png', height: 90),
                   ),
-
-                  SizedBox(height: 20.0),
-
+                  const SizedBox(height: 20.0),
                   const Center(
                     child: Text(
                       "Please Register as a Tourist",
@@ -272,18 +309,14 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 6),
-
                   const Center(
                     child: Text(
                       "Fill the details below to continue",
                       style: TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   Row(
                     children: [
                       Expanded(child: firstNameFormField()),
@@ -291,13 +324,9 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                       Expanded(child: lastNameFormField()),
                     ],
                   ),
-
                   const SizedBox(height: 15),
-
                   emailFormField(),
-
                   const SizedBox(height: 15),
-
                   Row(
                     children: [
                       Expanded(child: genderFormField()),
@@ -305,21 +334,13 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                       Expanded(child: dobFormField()),
                     ],
                   ),
-
                   const SizedBox(height: 15),
-
                   selectCountryFormField(),
-
                   const SizedBox(height: 30),
-
                   passwordFormField(),
-
                   const SizedBox(height: 15),
-
                   confirmPasswordFormField(),
-
                   const SizedBox(height: 30),
-
                   SizedBox(
                     width: double.infinity,
                     height: 55,
@@ -330,98 +351,8 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () async {
-                        // if validated save to global variables
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState?.save();
-
-                          final tourist = Tourist(
-                            firstName: firstName,
-                            lastName: lastName,
-                            email: email,
-                            password: password,
-                            gender: gender,
-                            dob: dob,
-                            country: selectedCountry,
-                            type: type,
-                          );
-                          try {
-                            final response = await http.post(
-                              Uri.parse(
-                                "${AppConfig.SERVER_URL}/api/users/register-tourist",
-                              ),
-                              headers: {
-                                "Content-Type": "application/json",
-                              }, //  tells the server the body is JSON
-                              body: jsonEncode(tourist.toMap()),
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text("Connecting... "),
-                                    CircularProgressIndicator.adaptive(),
-                                  ],
-                                ),
-                                backgroundColor: const Color.fromARGB(
-                                  180,
-                                  76,
-                                  175,
-                                  79,
-                                ),
-                              ),
-                            );
-                            final data = jsonDecode(response.body);
-                            print(data);
-                            if (response.statusCode == 201) {
-                              Navigator.pop(context, LoginSetup());
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('${data['msg']}'),
-                                  backgroundColor: const Color.fromARGB(
-                                    180,
-                                    76,
-                                    175,
-                                    79,
-                                  ),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '${data['msg']} : status code = ${response.statusCode}',
-                                  ),
-                                  backgroundColor: const Color.fromARGB(
-                                    180,
-                                    244,
-                                    67,
-                                    54,
-                                  ),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            print(e);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Error while connecting to server...',
-                                ),
-                                backgroundColor: const Color.fromARGB(
-                                  180,
-                                  244,
-                                  67,
-                                  54,
-                                ),
-                              ),
-                            );
-                          }
-                        }
-                      },
-
-                      child: Text(
+                      onPressed: _registerTourist,
+                      child: const Text(
                         "Register",
                         style: TextStyle(
                           fontSize: 18,
@@ -431,9 +362,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 15),
-
                   Center(
                     child: Text.rich(
                       TextSpan(
@@ -450,7 +379,6 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 40),
                 ],
               ),
@@ -464,22 +392,17 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
   InputDecoration fieldStyle(String hint) {
     return InputDecoration(
       hintText: hint,
-
       filled: true,
       fillColor: Colors.white,
-
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.grey.shade300),
       ),
-
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.grey.shade300),
       ),
-
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Colors.green),
