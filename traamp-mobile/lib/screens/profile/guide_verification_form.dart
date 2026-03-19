@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -306,11 +305,7 @@ class _GuideVerificationFormState extends State<GuideVerificationForm> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,
-              fontWeight: isActive
-                  ? FontWeight.w600
-                  : Colors.black54 == null
-                  ? FontWeight.w500
-                  : FontWeight.w500,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
               color: isActive ? Colors.green : Colors.black54,
             ),
           ),
