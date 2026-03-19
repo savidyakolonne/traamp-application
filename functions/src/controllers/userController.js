@@ -160,7 +160,7 @@ export const loginWithEmail = async (req, res) => {
     const userDoc = await db.collection("users").doc(uid).get();
 
     if (!userDoc.exists) {
-      return res.status(404).json({ msg: "User profile not found" });
+      return res.status(404).json({ msg: "User cannot not found" });
     }
 
     res.status(200).json({
