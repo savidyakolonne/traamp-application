@@ -139,7 +139,7 @@ export const getAllPackages = async (_, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      msg: error,
+      msg: "Error while retrieving packages.",
     });
   }
 };

@@ -3,6 +3,8 @@ import '../../services/places_service.dart';
 import '../../widgets/place_tile.dart';
 
 class PlacesListScreen extends StatefulWidget {
+  const PlacesListScreen({super.key});
+
   @override
   State<PlacesListScreen> createState() => _PlacesListScreenState();
 }
