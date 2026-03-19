@@ -6,7 +6,7 @@ const { auth, db, bucket } = firebaseAdmin;
 // register tourist
 export const registerTourist = async (req, res) => {
   try {
-    const createdAt = new Date(req.body.createdAt);
+
     const { firstName, lastName, email, password, gender, dob, type, country } =
       req.body;
 
@@ -24,7 +24,8 @@ export const registerTourist = async (req, res) => {
       dob,
       type,
       country,
-      createdAt,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      accountStatus: "active",
     });
 
     // setup a notification
