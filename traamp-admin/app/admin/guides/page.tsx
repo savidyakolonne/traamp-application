@@ -63,14 +63,46 @@ export default function GuidesPage() {
     return "N/A";
   };
 
+  const getGuideStatus = (guide: Guide) => {
+    return guide.currentVerificationStatus || "not_submitted";
+  };
+
+  const getStatusLabel = (status?: string) => {
+    switch (status) {
+      case "pending":
+        return "Pending";
+      case "approved":
+        return "Approved";
+      case "rejected":
+        return "Rejected";
+      case "not_submitted":
+      default:
+        return "Not Submitted";
+    }
+  };
+
+  const getStatusClasses = (status?: string) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+      case "approved":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      case "rejected":
+        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+      case "not_submitted":
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
+    }
+  };
+
   const stats = useMemo(() => {
     const totalGuides = guides.length;
     const verifiedGuides = guides.filter((g) => g.isVerified === true).length;
     const pendingGuides = guides.filter(
-      (g) => g.currentVerificationStatus === "pending"
+      (g) => getGuideStatus(g) === "pending"
     ).length;
     const rejectedGuides = guides.filter(
-      (g) => g.currentVerificationStatus === "rejected"
+      (g) => getGuideStatus(g) === "rejected"
     ).length;
 
     return {
@@ -92,29 +124,14 @@ export default function GuidesPage() {
       const matchesSearch =
         fullName.includes(q) || email.includes(q) || location.includes(q);
 
+      const guideStatus = getGuideStatus(guide);
+
       const matchesStatus =
-        statusFilter === "all"
-          ? true
-          : guide.currentVerificationStatus === statusFilter;
+        statusFilter === "all" ? true : guideStatus === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
   }, [guides, search, statusFilter]);
-
-  const getStatusClasses = (status?: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
-      case "approved":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
-      case "rejected":
-        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
-      case "not_submitted":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
-    }
-  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -151,7 +168,6 @@ export default function GuidesPage() {
         </div>
       </div>
 
-      {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -244,80 +260,89 @@ export default function GuidesPage() {
                   </td>
                 </tr>
               ) : (
-                filteredGuides.map((guide) => (
-                  <tr
-                    key={guide.uid}
-                    className="hover:bg-gray-50 dark:hover:bg-surface-darker/50 transition-colors"
-                  >
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                          {guide.firstName?.[0] ?? ""}
-                          {guide.lastName?.[0] ?? ""}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                              {guide.firstName || "Unknown"} {guide.lastName || ""}
-                            </p>
-                            {guide.isVerified ? (
-                              <span className="material-icons text-green-500 text-base">
-                                verified
-                              </span>
-                            ) : null}
+                filteredGuides.map((guide) => {
+                  const guideStatus = getGuideStatus(guide);
+
+                  return (
+                    <tr
+                      key={guide.uid}
+                      className="hover:bg-gray-50 dark:hover:bg-surface-darker/50 transition-colors"
+                    >
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                            {guide.firstName?.[0] ?? ""}
+                            {guide.lastName?.[0] ?? ""}
                           </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {guide.email || "No email"}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {guide.phoneNumber || "No phone"}
-                          </p>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                {guide.firstName || "Unknown"}{" "}
+                                {guide.lastName || ""}
+                              </p>
+                              {guide.isVerified ? (
+                                <span className="material-icons text-green-500 text-base">
+                                  verified
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {guide.email || "No email"}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {guide.phoneNumber || "No phone"}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-300">
-                      {guide.location || "N/A"}
-                    </td>
+                      <td className="py-4 px-6 text-sm text-gray-600 dark:text-gray-300">
+                        {guide.location || "N/A"}
+                      </td>
 
-                    <td className="py-4 px-6">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getStatusClasses(
-                          guide.currentVerificationStatus
-                        )}`}
-                      >
-                        {guide.currentVerificationStatus || "unknown"}
-                      </span>
-                    </td>
-
-                    <td className="py-4 px-6">
-                      {guide.badgeIssued ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                          <span className="material-icons text-sm">verified</span>
-                          Issued
+                      <td className="py-4 px-6">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(
+                            guideStatus
+                          )}`}
+                        >
+                          {getStatusLabel(guideStatus)}
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400">
-                          <span className="material-icons text-sm">remove_moderator</span>
-                          Not Issued
-                        </span>
-                      )}
-                    </td>
+                      </td>
 
-                    <td className="py-4 px-6 text-sm text-gray-500 dark:text-gray-400">
-                      {formatDate(guide.createdAt)}
-                    </td>
+                      <td className="py-4 px-6">
+                        {guide.badgeIssued ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                            <span className="material-icons text-sm">
+                              verified
+                            </span>
+                            Issued
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400">
+                            <span className="material-icons text-sm">
+                              remove_moderator
+                            </span>
+                            Not Issued
+                          </span>
+                        )}
+                      </td>
 
-                    <td className="py-4 px-6 text-right">
-                      <Link
-                        href={`/admin/guides/${guide.uid}`}
-                        className="inline-flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-lg transition-colors"
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))
+                      <td className="py-4 px-6 text-sm text-gray-500 dark:text-gray-400">
+                        {formatDate(guide.createdAt)}
+                      </td>
+
+                      <td className="py-4 px-6 text-right">
+                        <Link
+                          href={`/admin/guides/${guide.uid}`}
+                          className="inline-flex items-center justify-center px-3 py-2 text-xs font-medium text-primary bg-primary/10 hover:bg-primary hover:text-white rounded-lg transition-colors"
+                        >
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

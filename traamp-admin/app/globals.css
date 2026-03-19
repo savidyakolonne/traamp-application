@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 /* Enable class-based dark mode (so <html class="dark"> works) */
-@variant dark (&:where(.dark, .dark *));
+/* @variant dark (&:where(.dark, .dark *)); */
 
 /* Your custom theme tokens (this replaces tailwind.config colors) */
-@theme {
+/* @theme {
   --color-primary: #136dec;
 
   --color-background-light: #f6f7f8;
@@ -12,10 +12,10 @@
 
   --color-surface-dark: #1a2332;
   --color-surface-darker: #151e2a;
-}
+} */
 
 /* Optional: nice defaults */
-html,
+/* html,
 body {
   height: 100%;
-}
+} */
