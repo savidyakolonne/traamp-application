@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type NavItem = { href: string; icon: string; label: string; badge?: string };
 
@@ -46,11 +47,19 @@ export default function Sidebar() {
   return (
     <aside className="w-64 bg-white dark:bg-surface-dark border-r border-gray-200 dark:border-gray-800 flex flex-col h-screen fixed left-0 top-0 z-50">
       <div className="h-20 flex items-center px-8 border-b border-gray-100 dark:border-gray-800/50">
-        <div className="flex items-center gap-2 text-primary font-bold text-xl tracking-tight">
-          <span className="material-icons text-3xl">explore</span>
-          <span>Traamp Admin</span>
-        </div>
+      <div className="flex items-center gap-2 text-primary font-bold text-xl tracking-tight">
+        
+        <Image
+          src="/logo.png"
+          alt="Logo"
+          width={40}
+          height={40}
+          className="object-contain"
+        />
+
+        <span>Traamp Admin</span>
       </div>
+    </div>
 
       <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
         <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">
