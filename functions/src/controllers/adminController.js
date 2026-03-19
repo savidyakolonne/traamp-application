@@ -62,15 +62,14 @@ export const getAllTourists = async (req, res) => {
   try {
     let query = db.collection("users").where("type", "==", "tourist");
 
-    // optional filters
     if (req.query.status) {
-      query = query.where("verificationStatus", "==", req.query.status);
+      query = query.where("accountStatus", "==", req.query.status);
     }
 
     const snapshot = await query.get();
 
     const tourists = snapshot.docs.map((doc) => {
-      const data = doc.data();
+    const data = doc.data();
       return {
         uid: doc.id,
         firstName: data.firstName,
@@ -97,7 +96,10 @@ export const getAllTourists = async (req, res) => {
 // Get tourist stats
 export const getTouristStats = async (req, res) => {
   try {
-    const snapshot = await db.collection("users").where("type", "==", "tourist").get();
+    const snapshot = await db
+      .collection("users")
+      .where("type", "==", "tourist")
+      .get();
 
     let total = 0;
     let active = 0;
@@ -105,8 +107,9 @@ export const getTouristStats = async (req, res) => {
 
     snapshot.forEach((doc) => {
       total++;
-      const status = doc.data().verificationStatus;
-      if (status === "verified") active++;
+      const status = doc.data().accountStatus || "active";
+
+      if (status === "active") active++;
       if (status === "suspended") suspended++;
     });
 
