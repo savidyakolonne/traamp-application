@@ -21,7 +21,6 @@ class _LoginSetupState extends State<LoginSetup> {
   late Map<String, dynamic> userData;
   late String idToken;
 
-  // function to hide and visible password
   Widget showAndHidePasswordIcon() {
     return IconButton(
       icon: Icon(
@@ -37,41 +36,51 @@ class _LoginSetupState extends State<LoginSetup> {
     );
   }
 
-  // function to login with email and password
   Future<void> _loginEmail() async {
     String email = emailCtrl.text.trim().toLowerCase();
     String password = passCtrl.text;
+
+    setState(() {
+      loading = true;
+    });
 
     try {
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      String? token = await userCredential.user!.getIdToken(true);
-      setState(() {
-        idToken = token!;
-      });
+      await userCredential.user!.reload();
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null || !user.emailVerified) {
+        await FirebaseAuth.instance.signOut();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please verify your email before logging in.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+
+        setState(() {
+          loading = false;
+        });
+        return;
+      }
+
+      String? token = await user.getIdToken(true);
+      idToken = token!;
+
       final response = await http.post(
         Uri.parse("${AppConfig.SERVER_URL}/api/users/loginWithEmail"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"idToken": idToken}),
       );
 
-      final data = await jsonDecode(response.body);
+      final data = jsonDecode(response.body);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Connecting... ", style: TextStyle(color: Colors.white)),
-              CircularProgressIndicator.adaptive(backgroundColor: Colors.green),
-            ],
-          ),
-          backgroundColor: const Color.fromARGB(123, 0, 0, 0),
-        ),
-      );
-
-      if (response.statusCode == 404 || response.statusCode == 401) {
+      if (response.statusCode == 404 ||
+          response.statusCode == 401 ||
+          response.statusCode == 403) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${data['msg']}'),
@@ -79,16 +88,15 @@ class _LoginSetupState extends State<LoginSetup> {
           ),
         );
       } else if (response.statusCode == 200) {
-        setState(() {
-          userData = data['profile'];
-        });
+        userData = data['profile'];
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${data['msg']}'),
             backgroundColor: const Color.fromARGB(125, 76, 175, 79),
           ),
         );
-        // routing
+
         if (userData['type'] == "tourist") {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -107,7 +115,7 @@ class _LoginSetupState extends State<LoginSetup> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text('User type is invalid...'),
               backgroundColor: Colors.red,
             ),
@@ -115,13 +123,18 @@ class _LoginSetupState extends State<LoginSetup> {
         }
       }
     } catch (e) {
-      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Incorrect username or password.'),
           backgroundColor: Colors.red,
         ),
       );
+    }
+
+    if (mounted) {
+      setState(() {
+        loading = false;
+      });
     }
   }
 
@@ -138,7 +151,7 @@ class _LoginSetupState extends State<LoginSetup> {
       backgroundColor: const Color.fromARGB(255, 255, 254, 254),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(top: 100, left: 24, right: 24),
+          padding: const EdgeInsets.only(top: 100, left: 24, right: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -210,9 +223,7 @@ class _LoginSetupState extends State<LoginSetup> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    _loginEmail();
-                  },
+                  onPressed: loading ? null : _loginEmail,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 247, 250, 247),
                     foregroundColor: Colors.green,
@@ -235,14 +246,9 @@ class _LoginSetupState extends State<LoginSetup> {
                 child: OutlinedButton(
                   onPressed: () {},
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(
-                      255,
-                      247,
-                      250,
-                      247,
-                    ), // light green bg
-                    foregroundColor: Colors.green, // text color
-                    side: const BorderSide(color: Colors.green), // border color
+                    backgroundColor: const Color.fromARGB(255, 247, 250, 247),
+                    foregroundColor: Colors.green,
+                    side: const BorderSide(color: Colors.green),
                   ),
                   child: const Text("Continue with Google"),
                 ),

@@ -3,20 +3,34 @@ import admin from "firebase-admin";
 
 const { auth, db, bucket } = firebaseAdmin;
 
-// register tourist
+// complete tourist registration after email verification
 export const registerTourist = async (req, res) => {
   try {
-
-    const { firstName, lastName, email, password, gender, dob, type, country } =
+    const { idToken, firstName, lastName, gender, dob, type, country } =
       req.body;
 
-    const userRecord = await auth.createUser({
-      email,
-      password,
-    });
+    const decoded = await auth.verifyIdToken(idToken);
 
-    await db.collection("users").doc(userRecord.uid).set({
-      uid: userRecord.uid,
+    if (!decoded.email) {
+      return res.status(400).json({ msg: "Email not found in token" });
+    }
+
+    if (!decoded.email_verified) {
+      return res.status(403).json({ msg: "Please verify your email first" });
+    }
+
+    const uid = decoded.uid;
+    const email = decoded.email;
+
+    const userRef = db.collection("users").doc(uid);
+    const userDoc = await userRef.get();
+
+    if (userDoc.exists) {
+      return res.status(409).json({ msg: "User already registered" });
+    }
+
+    await userRef.set({
+      uid,
       firstName,
       lastName,
       email,
@@ -28,12 +42,10 @@ export const registerTourist = async (req, res) => {
       accountStatus: "active",
     });
 
-    // setup a notification
     const notificationDocRef = db.collection("notifications").doc();
-    console.log("notificationDocRef: ", notificationDocRef);
     await notificationDocRef.set({
       notificationId: notificationDocRef.id,
-      uid: userRecord.uid,
+      uid,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       isUnread: true,
       type: "registration",
@@ -47,15 +59,13 @@ export const registerTourist = async (req, res) => {
   }
 };
 
-// register guide
+// complete guide registration after email verification
 export const registerGuide = async (req, res) => {
   try {
-    const createdAt = new Date(req.body.createdAt);
     const {
+      idToken,
       firstName,
       lastName,
-      email,
-      password,
       gender,
       dob,
       type,
@@ -68,13 +78,28 @@ export const registerGuide = async (req, res) => {
       availability,
     } = req.body;
 
-    const userRecord = await auth.createUser({
-      email,
-      password,
-    });
+    const decoded = await auth.verifyIdToken(idToken);
 
-    await db.collection("users").doc(userRecord.uid).set({
-      uid: userRecord.uid,
+    if (!decoded.email) {
+      return res.status(400).json({ msg: "Email not found in token" });
+    }
+
+    if (!decoded.email_verified) {
+      return res.status(403).json({ msg: "Please verify your email first" });
+    }
+
+    const uid = decoded.uid;
+    const email = decoded.email;
+
+    const userRef = db.collection("users").doc(uid);
+    const userDoc = await userRef.get();
+
+    if (userDoc.exists) {
+      return res.status(409).json({ msg: "User already registered" });
+    }
+
+    await userRef.set({
+      uid,
       firstName,
       lastName,
       email,
@@ -90,27 +115,25 @@ export const registerGuide = async (req, res) => {
       availability,
       languages: [],
       profilePicture: "",
-      bio: "" ,
-      skills: [] ,
+      bio: "",
+      skills: [],
 
       guideCertificateType: null,
       certificateNumber: null,
 
-      //verification
       isVerified: false,
       badgeIssued: false,
       currentVerificationStatus: "not_submitted",
       activeVerificationId: null,
 
-      createdAt,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      accountStatus: "active",
     });
 
-    // setup a notification
     const notificationDocRef = db.collection("notifications").doc();
-    console.log("notificationDocRef: ", notificationDocRef);
     await notificationDocRef.set({
       notificationId: notificationDocRef.id,
-      uid: userRecord.uid,
+      uid,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       isUnread: true,
       type: "registration",
@@ -129,6 +152,10 @@ export const loginWithEmail = async (req, res) => {
   try {
     const decoded = await auth.verifyIdToken(idToken);
     const uid = decoded.uid;
+
+    if (!decoded.email_verified) {
+      return res.status(403).json({ msg: "Please verify your email first" });
+    }
 
     const userDoc = await db.collection("users").doc(uid).get();
 
@@ -180,7 +207,6 @@ export const updateGuideAvailability = async (req, res) => {
 
     await userDocRef.update({ availability });
 
-    // setup a notification
     let availabilityString;
     if (availability) {
       availabilityString = "available";
@@ -188,24 +214,16 @@ export const updateGuideAvailability = async (req, res) => {
       availabilityString = "not available";
     }
 
-    try {
-      const notificationDocRef = db.collection("notifications").doc();
-      console.log("notificationDocRef: ", notificationDocRef);
+    const notificationDocRef = db.collection("notifications").doc();
 
-      await notificationDocRef.set({
-        notificationId: notificationDocRef.id,
-        uid: id,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        isUnread: true,
-        type: "availability-status",
-        msg: availabilityString,
-      });
-
-      res.status(200).json({ msg: "Successfully created a notification." });
-    } catch (e) {
-      console.error("Error creating notification:", e);
-      res.status(400).json({ msg: "Failed to update field." });
-    }
+    await notificationDocRef.set({
+      notificationId: notificationDocRef.id,
+      uid: id,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      isUnread: true,
+      type: "availability-status",
+      msg: availabilityString,
+    });
 
     res.status(200).json({ msg: "Successfully Updated." });
   } catch (e) {
@@ -257,9 +275,7 @@ export const updateTouristProfile = async (req, res) => {
       profilePicture,
     });
 
-    // setup a notification
     const notificationDocRef = db.collection("notifications").doc();
-    console.log("notificationDocRef: ", notificationDocRef);
     await notificationDocRef.set({
       notificationId: notificationDocRef.id,
       uid: uid,
@@ -294,7 +310,7 @@ export const updateGuideProfile = async (req, res) => {
       languages,
       profilePicture,
       bio,
-      skills
+      skills,
     } = req.body;
 
     const decoded = await auth.verifyIdToken(idToken);
@@ -319,9 +335,7 @@ export const updateGuideProfile = async (req, res) => {
 
     await userRef.update(updateData);
 
-    // setup a notification
     const notificationDocRef = db.collection("notifications").doc();
-    console.log("notificationDocRef: ", notificationDocRef);
     await notificationDocRef.set({
       notificationId: notificationDocRef.id,
       uid: uid,
@@ -420,7 +434,6 @@ export const deleteUser = async (req, res) => {
     const { uid, isTourist } = req.body;
 
     if (isTourist) {
-      // remove all notifications belongs to user
       const snapshot = await db
         .collection("notifications")
         .where("uid", "==", uid)
@@ -433,7 +446,6 @@ export const deleteUser = async (req, res) => {
 
       await batch.commit();
 
-      // remove favorites
       const favoriteDocRef = db.collection("favorites");
       const favoriteQuarry = favoriteDocRef.where("uid", "==", uid);
       const favoriteSnapshot = await favoriteQuarry.get();
@@ -446,9 +458,7 @@ export const deleteUser = async (req, res) => {
         const favId = favorites[i]["favoriteId"];
         await db.collection("favorites").doc(favId).delete();
       }
-      console.log("Successfully deleted favorites.");
 
-      // remove saved guides
       const savedGuidesDocRef = db.collection("saved_guides");
       const savedGuidesQuarry = savedGuidesDocRef.where(
         "touristUid",
@@ -464,16 +474,11 @@ export const deleteUser = async (req, res) => {
         const savedGuidesId = savedGuides[i]["id"];
         await db.collection("saved_guides").doc(savedGuidesId).delete();
       }
-      console.log("Successfully deleted saved_guides.");
 
-      // revoke the token
       await auth.revokeRefreshTokens(uid);
-      // delete the document of the tourist from firebase
       await db.collection("users").doc(uid).delete();
-      // delete email and password from firebase auth
       await admin.auth().deleteUser(uid);
     } else {
-      // remove all notifications belongs to user
       const snapshotNotifications = await db
         .collection("notifications")
         .where("uid", "==", uid)
@@ -486,10 +491,8 @@ export const deleteUser = async (req, res) => {
 
       await batch.commit();
 
-      // remove all ratings
       await db.collection("ratings").doc(uid).delete();
 
-      //remove all reviews
       const reviewDocRef = db.collection("reviews");
       const reviewQuarry = reviewDocRef.where("guideId", "==", uid);
       const reviewSnapshot = await reviewQuarry.get();
@@ -502,9 +505,7 @@ export const deleteUser = async (req, res) => {
         const reviewId = reviews[i]["reviewDocId"];
         await db.collection("reviews").doc(reviewId).delete();
       }
-      console.log("Reviews deleted successfully.");
 
-      // get all packages belongs to guide
       const guide_package_ref = db.collection("guide_packages");
       const packageQuery = guide_package_ref.where("uid", "==", uid);
 
@@ -514,13 +515,11 @@ export const deleteUser = async (req, res) => {
         ...doc.data(),
       }));
 
-      // deleting each package from fireStore
       for (let i = 0; i < packages.length; i++) {
         const images = packages[i]["images"];
         const coverImage = packages[i]["coverImage"];
         const packageId = packages[i]["packageId"];
 
-        // Merge coverImage into images array safely
         let allImages = [];
         if (Array.isArray(images)) {
           allImages = images;
@@ -535,7 +534,6 @@ export const deleteUser = async (req, res) => {
           allImages.push(coverImage);
         }
 
-        // Delete each image from Firebase Storage
         for (const img of allImages) {
           try {
             const withoutQuery = img.split("?")[0];
@@ -550,7 +548,6 @@ export const deleteUser = async (req, res) => {
                 .join("/");
             }
 
-            console.log("Deleting file:", storagePath);
             const file = bucket.file(storagePath);
             await file.delete();
           } catch (err) {
@@ -558,12 +555,9 @@ export const deleteUser = async (req, res) => {
           }
         }
 
-        // deleting the package
         await db.collection("guide_packages").doc(packageId).delete();
-        console.log("Successfully deleted the package.");
       }
 
-      // delete all gallery belongs to guide from fireStore
       const gallery_ref = db.collection("gallery");
       const galleryQuery = gallery_ref.where("uid", "==", uid);
 
@@ -573,9 +567,6 @@ export const deleteUser = async (req, res) => {
         ...doc.data(),
       }));
 
-      console.log("All Gallery retrieved successfully");
-
-      // delete each gallery from fireStore
       for (let i = 0; i < galleries.length; i++) {
         const galleryId = galleries[i]["galleryId"];
         const images = galleries[i]["images"];
@@ -592,7 +583,6 @@ export const deleteUser = async (req, res) => {
               storagePath = parts.slice(parts.indexOf("gallery")).join("/");
             }
 
-            console.log("Deleting file:", storagePath);
             const file = bucket.file(storagePath);
             await file.delete();
           }
@@ -600,19 +590,14 @@ export const deleteUser = async (req, res) => {
           console.log("Error deleting image:", err.message);
         }
 
-        // deleting the documents
         await db.collection("gallery").doc(galleryId).delete();
       }
 
-      // revoke the token
       await auth.revokeRefreshTokens(uid);
-      // delete the document of the tourist from firebase
       await db.collection("users").doc(uid).delete();
-      // delete email and password from firebase auth
       await admin.auth().deleteUser(uid);
     }
 
-    console.log("Successfully deleted user.");
     res.status(200).json({
       msg: "Successfully deleted user",
     });
