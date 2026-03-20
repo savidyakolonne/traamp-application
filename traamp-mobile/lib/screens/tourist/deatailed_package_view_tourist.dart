@@ -133,8 +133,8 @@ class _DetailedPackageViewTouristState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 60,
-                    height: 60,
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50),
                       color: const Color.fromARGB(162, 141, 145, 145),
@@ -199,7 +199,7 @@ class _DetailedPackageViewTouristState
                                   style: TextStyle(
                                     color: Color.fromARGB(255, 125, 212, 33),
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
@@ -231,7 +231,7 @@ class _DetailedPackageViewTouristState
                             widget.packageData['packageTitle'],
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 25,
+                              fontSize: 20,
                             ),
                           ),
                           // location
@@ -245,7 +245,7 @@ class _DetailedPackageViewTouristState
                               Text(
                                 widget.packageData['location'],
                                 style: TextStyle(
-                                  fontSize: 17,
+                                  fontSize: 15,
                                   color: Color.fromARGB(255, 100, 116, 139),
                                 ),
                               ),
@@ -256,139 +256,142 @@ class _DetailedPackageViewTouristState
                     ),
 
                     // duration, season, guest section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      spacing: 10,
-                      children: [
-                        // duration
-                        Container(
-                          padding: EdgeInsets.all(16),
-                          width: 105,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color.fromARGB(74, 0, 0, 0),
-                                blurRadius: 5,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 5,
-                            children: [
-                              Icon(
-                                Icons.access_time,
-                                color: Color.fromARGB(255, 125, 212, 33),
-                                size: 28,
-                              ),
-                              Text(
-                                "DURATION",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 100, 116, 139),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        spacing: 10,
+                        children: [
+                          // duration
+                          Container(
+                            padding: EdgeInsets.all(16),
+                            width: 105,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color.fromARGB(52, 0, 0, 0),
+                                  blurRadius: 5,
+                                  spreadRadius: 1,
                                 ),
-                              ),
-                              Text(
-                                widget.packageData['duration'],
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                              ],
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              spacing: 5,
+                              children: [
+                                Icon(
+                                  Icons.access_time,
+                                  color: Color.fromARGB(255, 125, 212, 33),
+                                  size: 28,
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  "DURATION",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(255, 100, 116, 139),
+                                  ),
+                                ),
+                                Text(
+                                  widget.packageData['duration'],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
 
-                        // season
-                        Container(
-                          padding: EdgeInsets.all(16),
-                          width: 105,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color.fromARGB(74, 0, 0, 0),
-                                blurRadius: 5,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 5,
-                            children: [
-                              Icon(
-                                Icons.calendar_today_outlined,
-                                color: Color.fromARGB(255, 125, 212, 33),
-                                size: 28,
-                              ),
-                              Text(
-                                "SEASON",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 100, 116, 139),
+                          // season
+                          Container(
+                            padding: EdgeInsets.all(16),
+                            width: 105,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color.fromARGB(52, 0, 0, 0),
+                                  blurRadius: 5,
+                                  spreadRadius: 1,
                                 ),
-                              ),
-                              Text(
-                                widget.packageData['season'],
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                              ],
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              spacing: 5,
+                              children: [
+                                Icon(
+                                  Icons.calendar_today_outlined,
+                                  color: Color.fromARGB(255, 125, 212, 33),
+                                  size: 28,
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  "SEASON",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(255, 100, 116, 139),
+                                  ),
+                                ),
+                                Text(
+                                  widget.packageData['season'],
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
 
-                        // guests
-                        Container(
-                          padding: EdgeInsets.all(16),
-                          width: 105,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color.fromARGB(74, 0, 0, 0),
-                                blurRadius: 5,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 5,
-                            children: [
-                              Icon(
-                                Icons.groups_3_outlined,
-                                color: Color.fromARGB(255, 125, 212, 33),
-                                size: 28,
-                              ),
-                              Text(
-                                "GUESTS",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 100, 116, 139),
+                          // guests
+                          Container(
+                            padding: EdgeInsets.all(16),
+                            width: 105,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color.fromARGB(52, 0, 0, 0),
+                                  blurRadius: 5,
+                                  spreadRadius: 1,
                                 ),
-                              ),
-                              Text(
-                                '${widget.packageData['minGuests']}-${widget.packageData['maxGuests']}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                              ],
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              spacing: 5,
+                              children: [
+                                Icon(
+                                  Icons.groups_3_outlined,
+                                  color: Color.fromARGB(255, 125, 212, 33),
+                                  size: 28,
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  "GUESTS",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(255, 100, 116, 139),
+                                  ),
+                                ),
+                                Text(
+                                  '${widget.packageData['minGuests']}-${widget.packageData['maxGuests']}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
 
                     // description
@@ -401,7 +404,7 @@ class _DetailedPackageViewTouristState
                           Text(
                             "Description",
                             style: TextStyle(
-                              fontSize: 25,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -482,7 +485,7 @@ class _DetailedPackageViewTouristState
                             Text(
                               "What's Included",
                               style: TextStyle(
-                                fontSize: 25,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -522,7 +525,7 @@ class _DetailedPackageViewTouristState
                                               .toUpperCase(),
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                                            fontSize: 15,
                                           ),
                                         ),
                                       ],
@@ -550,7 +553,7 @@ class _DetailedPackageViewTouristState
                             Text(
                               "What's Excluded",
                               style: TextStyle(
-                                fontSize: 25,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -563,12 +566,12 @@ class _DetailedPackageViewTouristState
                                   Icon(
                                     Icons.close,
                                     color: Colors.red,
-                                    size: 30,
+                                    size: 26,
                                   ),
                                   Text(
                                     packageExclude[i].toString(),
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w400,
                                       color: .fromARGB(255, 100, 116, 139),
                                     ),
@@ -589,7 +592,7 @@ class _DetailedPackageViewTouristState
                             Text(
                               "Planned Stops",
                               style: TextStyle(
-                                fontSize: 25,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -627,7 +630,7 @@ class _DetailedPackageViewTouristState
                                       Text(
                                         stops[i].toString(),
                                         style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -674,7 +677,7 @@ class _DetailedPackageViewTouristState
                   Text(
                     "TOTAL PRICE",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: .fromARGB(255, 100, 116, 139),
                     ),
@@ -682,7 +685,7 @@ class _DetailedPackageViewTouristState
                   Text(
                     "${widget.packageData['price']} LKR",
                     style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: const Color.fromARGB(255, 130, 185, 70),
                     ),
@@ -704,14 +707,17 @@ class _DetailedPackageViewTouristState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Start Location", style: TextStyle(fontSize: 16)),
+                      Text(
+                        "Start Location",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       Text(
                         textAlign: TextAlign.right,
                         "${widget.packageData['startLocation']}",
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: TextStyle(fontSize: 16),
                       ),
                     ],
                   ),
@@ -720,14 +726,17 @@ class _DetailedPackageViewTouristState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("End Location", style: TextStyle(fontSize: 16)),
+                      Text(
+                        "End Location",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       Text(
                         textAlign: TextAlign.right,
                         "${widget.packageData['endLocation']}",
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: TextStyle(fontSize: 16),
                       ),
                     ],
                   ),
@@ -738,18 +747,21 @@ class _DetailedPackageViewTouristState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Languages", style: TextStyle(fontSize: 16)),
+                        Text(
+                          "Languages",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             for (int i = 0; i < languages.length; i++)
                               Text(
                                 textAlign: TextAlign.right,
-                                "${languages[i].toString()}",
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                languages[i].toString(),
+                                style: TextStyle(fontSize: 16),
                               ),
                           ],
                         ),
@@ -763,46 +775,46 @@ class _DetailedPackageViewTouristState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Tour Options", style: TextStyle(fontSize: 16)),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            widget.packageData['havePrivateTourOption']
-                                ? Text(
-                                    textAlign: TextAlign.right,
-                                    "Private Tour Available",
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  )
-                                : Text(
-                                    textAlign: TextAlign.right,
-                                    "No Private Tours",
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
+                        Text(
+                          "Tour Options",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 195,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                widget.packageData['havePrivateTourOption']
+                                    ? Text(
+                                        textAlign: TextAlign.right,
+                                        "Private Tour Available",
+                                        style: TextStyle(fontSize: 16),
+                                      )
+                                    : Text(
+                                        textAlign: TextAlign.right,
+                                        "No Private Tours",
+                                        style: TextStyle(fontSize: 16),
+                                      ),
 
-                            widget.packageData['haveGroupDiscounts']
-                                ? Text(
-                                    textAlign: TextAlign.right,
-                                    "Group Discounts Available",
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  )
-                                : Text(
-                                    textAlign: TextAlign.right,
-                                    "No Group Discounts",
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                          ],
+                                widget.packageData['haveGroupDiscounts']
+                                    ? Text(
+                                        textAlign: TextAlign.right,
+                                        "Group Discounts Available",
+                                        style: TextStyle(fontSize: 16),
+                                      )
+                                    : Text(
+                                        textAlign: TextAlign.right,
+                                        "No Group Discounts",
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -813,7 +825,13 @@ class _DetailedPackageViewTouristState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Available Days", style: TextStyle(fontSize: 16)),
+                        Text(
+                          "Available Days",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
@@ -821,21 +839,15 @@ class _DetailedPackageViewTouristState
                               Text(
                                 textAlign: TextAlign.right,
                                 "Mon - Sun",
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: TextStyle(fontSize: 16),
                               ),
 
                             if (availableDays.length != 7)
                               for (int i = 0; i < availableDays.length; i++)
                                 Text(
                                   textAlign: TextAlign.right,
-                                  "${availableDays[i].toString()}",
-                                  style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  availableDays[i].toString(),
+                                  style: TextStyle(fontSize: 16),
                                 ),
                           ],
                         ),

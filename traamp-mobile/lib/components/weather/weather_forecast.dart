@@ -23,7 +23,7 @@ class _WeatherForecastState extends State<WeatherForecast> {
             for (int i = 0; i < widget.forecast.length; i++)
               Container(
                 width: 110,
-                height: 180,
+                height: 173,
                 padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   boxShadow: [
