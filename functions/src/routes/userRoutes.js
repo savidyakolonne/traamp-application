@@ -10,7 +10,6 @@ import {
   logoutUser,
   updateTouristProfile,
   updateGuideProfile,
-  updateGuideCertificate,
   deleteUser,
 } from "../controllers/userController.js";
 
@@ -23,12 +22,6 @@ userRouter.post("/register-guide", upload.single("certificate"), registerGuide);
 
 userRouter.post("/loginWithEmail", loginWithEmail);
 userRouter.post("/get-user-data", getUserData);
-
-userRouter.put(
-  "/update-guide-certificate",
-  upload.single("certificate"),
-  updateGuideCertificate,
-);
 
 userRouter.put("/update-tourist-profile", updateTouristProfile);
 userRouter.put("/update-guide-profile", updateGuideProfile);
