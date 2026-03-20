@@ -33,6 +33,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   double rating = 0.0;
   String review = "";
   List<String> _imageList = [];
+  List<dynamic> reviews = [];
 
   final SavedGuidesService _savedGuidesService = SavedGuidesService();
   final GuideService _guideService = GuideService();
@@ -57,6 +58,28 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
 
       if (response.statusCode == 200) {
         print(data['msg']);
+      } else {
+        print(data['msg']);
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<void> getReviews() async {
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConfig.SERVER_URL}/api/reviews/get-reviews-by-id'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"guideId": widget.guideId}),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print(data['msg']);
+        setState(() {
+          reviews = data['data'];
+        });
       } else {
         print(data['msg']);
       }
@@ -263,6 +286,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
     super.initState();
     _loadAll();
     _getGalleries();
+    getReviews();
   }
 
   @override
@@ -397,6 +421,14 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '(${reviews.length})',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black54,
                                   ),
                                 ),
                               ],
@@ -749,7 +781,10 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) {
-                                    return RatingListScreen(widget.guideId);
+                                    return RatingListScreen(
+                                      widget.guideId,
+                                      reviews,
+                                    );
                                   },
                                 ),
                               );

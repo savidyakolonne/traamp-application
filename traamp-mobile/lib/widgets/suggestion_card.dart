@@ -93,7 +93,8 @@ class _SuggestionCardState extends State<SuggestionCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
                           width: 90,
@@ -110,7 +111,7 @@ class _SuggestionCardState extends State<SuggestionCard> {
                           ),
                         ),
                         Text(
-                          "/pp",
+                          "per person",
                           style: TextStyle(
                             color: const Color.fromARGB(255, 100, 116, 139),
                             fontSize: 14,
