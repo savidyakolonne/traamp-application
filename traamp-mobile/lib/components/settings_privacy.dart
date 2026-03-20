@@ -33,10 +33,10 @@ class SettingsPrivacy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: const Color.fromARGB(255, 255, 254, 254),
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF3F4F6),
+        backgroundColor: const Color.fromARGB(255, 255, 254, 254),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -55,9 +55,9 @@ class SettingsPrivacy extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                color: const Color.fromARGB(39, 0, 0, 0).withOpacity(0.05),
+                blurRadius: 5,
+                spreadRadius: 5,
               ),
             ],
           ),

@@ -6,11 +6,11 @@ class Guide extends AppUser {
   final String? guideCertificateType;
   final String? certificateNumber;
   final File? uploadedCertificatePath;
-  final String nic;
+  final String? nic;
   final String location;
   final String address;
   final String country;
-  final double rating;
+  final double? rating;
   final bool availability;
   final bool isVerified;
   final String? profilePicture;
@@ -31,11 +31,11 @@ class Guide extends AppUser {
     this.guideCertificateType,
     this.certificateNumber,
     this.uploadedCertificatePath, // optional
-    required this.nic,
+    this.nic,
     required this.location,
     required this.address,
     required this.country,
-    required this.rating,
+    this.rating,
     required this.availability,
     this.isVerified = false,
     this.profilePicture,

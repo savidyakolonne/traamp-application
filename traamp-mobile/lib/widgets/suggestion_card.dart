@@ -93,18 +93,25 @@ class _SuggestionCardState extends State<SuggestionCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "LKR ${widget.price}",
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
+                        SizedBox(
+                          width: 90,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Text(
+                              "LKR ${widget.price}",
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                              ),
+                            ),
                           ),
                         ),
                         Text(
-                          "/pp",
+                          "per person",
                           style: TextStyle(
                             color: const Color.fromARGB(255, 100, 116, 139),
                             fontSize: 14,
