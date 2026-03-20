@@ -492,15 +492,14 @@ class _EditGuideProfileState extends State<EditGuideProfile> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.lightGreen),
-        ),
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
+        body: Center(child: CircularProgressIndicator.adaptive()),
       );
     }
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 247, 248, 246),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromARGB(255, 247, 248, 246),
         elevation: 0,
         leadingWidth: 100,
         leading: TextButton(

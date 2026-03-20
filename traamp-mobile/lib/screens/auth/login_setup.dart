@@ -67,8 +67,11 @@ class _LoginSetupState extends State<LoginSetup> {
         return;
       }
 
+      String? idToken;
       String? token = await user.getIdToken(true);
-      idToken = token!;
+      setState(() {
+        idToken = token;
+      });
 
       final response = await http.post(
         Uri.parse("${AppConfig.SERVER_URL}/api/users/loginWithEmail"),
@@ -101,7 +104,7 @@ class _LoginSetupState extends State<LoginSetup> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return MainTabView(true, idToken, userData);
+                return MainTabView(true, idToken!, userData);
               },
             ),
           );
@@ -109,7 +112,7 @@ class _LoginSetupState extends State<LoginSetup> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
-                return MainTabView(false, idToken, userData);
+                return MainTabView(false, idToken!, userData);
               },
             ),
           );
