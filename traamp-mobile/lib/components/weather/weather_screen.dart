@@ -75,8 +75,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
         };
         weatherImage = Image.network(
           "http://openweathermap.org/img/wn/${currentWeather['icon']}@2x.png",
-          width: 100,
-          height: 100,
+          width: 60,
+          height: 60,
         );
         getWeatherForecastWithCoordinates(lat, long);
       });
@@ -108,8 +108,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
         currentLocation = city;
         weatherImage = Image.network(
           "http://openweathermap.org/img/wn/${currentWeather['icon']}@2x.png",
-          width: 100,
-          height: 100,
+          width: 60,
+          height: 60,
         );
         _textController.text = "";
         getWeatherForecastWithCity(city);
@@ -225,7 +225,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           icon: Icon(
                             Icons.location_on_outlined,
                             color: const Color.fromARGB(255, 100, 116, 139),
-                            size: 28,
+                            size: 26,
                           ),
                         ),
                       ),
@@ -269,8 +269,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
                       // image
                       Container(
-                        width: 128,
-                        height: 128,
+                        width: 100,
+                        height: 100,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(100),
                           color: Color.fromARGB(255, 125, 212, 33),
@@ -317,7 +317,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                       ? "--\u00B0C"
                                       : "${currentWeather['temp']}\u00B0C",
                                   style: TextStyle(
-                                    fontSize: 72.0,
+                                    fontSize: 50.0,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -458,7 +458,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                     Text(
                                       "Weather Forecast",
                                       style: TextStyle(
-                                        fontSize: 24,
+                                        fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                       ),
                                       textAlign: TextAlign.start,
@@ -466,7 +466,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                     Text(
                                       "Next 7 Days",
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.w500,
                                         color: Color.fromARGB(
                                           255,

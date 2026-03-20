@@ -61,7 +61,7 @@ class _PricingTabState extends State<PricingTab> {
                     },
                     onChanged: (text) {
                       setState(() {
-                        if (!text.isEmpty) {
+                        if (text.isNotEmpty) {
                           double price = double.parse(text.trim());
                           widget.data.price = price;
                         }

@@ -6,22 +6,22 @@ class HelpAndSupport extends StatelessWidget {
   const HelpAndSupport({super.key});
 
   Future<void> _callNumber(BuildContext context, String number) async {
-  final Uri launchUri = Uri(scheme: 'tel', path: number);
-  if (await canLaunchUrl(launchUri)) {
-    await launchUrl(launchUri);
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Could not launch dialer")),
-    );
+    final Uri launchUri = Uri(scheme: 'tel', path: number);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Could not launch dialer")));
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
+      backgroundColor: const Color.fromARGB(255, 255, 254, 254),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF3F4F6),
+        backgroundColor: const Color.fromARGB(255, 255, 254, 254),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),

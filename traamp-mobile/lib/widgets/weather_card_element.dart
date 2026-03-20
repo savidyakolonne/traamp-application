@@ -53,14 +53,14 @@ class WeatherCardElement {
                 Text(
                   title.toUpperCase(),
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: const Color.fromARGB(255, 100, 116, 139),
                   ),
                 ),
                 Text(
-                  "${value} ${measure}",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  "$value $measure",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                 ),
               ],
             ),

@@ -104,7 +104,7 @@ class _GuidePackageCardState extends State<GuidePackageCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      width: 230,
+                      width: MediaQuery.of(context).size.width * 0.5,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Text(
@@ -117,13 +117,17 @@ class _GuidePackageCardState extends State<GuidePackageCard> {
                       ),
                     ),
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'LKR ${widget.packageData['price']}',
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 125, 212, 33),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          child: Text(
+                            'LKR ${widget.packageData['price']}',
+                            style: TextStyle(
+                              color: const Color.fromARGB(255, 125, 212, 33),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
                           ),
                         ),
                         Text(

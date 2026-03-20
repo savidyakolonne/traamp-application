@@ -142,7 +142,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
 
   Widget genderFormField() {
     return DropdownButtonFormField<String>(
-      decoration: fieldStyle("Select Gender"),
+      decoration: fieldStyle("Gender"),
       items: _genders.map((gender) {
         return DropdownMenuItem(value: gender, child: Text(gender));
       }).toList(),
