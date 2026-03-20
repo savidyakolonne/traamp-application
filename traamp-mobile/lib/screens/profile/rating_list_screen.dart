@@ -5,17 +5,17 @@ import 'package:intl/intl.dart';
 import '../../app_config.dart';
 import '../../widgets/review_card.dart';
 
+// ignore: must_be_immutable
 class RatingListScreen extends StatefulWidget {
   final String guideId;
-  const RatingListScreen(this.guideId, {super.key});
+  List<dynamic> reviews = [];
+  RatingListScreen(this.guideId, this.reviews, {super.key});
 
   @override
   State<RatingListScreen> createState() => _RatingListScreenState();
 }
 
 class _RatingListScreenState extends State<RatingListScreen> {
-  List<dynamic> reviews = [];
-
   // to format date
   String formatTimestamp(int seconds) {
     // Convert Firestore _seconds (epoch seconds) into DateTime
@@ -40,7 +40,7 @@ class _RatingListScreenState extends State<RatingListScreen> {
       if (response.statusCode == 200) {
         print(data['msg']);
         setState(() {
-          reviews = data['data'];
+          widget.reviews = data['data'];
         });
       } else {
         print(data['msg']);
@@ -48,12 +48,6 @@ class _RatingListScreenState extends State<RatingListScreen> {
     } catch (e) {
       print(e.toString());
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getReviews();
   }
 
   @override
@@ -79,7 +73,7 @@ class _RatingListScreenState extends State<RatingListScreen> {
         child: RefreshIndicator(
           onRefresh: getReviews,
           child: SingleChildScrollView(
-            child: reviews.isEmpty
+            child: widget.reviews.isEmpty
                 ? SizedBox(
                     height: MediaQuery.of(context).size.height * 0.7,
                     child: Center(child: Text("No reviews to show")),
@@ -87,15 +81,15 @@ class _RatingListScreenState extends State<RatingListScreen> {
                 : Column(
                     spacing: 10,
                     children: [
-                      for (int i = 0; i < reviews.length; i++)
+                      for (int i = 0; i < widget.reviews.length; i++)
                         ReviewCard(
-                          name: reviews[i]['reviewerName'].toString(),
-                          rating: reviews[i]['rating'],
+                          name: widget.reviews[i]['reviewerName'].toString(),
+                          rating: widget.reviews[i]['rating'],
                           date: formatTimestamp(
-                            reviews[i]['createdAt']["_seconds"],
+                            widget.reviews[i]['createdAt']["_seconds"],
                           ),
-                          review: reviews[i]['review'].toString(),
-                          profilePic: reviews[i]['profPic'].toString(),
+                          review: widget.reviews[i]['review'].toString(),
+                          profilePic: widget.reviews[i]['profPic'].toString(),
                         ),
                     ],
                   ),

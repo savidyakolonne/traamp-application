@@ -23,6 +23,7 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
   bool _isLoading = false;
   String profilePicture = "";
   List<dynamic> _packages = [];
+  List<dynamic> reviews = [];
   bool _packagesLoading = true;
 
   Future<void> _getUserData() async {
@@ -80,6 +81,28 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
     }
   }
 
+  Future<void> getReviews() async {
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConfig.SERVER_URL}/api/reviews/get-reviews-by-id'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"guideId": widget.userData['uid'].toString()}),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print(data['msg']);
+        setState(() {
+          reviews = data['data'];
+        });
+      } else {
+        print(data['msg']);
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   Future<void> _refreshAll() async {
     await _getUserData();
     await _getPackages();
@@ -89,6 +112,7 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
   void initState() {
     super.initState();
     _getUserData().then((_) => _getPackages());
+    getReviews();
   }
 
   List<String> get _languages {
@@ -195,6 +219,7 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                                         builder: (context) {
                                           return RatingListScreen(
                                             widget.userData['uid'].toString(),
+                                            reviews,
                                           );
                                         },
                                       ),
