@@ -34,13 +34,10 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
   String? certificateNumber;
   File? uploadedCertificatePath;
   Uint8List? uploadedCertificateBytes;
-  String nic = "";
   String location = "";
   String address = "";
   String country = "Sri Lanka";
   String type = "guide";
-  double rating = 0.0;
-  bool availability = false;
 
   Widget firstNameFormField() {
     return TextFormField(
@@ -153,7 +150,7 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
 
   Widget genderFormField() {
     return DropdownButtonFormField<String>(
-      decoration: fieldStyle("Select Gender"),
+      decoration: fieldStyle("Gender"),
       items: _genders.map((gender) {
         return DropdownMenuItem(value: gender, child: Text(gender));
       }).toList(),
@@ -231,24 +228,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
     );
   }
 
-  Widget NICFormField() {
-    return TextFormField(
-      decoration: fieldStyle("NIC Number (123214255v/123456789123)"),
-      validator: (number) {
-        if (number == null || number.isEmpty) {
-          return 'NIC number is required';
-        }
-        if (number.length != 12 && number.length != 10) {
-          return 'NIC must be 123456789v or 123456789123';
-        }
-        return null;
-      },
-      onSaved: (number) {
-        nic = number!.toLowerCase().trim();
-      },
-    );
-  }
-
   Widget locationFormField() {
     return DropdownButtonFormField<String>(
       decoration: fieldStyle("Select Location"),
@@ -313,13 +292,11 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       gender: gender,
       dob: dob,
       phoneNumber: phoneNumber,
-      nic: nic,
       location: location,
       address: address,
       country: country,
       type: type,
-      rating: rating,
-      availability: availability,
+      availability: false,
     );
 
     try {
@@ -426,8 +403,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
               phoneNumberFormField(),
               const SizedBox(height: 15),
               addressFormField(),
-              const SizedBox(height: 15),
-              NICFormField(),
               const SizedBox(height: 15),
               locationFormField(),
               const SizedBox(height: 15),

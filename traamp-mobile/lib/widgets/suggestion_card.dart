@@ -95,12 +95,18 @@ class _SuggestionCardState extends State<SuggestionCard> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          "LKR ${widget.price}",
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
+                        SizedBox(
+                          width: 90,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Text(
+                              "LKR ${widget.price}",
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                              ),
+                            ),
                           ),
                         ),
                         Text(

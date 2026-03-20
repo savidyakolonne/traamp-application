@@ -70,12 +70,9 @@ export const registerGuide = async (req, res) => {
       dob,
       type,
       phoneNumber,
-      nic,
       location,
       address,
       country,
-      rating,
-      availability,
     } = req.body;
 
     const decoded = await auth.verifyIdToken(idToken);
@@ -107,25 +104,21 @@ export const registerGuide = async (req, res) => {
       dob,
       type,
       phoneNumber,
-      nicNumber: nic,
       location,
       address,
       country,
-      rating,
-      availability,
+      rating: 0.0,
+      availability: false,
       languages: [],
       profilePicture: "",
       bio: "",
       skills: [],
-
       guideCertificateType: null,
       certificateNumber: null,
-
       isVerified: false,
       badgeIssued: false,
       currentVerificationStatus: "not_submitted",
       activeVerificationId: null,
-
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       accountStatus: "active",
     });

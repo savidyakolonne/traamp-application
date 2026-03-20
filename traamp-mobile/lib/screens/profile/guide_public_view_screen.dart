@@ -30,7 +30,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
   String? _errorMessage;
   List<dynamic> _packages = [];
   bool _packagesLoading = true;
-  int rating = 0;
+  double rating = 0.0;
   String review = "";
   List<String> _imageList = [];
 
@@ -393,7 +393,7 @@ class _GuidePublicViewScreenState extends State<GuidePublicViewScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  _guide?.rating.toStringAsFixed(1) ?? '0.0',
+                                  _guide!.rating?.toStringAsFixed(1) ?? '0.0',
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
