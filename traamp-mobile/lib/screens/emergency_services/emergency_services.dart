@@ -7,7 +7,7 @@ class EmergencyServices extends StatelessWidget {
   Future<void> open(String u) async =>
       launchUrl(Uri.parse(u), mode: LaunchMode.externalApplication);
 
-  final data = const [ // Set details for array of emergency services.
+  final data = const [                          // Set details for array of emergency services.
     [
       "assets/images/tourism.png",
       "Sri Lanka Tourism Development Authority",

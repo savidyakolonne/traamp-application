@@ -17,20 +17,20 @@ class HelpAndSupport extends StatelessWidget {
   }
 
   Future<void> _sendEmail(BuildContext context) async {
-  final Uri emailUri = Uri(
-    scheme: 'mailto',
-    path: 'traamp@gmail.com',
-    query: 'subject=Support Request&body=Describe your issue here...',
-  );
-
-  if (await canLaunchUrl(emailUri)) {
-    await launchUrl(emailUri);
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Could not open email app")),
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'traamp@gmail.com',
+      query: 'subject=Support Request&body=Describe your issue here...',
     );
+
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Could not open email app")));
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
