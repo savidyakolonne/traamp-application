@@ -1,29 +1,32 @@
 import admin from "firebase-admin";
-import { readFileSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 
-// Setup __dirname for ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const projectId = process.env.FIREBASE_PROJECT_ID;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
 
-// Load service account JSON
-const serviceAccount = JSON.parse(
-  readFileSync(join(__dirname, "serviceAccountKey.json"), "utf8"),
-);
+if (!projectId || !clientEmail || !privateKey) {
+  throw new Error("Missing Firebase environment variables");
+}
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: "traamp-app.firebasestorage.app",
-});
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId,
+      clientEmail,
+      privateKey,
+    }),
+    storageBucket,
+  });
 
-admin.firestore().settings({ ignoreUndefinedProperties: true });
+  admin.firestore().settings({ ignoreUndefinedProperties: true });
+}
 
 const auth = admin.auth();
 const db = admin.firestore();
 const bucket = admin.storage().bucket();
 
-//Firebase Auth Middleware
+// Firebase Auth Middleware
 const firebaseAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -54,7 +57,6 @@ const firebaseAuth = async (req, res, next) => {
 
     console.log(`Auth: ${req.user.uid} (${req.user.email})`);
     next();
-
   } catch (error) {
     console.error("Firebase Auth Error:", error.message);
 
