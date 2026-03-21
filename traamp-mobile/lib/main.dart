@@ -16,12 +16,7 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(
-    DevicePreview(
-      enabled: true, // set false for release
-      builder: (context) => TraampApp(),
-    ),
-  );
+  runApp(TraampApp());
 }
 
 class TraampApp extends StatelessWidget {
