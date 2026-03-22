@@ -77,7 +77,7 @@ class _GuideCardState extends State<GuideCard> {
                     spacing: 10,
                     children: [
                       SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.4,
+                        width: MediaQuery.of(context).size.width * 0.35,
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Text(
