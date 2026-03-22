@@ -75,105 +75,114 @@ class _PricingTabState extends State<PricingTab> {
             SizedBox(height: 10),
 
             // second element
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // minimum guests
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  spacing: 10,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Min Guests *",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: const Color.fromARGB(255, 15, 84, 20),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Container(
-                      width: 130,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1.5),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: TextFormField(
-                        maxLength: 2,
-                        decoration: InputDecoration(
-                          border: InputBorder.none, // removes the bottom line
-                          enabledBorder:
-                              InputBorder.none, // also removes when not focused
-                          focusedBorder: InputBorder.none,
-                          hintText: "1",
+                    // minimum guests
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Min Guests *",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: const Color.fromARGB(255, 15, 84, 20),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        keyboardType: TextInputType.number,
-                        validator: (text) {
-                          if (text!.isEmpty) {
-                            return "Min Guests cannot be empty";
-                          }
-                          return null;
-                        },
-                        onChanged: (text) {
-                          setState(() {
-                            if (!text.isEmpty) {
-                              double guest = double.parse(text.trim());
-                              widget.data.minGuests = guest.floor();
-                            }
-                          });
-                        },
-                      ),
+                        Container(
+                          width: 130,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black, width: 1.5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: TextFormField(
+                            maxLength: 2,
+                            decoration: InputDecoration(
+                              border:
+                                  InputBorder.none, // removes the bottom line
+                              enabledBorder: InputBorder
+                                  .none, // also removes when not focused
+                              focusedBorder: InputBorder.none,
+                              hintText: "1",
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (text) {
+                              if (text!.isEmpty) {
+                                return "Min Guests cannot be empty";
+                              }
+                              return null;
+                            },
+                            onChanged: (text) {
+                              setState(() {
+                                if (!text.isEmpty) {
+                                  double guest = double.parse(text.trim());
+                                  widget.data.minGuests = guest.floor();
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
 
-                // maximum guests
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Max Guests *",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: const Color.fromARGB(255, 15, 84, 20),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Container(
-                      width: 130,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1.5),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: TextFormField(
-                        maxLength: 3,
-                        decoration: InputDecoration(
-                          border: InputBorder.none, // removes the bottom line
-                          enabledBorder:
-                              InputBorder.none, // also removes when not focused
-                          focusedBorder: InputBorder.none,
-                          hintText: "10",
+                    // maximum guests
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Max Guests *",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: const Color.fromARGB(255, 15, 84, 20),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        keyboardType: TextInputType.number,
-                        validator: (text) {
-                          if (text!.isEmpty) {
-                            return "Max Guests cannot be empty";
-                          }
-                          return null;
-                        },
-                        onChanged: (text) {
-                          setState(() {
-                            if (!text.isEmpty) {
-                              double guest = double.parse(text.trim());
-                              widget.data.maxGuests = guest.floor();
-                            }
-                          });
-                        },
-                      ),
+                        Container(
+                          width: 130,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black, width: 1.5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: TextFormField(
+                            maxLength: 3,
+                            decoration: InputDecoration(
+                              border:
+                                  InputBorder.none, // removes the bottom line
+                              enabledBorder: InputBorder
+                                  .none, // also removes when not focused
+                              focusedBorder: InputBorder.none,
+                              hintText: "10",
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (text) {
+                              if (text!.isEmpty) {
+                                return "Max Guests cannot be empty";
+                              }
+                              return null;
+                            },
+                            onChanged: (text) {
+                              setState(() {
+                                if (!text.isEmpty) {
+                                  double guest = double.parse(text.trim());
+                                  widget.data.maxGuests = guest.floor();
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
 
             SizedBox(height: 10),

@@ -420,6 +420,7 @@ class _EditTouristProfileState extends State<EditTouristProfile> {
               const SizedBox(height: 15),
               _buildLabel("Country"),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 value: _selectedCountry,
                 items: ListData.countryNames
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))

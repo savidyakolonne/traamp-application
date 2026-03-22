@@ -162,7 +162,8 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
 
   Widget selectCountryFormField() {
     return DropdownButtonFormField<String>(
-      decoration: fieldStyle("Select Your Country"),
+      isExpanded: true,
+      decoration: fieldStyle("Select Country"),
       items: _countries.map((country) {
         return DropdownMenuItem(value: country, child: Text(country));
       }).toList(),
@@ -336,7 +337,7 @@ class _TouristSignupFormState extends State<TouristSignupForm> {
                   ),
                   const SizedBox(height: 15),
                   selectCountryFormField(),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 15),
                   passwordFormField(),
                   const SizedBox(height: 15),
                   confirmPasswordFormField(),

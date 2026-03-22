@@ -219,7 +219,7 @@ class SettingsPrivacy extends StatelessWidget {
                                           Navigator.pop(context);
                                         },
                                         icon: Container(
-                                          width: 100,
+                                          width: 90,
                                           padding: EdgeInsets.all(10),
                                           decoration: BoxDecoration(
                                             color: Color(0xFF6CD21F),
@@ -257,7 +257,7 @@ class SettingsPrivacy extends StatelessWidget {
                                           );
                                         },
                                         icon: Container(
-                                          width: 100,
+                                          width: 90,
                                           padding: EdgeInsets.all(10),
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(
