@@ -85,7 +85,10 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don’t have an account? "),
+                  const Text(
+                    "Don’t have an account? ",
+                    style: TextStyle(color: Colors.black),
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(

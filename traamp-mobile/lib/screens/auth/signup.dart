@@ -136,7 +136,10 @@ class _RoleCard extends StatelessWidget {
                     ),
                   ),
                   onPressed: onPressed,
-                  child: Text(buttonText),
+                  child: Text(
+                    buttonText,
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
               ),
             ],

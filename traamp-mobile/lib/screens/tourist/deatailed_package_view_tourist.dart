@@ -705,6 +705,7 @@ class _DetailedPackageViewTouristState
                 children: [
                   // 1
                   Row(
+                    spacing: 10,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
@@ -715,7 +716,7 @@ class _DetailedPackageViewTouristState
                         ),
                       ),
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.5,
+                        width: MediaQuery.of(context).size.width * 0.4,
                         alignment: Alignment.centerRight,
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
@@ -741,7 +742,7 @@ class _DetailedPackageViewTouristState
                         ),
                       ),
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.5,
+                        width: MediaQuery.of(context).size.width * 0.4,
                         alignment: Alignment.centerRight,
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
@@ -786,6 +787,7 @@ class _DetailedPackageViewTouristState
                   if (widget.packageData['haveGroupDiscounts'] ||
                       widget.packageData['havePrivateTourOption'])
                     Row(
+                      spacing: 10,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -796,35 +798,39 @@ class _DetailedPackageViewTouristState
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              widget.packageData['havePrivateTourOption']
-                                  ? Text(
-                                      textAlign: TextAlign.right,
-                                      "Private Tour Available",
-                                      style: TextStyle(fontSize: 16),
-                                    )
-                                  : Text(
-                                      textAlign: TextAlign.right,
-                                      "No Private Tours",
-                                      style: TextStyle(fontSize: 16),
-                                    ),
+                        Container(
+                          alignment: Alignment.centerRight,
+                          width: MediaQuery.of(context).size.width * 0.45,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                widget.packageData['havePrivateTourOption']
+                                    ? Text(
+                                        textAlign: TextAlign.right,
+                                        "Private Tour Available",
+                                        style: TextStyle(fontSize: 16),
+                                      )
+                                    : Text(
+                                        textAlign: TextAlign.right,
+                                        "No Private Tours",
+                                        style: TextStyle(fontSize: 16),
+                                      ),
 
-                              widget.packageData['haveGroupDiscounts']
-                                  ? Text(
-                                      textAlign: TextAlign.right,
-                                      "Group Discounts Available",
-                                      style: TextStyle(fontSize: 16),
-                                    )
-                                  : Text(
-                                      textAlign: TextAlign.right,
-                                      "No Group Discounts",
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                            ],
+                                widget.packageData['haveGroupDiscounts']
+                                    ? Text(
+                                        textAlign: TextAlign.right,
+                                        "Group Discounts Available",
+                                        style: TextStyle(fontSize: 16),
+                                      )
+                                    : Text(
+                                        textAlign: TextAlign.right,
+                                        "No Group Discounts",
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                              ],
+                            ),
                           ),
                         ),
                       ],

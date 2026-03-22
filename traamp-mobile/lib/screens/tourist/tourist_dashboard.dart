@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 import '../../app_config.dart';
+import '../../services/login_state.dart';
 import '../../widgets/suggestion_card.dart';
 import '../emergency_services/emergency_services.dart';
 import '../places/places_list_screen.dart';
@@ -31,6 +32,9 @@ class _TouristDashboardState extends State<TouristDashboard> {
 
   // get user data from DB
   Future<void> _getUserDataAndPackages() async {
+    setState(() {
+      widget.idToken = LoginState.getUserToken();
+    });
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
