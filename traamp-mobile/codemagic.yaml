@@ -1,0 +1,5 @@
+scripts:
+  - name: Build Android app
+    script: |
+      flutter build apk --dart-define=GEMINI_API_KEY=$GEMINI_API_KEY
+      flutter build appbundle --dart-define=GEMINI_API_KEY=$GEMINI_API_KEY
