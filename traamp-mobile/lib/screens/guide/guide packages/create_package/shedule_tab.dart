@@ -57,105 +57,116 @@ class _ScheduleTabTabState extends State<ScheduleTab> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // first form element
-            Row(
-              spacing: 10,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // duration
-                Column(
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.80,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  spacing: 10,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Duration Value*",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: const Color.fromARGB(255, 15, 84, 20),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Container(
-                      width: 150,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 1.5),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                      child: TextFormField(
-                        maxLength: 2,
-                        decoration: InputDecoration(
-                          border: InputBorder.none, // removes the bottom line
-                          enabledBorder:
-                              InputBorder.none, // also removes when not focused
-                          focusedBorder: InputBorder.none,
-                          hintText: "e.g. 4",
+                    // duration
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Duration Value*",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: const Color.fromARGB(255, 15, 84, 20),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        keyboardType: TextInputType.number,
-                        validator: (text) {
-                          if (text!.isEmpty) {
-                            return "Duration cannot be empty";
-                          }
-                          return null;
-                        },
-                        onChanged: (text) {
-                          setState(() {
-                            durationArray[0] = text.trim();
-                            widget.data.duration =
-                                durationArray[0] + " " + durationArray[1];
-                          });
-                          print(widget.data.duration);
-                        },
-                      ),
+                        SizedBox(height: 4),
+                        Container(
+                          width: 150,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black, width: 1.5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: EdgeInsets.only(
+                            left: 8,
+                            right: 8,
+                            bottom: 8,
+                          ),
+                          child: TextFormField(
+                            maxLength: 2,
+                            decoration: InputDecoration(
+                              border:
+                                  InputBorder.none, // removes the bottom line
+                              enabledBorder: InputBorder
+                                  .none, // also removes when not focused
+                              focusedBorder: InputBorder.none,
+                              hintText: "e.g. 4",
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (text) {
+                              if (text!.isEmpty) {
+                                return "Duration cannot be empty";
+                              }
+                              return null;
+                            },
+                            onChanged: (text) {
+                              setState(() {
+                                durationArray[0] = text.trim();
+                                widget.data.duration =
+                                    durationArray[0] + " " + durationArray[1];
+                              });
+                              print(widget.data.duration);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Unit
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Unit *",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: const Color.fromARGB(255, 15, 84, 20),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        SizedBox(
+                          width: 100,
+                          height: 80,
+                          child: DropdownButtonFormField<String>(
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                            items: _units.map((unit) {
+                              return DropdownMenuItem(
+                                value: unit,
+                                child: Text(unit),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                durationArray[1] = value!;
+                                widget.data.duration =
+                                    durationArray[0] + " " + durationArray[1];
+                              });
+                              print(widget.data.duration);
+                            },
+                            validator: (value) {
+                              if (value == null || value == "") {
+                                return "*";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                // Unit
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Unit *",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: const Color.fromARGB(255, 15, 84, 20),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Container(
-                      width: 100,
-                      height: 80,
-                      child: DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                        items: _units.map((unit) {
-                          return DropdownMenuItem(
-                            value: unit,
-                            child: Text(unit),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            durationArray[1] = value!;
-                            widget.data.duration =
-                                durationArray[0] + " " + durationArray[1];
-                          });
-                          print(widget.data.duration);
-                        },
-                        validator: (value) {
-                          if (value == null || value == "") {
-                            return "*";
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
 
             SizedBox(height: 10),

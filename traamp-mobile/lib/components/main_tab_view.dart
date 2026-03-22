@@ -39,7 +39,7 @@ class _MainTabViewState extends State<MainTabView> {
           ],
         ),
         bottomNavigationBar: Container(
-          height: 60,
+          height: 50,
           decoration: BoxDecoration(
             color: const Color.fromARGB(255, 247, 248, 246),
             boxShadow: [
@@ -56,9 +56,9 @@ class _MainTabViewState extends State<MainTabView> {
             labelColor: Colors.green,
             unselectedLabelColor: Color.fromARGB(255, 148, 163, 184),
             tabs: [
-              Tab(icon: Icon(Icons.home, size: 30)),
-              Tab(icon: Icon(Icons.notifications_active, size: 30)),
-              Tab(icon: Icon(Icons.person, size: 30)),
+              Tab(icon: Icon(Icons.home)),
+              Tab(icon: Icon(Icons.notifications_active)),
+              Tab(icon: Icon(Icons.person)),
             ],
           ),
         ),

@@ -22,13 +22,11 @@ class _AssistantHomeState extends State<AssistantHome> {
   bool _loading = false;
 
   String _getGeminiKey() {
-    // ✅ Web: key comes from --dart-define
-    if (kIsWeb) {
-      const key = String.fromEnvironment('GEMINI_API_KEY');
-      return key;
+    const key = String.fromEnvironment('GEMINI_API_KEY');
+    if (key.isEmpty) {
+      throw Exception("Missing GEMINI_API_KEY.");
     }
-    // ✅ Android/Desktop: key comes from .env (dotenv loaded in main.dart)
-    return String.fromEnvironment('GEMINI_API_KEY');
+    return key;
   }
 
   @override

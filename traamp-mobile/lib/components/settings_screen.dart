@@ -30,27 +30,22 @@ class _SettingsState extends State<Settings> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        String? idToken = await user.getIdToken(true);
-        if (idToken != null) {
-          final response = await http.post(
-            Uri.parse("${AppConfig.SERVER_URL}/api/users/user-logout"),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode({"idToken": idToken}),
-          );
-          final data = jsonDecode(response.body);
-          if (response.statusCode == 400) {
-            print(data['msg']);
-            loggedOut = false;
-          }
-          if (response.statusCode == 200) {
-            print(data['msg']);
-            LoginState.setLoggedIn(false);
-            await FirebaseAuth.instance.signOut();
-            loggedOut = true;
-          }
-        } else {
-          print("Something went wrong during creating instance from firebase");
+        String idToken = LoginState.getUserToken();
+        final response = await http.post(
+          Uri.parse("${AppConfig.SERVER_URL}/api/users/user-logout"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({"idToken": idToken}),
+        );
+        final data = jsonDecode(response.body);
+        if (response.statusCode == 400) {
+          print(data['msg']);
           loggedOut = false;
+        }
+        if (response.statusCode == 200) {
+          print(data['msg']);
+          LoginState.setLoggedIn(false);
+          await FirebaseAuth.instance.signOut();
+          loggedOut = true;
         }
       }
     } catch (e) {

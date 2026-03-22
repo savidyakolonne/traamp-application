@@ -7,7 +7,7 @@ import '../../widgets/review_card.dart';
 
 // ignore: must_be_immutable
 class RatingListScreen extends StatefulWidget {
-  final String guideId;
+  String guideId;
   List<dynamic> reviews = [];
   RatingListScreen(this.guideId, this.reviews, {super.key});
 
@@ -48,6 +48,12 @@ class _RatingListScreenState extends State<RatingListScreen> {
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getReviews();
   }
 
   @override
