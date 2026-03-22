@@ -554,7 +554,7 @@ class _DetailedGuidePackageState extends State<DetailedGuidePackage> {
                                       SizedBox(
                                         width:
                                             MediaQuery.of(context).size.width *
-                                            0.7,
+                                            0.6,
                                         child: SingleChildScrollView(
                                           scrollDirection: Axis.horizontal,
                                           child: Text(

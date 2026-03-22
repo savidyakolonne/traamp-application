@@ -31,7 +31,7 @@ class ReviewCard extends StatelessWidget {
         children: [
           // name, rating and date
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 10,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // name rating and prof pic
@@ -77,14 +77,7 @@ class ReviewCard extends StatelessWidget {
                 ],
               ),
               // date
-              Container(
-                alignment: Alignment.centerRight,
-                width: 100,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Text(date),
-                ),
-              ),
+              Text(date),
             ],
           ),
           // review
