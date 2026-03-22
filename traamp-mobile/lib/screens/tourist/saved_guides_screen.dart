@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/saved_guides_service.dart';
 import '../profile/guide_public_view_screen.dart';
+import 'tourist_find_guide.dart';
 
 // ignore: must_be_immutable
 class SavedGuidesScreen extends StatefulWidget {
@@ -123,7 +124,13 @@ class _SavedGuidesScreenState extends State<SavedGuidesScreen> {
             ElevatedButton(
               onPressed: () {
                 // For now just go back to previous screen
-                Navigator.pop(context);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return FindGuidesScreen(widget.uid);
+                    },
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
