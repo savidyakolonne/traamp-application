@@ -3,6 +3,10 @@
 TRAAMP is a Flutter-based tourism discovery application designed for Sri Lanka.
 The platform helps tourists discover **lesser-known and hidden places** using an interactive map and location-based suggestions.
 
+<p align="center">
+  <img src="./docs//traampoverview.png" alt="TRAAMP Banner" width="100%" />
+</p>
+
 This repository contains:
 
 * **Flutter frontend** (Android, iOS, Web)
@@ -14,7 +18,74 @@ This repository contains:
 ## 📁 Project Structure
 
 ```text
-TRAAMP-MOBILE-FRONTEND/
+## 📁 Full Project Structure
+
+```text
+traamp-application/
+│
+├── functions/
+│   ├── node_modules/
+│   ├── src/
+│   │   ├── config/
+│   │   │   └── firebaseAdmin.js
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── placeRoutes.js
+│   │   │   ├── activityRoutes.js
+│   │   │   ├── guide_package.mjs
+│   │   │   ├── userRoutes.js
+│   │   │   └── guideRoutes.js
+│   │   │
+│   │   ├── controllers/
+│   │   │   ├── activityController.js
+│   │   │   ├── guideController.js
+│   │   │   ├── placeController.js
+│   │   │   └── userController.js
+│   │   │
+│   │   ├── app.js
+│   │   └── server.js
+│   │
+│   ├── .env
+│   ├── package.json
+│   └── package-lock.json
+│
+├── traamp-admin/
+│   ├── .next/
+│   ├── app/
+│   │   ├── admin/
+│   │   │   ├── dashboard/
+│   │   │   ├── guides/
+│   │   │   ├── tourists/
+│   │   │   ├── verifications/
+│   │   │   └── layout.tsx
+│   │   ├── favicon.ico
+│   │   ├── global.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   │
+│   ├── components/
+│   │   └── admin/
+│   │       ├── sidebar.tsx
+│   │       └── topbar.tsx
+│   │
+│   ├── config/
+│   │   └── serviceAccount.json
+│   │
+│   ├── lib/
+│   │   └── firebaseAdmin.ts
+│   │
+│   ├── public/
+│   ├── node_modules/
+│   ├── .env.local
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── eslint.config.mjs
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.mjs
+│   ├── next.config.ts
+│   ├── next-env.d.ts
+│   └── tsconfig.json
 │
 ├── traamp-mobile/
 │   ├── lib/
@@ -100,69 +171,8 @@ TRAAMP-MOBILE-FRONTEND/
 │   ├── ios/
 │   └── pubspec.yaml
 │
-├── functions/
-│   ├── node_modules/
-│   ├── src/
-│   │   ├── config/
-│   │   │   ├── firebaseAdmin.js
-│   │   │   └── serviceAccountKey.json
-│   │   │
-│   │   ├── routes/
-│   │   │   ├── placeRoutes.js
-│   │   │   ├── activityRoutes.js
-│   │   │   ├── guide_package.mjs
-│   │   │   ├── userRoutes.js
-│   │   │   └── guideRoutes.js
-│   │   │
-│   │   ├── controllers/
-│   │   │   ├── activityController.js
-│   │   │   ├── guideController.js
-│   │   │   ├── placeController.js
-│   │   │   └── userController.js
-│   │   │
-│   │   ├── app.js
-│   │   └── index.js
-│   │
-│   ├── package.json
-│   └── package-lock.json
-│
-├── traamp-admin/
-│   ├── .next/
-│   ├── app/
-│   │   ├── admin/
-│   │   │   ├── dashboard/
-│   │   │   ├── guides/
-│   │   │   ├── tourists/
-│   │   │   ├── verifications/
-│   │   │   └── layout.tsx
-│   │   ├── favicon.ico
-│   │   ├── global.css
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   │
-│   ├── components/
-│   │   └── admin/
-│   │       ├── sidebar.tsx
-│   │       └── topbar.tsx
-│   │
-│   ├── config/
-│   │   └── serviceAccount.json
-│   │
-│   ├── lib/
-│   │   └── firebaseAdmin.ts
-│   │
-│   ├── public/
-│   ├── node_modules/
-│   ├── .env.local
-│   ├── .env.example
-│   ├── .gitignore
-│   ├── eslint.config.mjs
-│   ├── package-lock.json
-│   ├── package.json
-│   ├── postcss.config.mjs
-│   ├── next.config.ts
-│   ├── next-env.d.ts
-│   └── tsconfig.json
+├── docs/
+│   └── traampoverview.png
 │
 ├── .gitignore
 └── README.md
@@ -225,7 +235,7 @@ cd functions
 npm run dev
 ```
 
-Runs on port **3000**
+Runs on port **5000**
 
 ---
 
@@ -233,15 +243,16 @@ Runs on port **3000**
 
 ```bash
 cd traamp-admin
+npm install
 ```
 
 Create a `.env.local` file and copy configurations from `.env.example`
 
 ```bash
-npm run dev -- -p 3001
+npm run dev
 ```
 
-Runs on port **3001**
+Runs on port **3000**
 
 ---
 
@@ -256,10 +267,4 @@ flutter run
 ```bash
 flutter run -d chrome --dart-define=GEMINI_API_KEY=YOUR_KEY
 ```
-
 (Required to test the TRAAMP assistant)
-
----
-
-
-testing the url change
