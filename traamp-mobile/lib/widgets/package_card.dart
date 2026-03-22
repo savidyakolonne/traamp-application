@@ -84,9 +84,18 @@ class _PackageCardState extends State<PackageCard> {
                       spacing: 8,
                       children: [
                         Icon(Icons.location_on, size: 20, color: Colors.white),
-                        Text(
-                          "${widget.packageData['location']}",
-                          style: TextStyle(color: Colors.white, fontSize: 15),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Text(
+                              "${widget.packageData['location']}",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),

@@ -77,7 +77,14 @@ class ReviewCard extends StatelessWidget {
                 ],
               ),
               // date
-              SizedBox(width: 86, child: Text(date)),
+              Container(
+                alignment: Alignment.centerRight,
+                width: 100,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Text(date),
+                ),
+              ),
             ],
           ),
           // review

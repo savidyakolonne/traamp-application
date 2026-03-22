@@ -76,11 +76,17 @@ class _GuideCardState extends State<GuideCard> {
                   Row(
                     spacing: 10,
                     children: [
-                      Text(
-                        widget.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.4,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Text(
+                            widget.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                          ),
                         ),
                       ),
                       Row(
