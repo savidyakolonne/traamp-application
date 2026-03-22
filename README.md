@@ -262,9 +262,8 @@ Runs on port **3000**
 flutter run
 ```
 
-**For Web (Chrome):**
+**(Required to test the TRAAMP assistant) For Web (Chrome):**
 
 ```bash
 flutter run -d chrome --dart-define=GEMINI_API_KEY=YOUR_KEY
 ```
-(Required to test the TRAAMP assistant)
