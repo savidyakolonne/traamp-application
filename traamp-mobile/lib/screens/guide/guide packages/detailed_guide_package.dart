@@ -638,10 +638,17 @@ class _DetailedGuidePackageState extends State<DetailedGuidePackage> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Text(
-                        textAlign: TextAlign.right,
-                        "${widget.packageData['startLocation']}",
-                        style: TextStyle(fontSize: 16),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        alignment: Alignment.centerRight,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Text(
+                            textAlign: TextAlign.right,
+                            "${widget.packageData['startLocation']}",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -657,10 +664,17 @@ class _DetailedGuidePackageState extends State<DetailedGuidePackage> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Text(
-                        textAlign: TextAlign.right,
-                        "${widget.packageData['endLocation']}",
-                        style: TextStyle(fontSize: 16),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        alignment: Alignment.centerRight,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Text(
+                            textAlign: TextAlign.right,
+                            "${widget.packageData['endLocation']}",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -706,38 +720,35 @@ class _DetailedGuidePackageState extends State<DetailedGuidePackage> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        SizedBox(
-                          width: 195,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                widget.packageData['havePrivateTourOption']
-                                    ? Text(
-                                        textAlign: TextAlign.right,
-                                        "Private Tour Available",
-                                        style: TextStyle(fontSize: 16),
-                                      )
-                                    : Text(
-                                        textAlign: TextAlign.right,
-                                        "No Private Tours",
-                                        style: TextStyle(fontSize: 16),
-                                      ),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              widget.packageData['havePrivateTourOption']
+                                  ? Text(
+                                      textAlign: TextAlign.right,
+                                      "Private Tour Available",
+                                      style: TextStyle(fontSize: 16),
+                                    )
+                                  : Text(
+                                      textAlign: TextAlign.right,
+                                      "No Private Tours",
+                                      style: TextStyle(fontSize: 16),
+                                    ),
 
-                                widget.packageData['haveGroupDiscounts']
-                                    ? Text(
-                                        textAlign: TextAlign.right,
-                                        "Group Discounts Available",
-                                        style: TextStyle(fontSize: 16),
-                                      )
-                                    : Text(
-                                        textAlign: TextAlign.right,
-                                        "No Group Discounts",
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                              ],
-                            ),
+                              widget.packageData['haveGroupDiscounts']
+                                  ? Text(
+                                      textAlign: TextAlign.right,
+                                      "Group Discounts Available",
+                                      style: TextStyle(fontSize: 16),
+                                    )
+                                  : Text(
+                                      textAlign: TextAlign.right,
+                                      "No Group Discounts",
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                            ],
                           ),
                         ),
                       ],

@@ -1,17 +1,20 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/app_config.dart';
+import 'package:traamp_frontend/services/login_state.dart';
 import '../screens/auth/login_screen.dart';
 
 // ignore: must_be_immutable
 class SettingsPrivacy extends StatelessWidget {
-  final String _uid;
+  String _uid;
   final bool _isTourist;
-  const SettingsPrivacy(this._uid, this._isTourist, {super.key});
+  SettingsPrivacy(this._uid, this._isTourist, {super.key});
 
   Future<void> deleteProfile() async {
     try {
+      _uid = FirebaseAuth.instance.currentUser!.uid;
       final response = await http.delete(
         Uri.parse("${AppConfig.SERVER_URL}/api/users/delete-user"),
         headers: {"Content-Type": "application/json"},
@@ -21,6 +24,7 @@ class SettingsPrivacy extends StatelessWidget {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        LoginState.clear();
         print(data['msg']);
       } else {
         print(data['msg']);

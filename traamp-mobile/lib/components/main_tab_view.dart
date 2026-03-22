@@ -1,20 +1,24 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'notification/notification_screen.dart';
 import 'settings_screen.dart';
 import '../screens/guide/guide_dashboard.dart';
 import '../screens/tourist/tourist_dashboard.dart';
 
+// ignore: must_be_immutable
 class MainTabView extends StatefulWidget {
   final bool isTourist;
-  final String idToken;
+  String idToken;
   final Map<String, dynamic> userData;
-  const MainTabView(this.isTourist, this.idToken, this.userData, {super.key});
+  MainTabView(this.isTourist, this.idToken, this.userData, {super.key});
 
   @override
   State<MainTabView> createState() => _MainTabViewState();
 }
 
 class _MainTabViewState extends State<MainTabView> {
+  final String userId = FirebaseAuth.instance.currentUser!.uid;
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -27,7 +31,7 @@ class _MainTabViewState extends State<MainTabView> {
                 ? TouristDashboard(widget.idToken, widget.userData)
                 : GuideDashboard(widget.idToken, widget.userData),
             // notification
-            NotificationScreen(widget.userData["uid"]),
+            NotificationScreen(widget.userData["uid"] ?? userId),
             // settings
             widget.isTourist
                 ? Settings(true, widget.idToken, widget.userData)

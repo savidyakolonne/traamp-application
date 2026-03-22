@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../app_config.dart';
 import '../../components/main_tab_view.dart';
+import '../../services/login_state.dart';
 import 'signup.dart';
 
 class LoginSetup extends StatefulWidget {
@@ -71,6 +72,7 @@ class _LoginSetupState extends State<LoginSetup> {
       String? token = await user.getIdToken(true);
       setState(() {
         idToken = token;
+        LoginState.setUserToken(token!);
       });
 
       final response = await http.post(
@@ -91,6 +93,7 @@ class _LoginSetupState extends State<LoginSetup> {
           ),
         );
       } else if (response.statusCode == 200) {
+        LoginState.setLoggedIn(true);
         userData = data['profile'];
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -101,6 +104,7 @@ class _LoginSetupState extends State<LoginSetup> {
         );
 
         if (userData['type'] == "tourist") {
+          LoginState.setUserType('tourist');
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
@@ -109,6 +113,7 @@ class _LoginSetupState extends State<LoginSetup> {
             ),
           );
         } else if (userData['type'] == "guide") {
+          LoginState.setUserType('guide');
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) {
