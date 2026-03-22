@@ -127,13 +127,7 @@ class _TouristProfileScreenState extends State<TouristProfileScreen> {
                                     errorBuilder: (_, __, ___) =>
                                         _buildInitialAvatar(),
                                   )
-                                : (widget.userData['gender'] == "Female"
-                                      ? Image.asset(
-                                          'assets/images/avatar-female.avif',
-                                        )
-                                      : Image.asset(
-                                          'assets/images/avatar-male.avif',
-                                        )),
+                                : _buildInitialAvatar(),
                           ),
                         ),
                       ),
