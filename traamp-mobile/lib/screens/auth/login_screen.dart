@@ -1,12 +1,38 @@
 import 'package:flutter/material.dart';
+import '../../components/main_tab_view.dart';
+import '../../services/login_state.dart';
 import 'login_setup.dart';
 import 'signup.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  late bool isLoggedIn;
+  late String userType;
+  late String userToken;
+
+  @override
+  void initState() {
+    super.initState();
+    isLoggedIn = LoginState.isLoggedIn();
+    userType = LoginState.getUserType();
+    userToken = LoginState.getUserToken();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (isLoggedIn) {
+      if (userType == "tourist") {
+        return MainTabView(true, userToken, {});
+      } else {
+        return MainTabView(false, userToken, {});
+      }
+    }
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 254, 254),
       body: SafeArea(
