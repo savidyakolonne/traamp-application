@@ -7,6 +7,7 @@ import '../app_config.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/profile/tourist_profile_screen.dart';
 import '../screens/profile/guide_profile_screen.dart';
+import '../services/login_state.dart';
 import 'settings_about.dart';
 import 'settings_help_support.dart';
 import 'settings_privacy.dart';
@@ -43,6 +44,7 @@ class _SettingsState extends State<Settings> {
           }
           if (response.statusCode == 200) {
             print(data['msg']);
+            LoginState.setLoggedIn(false);
             await FirebaseAuth.instance.signOut();
             loggedOut = true;
           }

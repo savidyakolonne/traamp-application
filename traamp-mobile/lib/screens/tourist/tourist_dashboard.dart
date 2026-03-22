@@ -16,7 +16,7 @@ import 'package:traamp_frontend/screens/assistant/assistant_home.dart';
 
 // ignore: must_be_immutable
 class TouristDashboard extends StatefulWidget {
-  final String idToken;
+  String idToken;
   Map<String, dynamic> userData = {};
   TouristDashboard(this.idToken, this.userData, {super.key});
 
