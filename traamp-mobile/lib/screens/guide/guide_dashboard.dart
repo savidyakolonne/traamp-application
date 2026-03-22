@@ -11,8 +11,8 @@ import 'news_screen.dart';
 
 // ignore: must_be_immutable
 class GuideDashboard extends StatefulWidget {
-  final String idToken;
-  Map<String, dynamic> userData;
+  String idToken;
+  Map<String, dynamic> userData = {};
   GuideDashboard(this.idToken, this.userData, {super.key});
 
   @override
@@ -144,21 +144,13 @@ class _GuideDashboardState extends State<GuideDashboard> {
                       size: 16,
                       color: const Color.fromARGB(255, 234, 210, 0),
                     ),
-                    widget.userData['rating'].runtimeType == String
-                        ? Text(
-                            "${widget.userData['rating']}",
-                            style: TextStyle(
-                              color: const Color.fromARGB(255, 100, 116, 139),
-                              fontSize: 16,
-                            ),
-                          )
-                        : Text(
-                            "${widget.userData['rating'].toStringAsFixed(1)}",
-                            style: TextStyle(
-                              color: const Color.fromARGB(255, 100, 116, 139),
-                              fontSize: 16,
-                            ),
-                          ),
+                    Text(
+                      "${widget.userData['rating']}",
+                      style: TextStyle(
+                        color: const Color.fromARGB(255, 100, 116, 139),
+                        fontSize: 16,
+                      ),
+                    ),
                   ],
                 ),
               ],

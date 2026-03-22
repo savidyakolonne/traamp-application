@@ -63,12 +63,15 @@ class _SuggestionCardState extends State<SuggestionCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // package title
-                Text(
-                  widget.title,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 30, 41, 59),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: const Color.fromARGB(255, 30, 41, 59),
+                    ),
                   ),
                 ),
                 // location

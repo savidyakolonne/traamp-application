@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import '../../app_config.dart';
 import '../places/place_detail_screen.dart'; // ✅ adjust path if needed
 //import '../../app_config.dart';
 
@@ -35,18 +36,18 @@ class _MapScreenState extends State<MapScreen> {
   // radius (meters)
   int _radius = 5000;
 
-  // String get baseUrl {
-  //   if (kIsWeb) return "${AppConfig.SERVER_URL}";
-  //   return "${AppConfig.SERVER_URL}"; // later: real device -> http://YOUR_PC_IP:3000
-  // }
-
   String get baseUrl {
-    if (kIsWeb) {
-      return "http://localhost:3000";
-    } else {
-      return "http://10.0.2.2:3000";
-    }
+    if (kIsWeb) return AppConfig.SERVER_URL;
+    return AppConfig.SERVER_URL; // later: real device -> http://YOUR_PC_IP:3000
   }
+
+  // String get baseUrl {
+  //   if (kIsWeb) {
+  //     return "http://localhost:3000";
+  //   } else {
+  //     return "http://10.0.2.2:3000";
+  //   }
+  // }
 
   @override
   void initState() {
@@ -116,6 +117,7 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     return Geolocator.getCurrentPosition(
+      // ignore: deprecated_member_use
       desiredAccuracy: LocationAccuracy.high,
     );
   }
