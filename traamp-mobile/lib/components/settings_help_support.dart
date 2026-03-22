@@ -16,6 +16,22 @@ class HelpAndSupport extends StatelessWidget {
     }
   }
 
+  Future<void> _sendEmail(BuildContext context) async {
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'traamp@gmail.com',
+      query: 'subject=Support Request&body=Describe your issue here...',
+    );
+
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Could not open email app")));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,7 +127,9 @@ class HelpAndSupport extends StatelessWidget {
                     backgroundColor: Colors.grey.shade300,
                     foregroundColor: Colors.black,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    _sendEmail(context);
+                  },
                   child: const Text("Send Email"),
                 ),
               ),
