@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-
 import '../../models/chat_message.dart';
 import '../../services/gemini_service.dart';
 
@@ -30,7 +28,7 @@ class _AssistantHomeState extends State<AssistantHome> {
       return key;
     }
     // ✅ Android/Desktop: key comes from .env (dotenv loaded in main.dart)
-    return dotenv.env['GEMINI_API_KEY'] ?? '';
+    return String.fromEnvironment('GEMINI_API_KEY');
   }
 
   @override
