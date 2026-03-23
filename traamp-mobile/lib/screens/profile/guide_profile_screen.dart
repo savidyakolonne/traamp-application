@@ -195,21 +195,13 @@ class _GuideProfileScreenState extends State<GuideProfileScreen> {
                                   size: 16,
                                 ),
                                 const SizedBox(width: 4),
-                                widget.userData['rating'].runtimeType == String
-                                    ? Text(
-                                        '${widget.userData['rating']}',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      )
-                                    : Text(
-                                        '${widget.userData['rating'].toStringAsFixed(1)}',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
+                                Text(
+                                  '${widget.userData['rating']}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
 
                                 const SizedBox(width: 8),
                                 IconButton(
