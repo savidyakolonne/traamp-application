@@ -224,7 +224,6 @@ class _GuideSignupFormState extends State<GuideSignupForm> {
       onSaved: (number) {
         phoneNumber = number!.trim();
       },
-      keyboardType: TextInputType.number,
     );
   }
 
