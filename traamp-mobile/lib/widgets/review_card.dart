@@ -51,7 +51,7 @@ class ReviewCard extends StatelessWidget {
                     children: [
                       // name
                       SizedBox(
-                        width: 160,
+                        width: 130,
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Text(

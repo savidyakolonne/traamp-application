@@ -217,80 +217,82 @@ class _Landing extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 78,
-              height: 78,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: const [
-                  BoxShadow(
-                    blurRadius: 18,
-                    color: Color(0x22000000),
-                    offset: Offset(0, 8),
-                  ),
-                ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 78,
+                height: 78,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: const [
+                    BoxShadow(
+                      blurRadius: 18,
+                      color: Color(0x22000000),
+                      offset: Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.smart_toy,
+                  size: 40,
+                  color: Color(0xFF2E3A59),
+                ),
               ),
-              child: const Icon(
-                Icons.smart_toy,
-                size: 40,
-                color: Color(0xFF2E3A59),
+              const SizedBox(height: 18),
+              const Text(
+                "Hi 👋",
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F172A),
+                ),
               ),
-            ),
-            const SizedBox(height: 18),
-            const Text(
-              "Hi 👋",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A),
+              const SizedBox(height: 8),
+              const Text(
+                "How can I help you today?",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF6B7280),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "How can I help you today?",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF6B7280),
+              const SizedBox(height: 22),
+              _SuggestionTile(
+                icon: Icons.map,
+                text: "Find a guide in Kandy",
+                onTap: () => onTapSuggestion(
+                  "Find me a friendly English-speaking guide in Kandy. Give options + what to do in 1 day.",
+                ),
               ),
-            ),
-            const SizedBox(height: 22),
-            _SuggestionTile(
-              icon: Icons.map,
-              text: "Find a guide in Kandy",
-              onTap: () => onTapSuggestion(
-                "Find me a friendly English-speaking guide in Kandy. Give options + what to do in 1 day.",
+              const SizedBox(height: 12),
+              _SuggestionTile(
+                icon: Icons.beach_access,
+                text: "Top beaches near Galle",
+                onTap: () => onTapSuggestion(
+                  "Top beaches near Galle for swimming and sunset. Include travel times and best hours.",
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            _SuggestionTile(
-              icon: Icons.beach_access,
-              text: "Top beaches near Galle",
-              onTap: () => onTapSuggestion(
-                "Top beaches near Galle for swimming and sunset. Include travel times and best hours.",
+              const SizedBox(height: 12),
+              _SuggestionTile(
+                icon: Icons.wb_sunny,
+                text: "Weather in Nuwara Eliya",
+                onTap: () => onTapSuggestion(
+                  "I’m visiting Nuwara Eliya. What’s the typical weather like now and what should I pack?",
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            _SuggestionTile(
-              icon: Icons.wb_sunny,
-              text: "Weather in Nuwara Eliya",
-              onTap: () => onTapSuggestion(
-                "I’m visiting Nuwara Eliya. What’s the typical weather like now and what should I pack?",
+              const SizedBox(height: 22),
+              const Text(
+                "Traamp assistant is here to support you",
+                style: TextStyle(
+                  color: Color(0xFF94A3B8),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            const SizedBox(height: 22),
-            const Text(
-              "Traamp assistant is here to support you",
-              style: TextStyle(
-                color: Color(0xFF94A3B8),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
