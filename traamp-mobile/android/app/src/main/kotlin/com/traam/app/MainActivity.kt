@@ -1,4 +1,4 @@
-package com.example.traamp_frontend
+package com.traam.app
 
 import io.flutter.embedding.android.FlutterActivity
 
