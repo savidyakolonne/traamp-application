@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../../models/chat_message.dart';
 import '../../services/gemini_service.dart';
@@ -22,6 +23,7 @@ class _AssistantHomeState extends State<AssistantHome> {
   bool _loading = false;
 
   String _getGeminiKey() {
+    // final key = dotenv.env['GEMINI_API_KEY'] ?? '';
     const key = String.fromEnvironment('GEMINI_API_KEY');
     if (key.isEmpty) {
       throw Exception("Missing GEMINI_API_KEY.");
