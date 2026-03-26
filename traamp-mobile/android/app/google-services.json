@@ -7,12 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:279123730825:android:cf2de4f30ac34386a94158",
+        "mobilesdk_app_id": "1:279123730825:android:e1e69ab6e7a244a3a94158",
         "android_client_info": {
-          "package_name": "com.example.traamp_frontend"
+          "package_name": "com.traamp.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "279123730825-095octqf033kkeflupovaefpvci16tp1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCrqy8KIR-u8lxn89RVs5EqwR5H_AOKVp4"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "279123730825-095octqf033kkeflupovaefpvci16tp1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "279123730825-32heago2ad2vpqe0k4gdof6vu22pd95m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.traampFrontend"
+              }
+            }
+          ]
         }
       }
     }
