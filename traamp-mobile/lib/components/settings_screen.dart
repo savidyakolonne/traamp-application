@@ -30,11 +30,10 @@ class _SettingsState extends State<Settings> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        String idToken = LoginState.getUserToken();
         final response = await http.post(
           Uri.parse("${AppConfig.SERVER_URL}/api/users/user-logout"),
           headers: {"Content-Type": "application/json"},
-          body: jsonEncode({"idToken": idToken}),
+          body: jsonEncode({"idToken": widget.idToken}),
         );
         final data = jsonDecode(response.body);
         if (response.statusCode == 400) {

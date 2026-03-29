@@ -23,14 +23,6 @@ class LoginState {
     return _prefs?.getString('userType') ?? "";
   }
 
-  static Future<void> setUserToken(String token) async {
-    await _prefs?.setString('userToken', token);
-  }
-
-  static String getUserToken() {
-    return _prefs?.getString('userToken') ?? "";
-  }
-
   static Future<void> clear() async {
     await _prefs?.clear();
   }

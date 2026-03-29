@@ -1,7 +1,7 @@
 name: traamp_frontend
 description: "A new Flutter project."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
-version: 1.0.0+3
+version: 1.0.0+6
 
 environment:
   sdk: ^3.10.0
@@ -32,6 +32,7 @@ dependencies:
   flutter_dotenv: ^6.0.0
   file_picker: ^10.3.10
   flutter_native_splash: ^2.4.7
+  firebase_app_check: ^0.4.2
 
 dev_dependencies:
   flutter_test:
