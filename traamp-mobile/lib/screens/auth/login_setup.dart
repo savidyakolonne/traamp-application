@@ -72,7 +72,6 @@ class _LoginSetupState extends State<LoginSetup> {
       String? token = await user.getIdToken(true);
       setState(() {
         idToken = token;
-        LoginState.setUserToken(token!);
       });
 
       final response = await http.post(

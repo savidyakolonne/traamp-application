@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:traamp_frontend/screens/map/map_screen.dart';
 import '../../app_config.dart';
-import '../../services/login_state.dart';
 import '../../widgets/suggestion_card.dart';
 import '../emergency_services/emergency_services.dart';
 import '../places/places_list_screen.dart';
@@ -17,7 +16,7 @@ import 'package:traamp_frontend/screens/assistant/assistant_home.dart';
 
 // ignore: must_be_immutable
 class TouristDashboard extends StatefulWidget {
-  String idToken;
+  String idToken = "";
   Map<String, dynamic> userData = {};
   TouristDashboard(this.idToken, this.userData, {super.key});
 
@@ -32,12 +31,15 @@ class _TouristDashboardState extends State<TouristDashboard> {
 
   // get user data from DB
   Future<void> _getUserDataAndPackages() async {
-    setState(() {
-      widget.idToken = LoginState.getUserToken();
-    });
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        if (widget.idToken.isEmpty) {
+          String? token = await user.getIdToken(true);
+          setState(() {
+            widget.idToken = token!;
+          });
+        }
         final response = await http.post(
           Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
           headers: {"Content-Type": "application/json"},
