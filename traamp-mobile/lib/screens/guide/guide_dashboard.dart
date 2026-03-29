@@ -30,6 +30,12 @@ class _GuideDashboardState extends State<GuideDashboard> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        if (widget.idToken.isEmpty) {
+          String? token = await user.getIdToken(true);
+          setState(() {
+            widget.idToken = token!;
+          });
+        }
         final response = await http.post(
           Uri.parse("${AppConfig.SERVER_URL}/api/users/get-user-data"),
           headers: {"Content-Type": "application/json"},
