@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../app_config.dart';
 import '../../components/weather/weather_screen.dart';
-import '../../services/login_state.dart';
 import '../emergency_services/emergency_services.dart';
 import 'guide gallery/guide_gallery.dart';
 import 'guide packages/guide_package.dart';
@@ -28,9 +27,6 @@ class _GuideDashboardState extends State<GuideDashboard> {
 
   // get user data from DB
   Future<void> _getUserData() async {
-    setState(() {
-      widget.idToken = LoginState.getUserToken();
-    });
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
