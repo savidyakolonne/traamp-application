@@ -23,34 +23,37 @@ class _MainTabViewState extends State<MainTabView> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
-      child: Scaffold(
-        body: TabBarView(
-          children: [
-            // dashboard
-            widget.isTourist
-                ? TouristDashboard(widget.idToken, widget.userData)
-                : GuideDashboard(widget.idToken, widget.userData),
-            // notification
-            NotificationScreen(widget.userData["uid"] ?? userId),
-            // settings
-            widget.isTourist
-                ? Settings(true, widget.idToken, widget.userData)
-                : Settings(false, widget.idToken, widget.userData),
-          ],
-        ),
-        bottomNavigationBar: Container(
-          height: 50,
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 247, 248, 246),
-            boxShadow: [
-              BoxShadow(
-                color: const Color.fromARGB(94, 0, 0, 0),
-                blurRadius: 10,
-                spreadRadius: 1,
-              ),
+      child: SafeArea(
+        left: false,
+        top: false,
+        right: false,
+        child: Scaffold(
+          body: TabBarView(
+            children: [
+              // dashboard
+              widget.isTourist
+                  ? TouristDashboard(widget.idToken, widget.userData)
+                  : GuideDashboard(widget.idToken, widget.userData),
+              // notification
+              NotificationScreen(widget.userData["uid"] ?? userId),
+              // settings
+              widget.isTourist
+                  ? Settings(true, widget.idToken, widget.userData)
+                  : Settings(false, widget.idToken, widget.userData),
             ],
           ),
-          child: SafeArea(
+          bottomNavigationBar: Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 247, 248, 246),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color.fromARGB(94, 0, 0, 0),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
             child: const TabBar(
               dividerColor: Colors.transparent,
               indicatorColor: Colors.transparent,
