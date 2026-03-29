@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../components/main_tab_view.dart';
 import '../../services/login_state.dart';
@@ -14,14 +15,22 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late bool isLoggedIn;
   late String userType;
-  late String userToken;
+  late String userToken = "";
+
+  Future<void> getUserToken() async {
+    final user = FirebaseAuth.instance.currentUser;
+    String? token = await user?.getIdToken(true);
+    setState(() {
+      userToken = token!;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     isLoggedIn = LoginState.isLoggedIn();
     userType = LoginState.getUserType();
-    userToken = LoginState.getUserToken();
+    getUserToken();
   }
 
   @override
