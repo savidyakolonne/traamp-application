@@ -1,10 +1,12 @@
-name: admin panel CI CD (Next.js)
+name: Admin Panel CI/CD (Next.js)
 
 on:
   push:
     branches: [main]
     paths:
       - 'traamp-admin/**'
+      - '.github/workflows/adminpanel.yml'
+  workflow_dispatch:
 
 jobs:
   build-test-deploy:
@@ -25,7 +27,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run Lint
         run: npm run lint
@@ -33,9 +35,11 @@ jobs:
       - name: Run Tests
         run: npm test -- --passWithNoTests
 
+      - name: Type Check
+        run: npx tsc --noEmit
+
       - name: Build Application
         run: npm run build
 
-      # 🚀 Deploy to Vercel
       - name: Deploy to Vercel
         run: curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK }}
