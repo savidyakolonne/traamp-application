@@ -12,34 +12,46 @@ jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: traamp-admin
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4   
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4  
+        uses: actions/setup-node@v4
         with:
-          node-version: 20           
+          node-version: 22
           cache: 'npm'
+          cache-dependency-path: traamp-admin/package-lock.json 
+
+      - name: Debug files
+        run: |
+          echo "ROOT:"
+          ls -la
+          echo "ADMIN:"
+          ls -la traamp-admin
 
       - name: Install dependencies
-        run: npm ci                 
+        run: npm ci
+        working-directory: traamp-admin   
 
       - name: Run Lint
         run: npm run lint
+        working-directory: traamp-admin
 
       - name: Run Tests
         run: npm test -- --passWithNoTests
+        working-directory: traamp-admin
 
       - name: Type Check
         run: npx tsc --noEmit
+        working-directory: traamp-admin
 
       - name: Build Application
         run: npm run build
+        working-directory: traamp-admin
 
       - name: Deploy to Vercel
         run: curl -X POST ${{ secrets.VERCEL_DEPLOY_HOOK }}
