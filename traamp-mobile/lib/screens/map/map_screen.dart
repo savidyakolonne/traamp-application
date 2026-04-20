@@ -6,8 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import '../../app_config.dart';
-import '../places/place_detail_screen.dart'; // ✅ adjust path if needed
-//import '../../app_config.dart';
+import '../places/place_detail_screen.dart';
 
 class MapScreen extends StatefulWidget {
   final String? focusPlaceId;
@@ -177,7 +176,7 @@ class _MapScreenState extends State<MapScreen> {
 
       final Set<Marker> newMarkers = {};
 
-      // ✅ Current location marker (blue)
+      //  Current location marker (blue)
       newMarkers.add(
         Marker(
           markerId: const MarkerId("me"),
@@ -189,7 +188,7 @@ class _MapScreenState extends State<MapScreen> {
         ),
       );
 
-      // ✅ Place markers (green/red)
+      // Place markers (green/red)
       if (_showPlaceMarkers) {
         for (final p in data) {
           final loc = p["location"];
@@ -396,7 +395,7 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: const Text("Discover Hidden Places"),
         actions: [
-          // ✅ toggle show/hide markers
+          //  toggle show/hide markers
           IconButton(
             tooltip: _showPlaceMarkers ? "Hide places" : "Show places",
             onPressed: () async {
@@ -408,7 +407,7 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
 
-          // ✅ radius selection
+          //  radius selection
           PopupMenuButton<int>(
             tooltip: "Radius (${_radiusLabel()})",
             onSelected: (v) async {
@@ -451,13 +450,13 @@ class _MapScreenState extends State<MapScreen> {
             onMapCreated: (c) async {
               _controller = c;
 
-              // ✅ if opened from PlaceDetailScreen -> go to that place
+              //  if opened from PlaceDetailScreen -> go to that place
               if (widget.focusLatLng != null) {
                 await _controller!.animateCamera(
                   CameraUpdate.newLatLngZoom(widget.focusLatLng!, 15),
                 );
               } else {
-                // ✅ normal open -> go to current location
+                //  normal open -> go to current location
                 await _controller!.animateCamera(
                   CameraUpdate.newLatLngZoom(_currentLocation!, 14),
                 );
