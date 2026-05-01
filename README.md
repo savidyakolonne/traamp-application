@@ -7,6 +7,9 @@ The platform helps tourists discover **lesser-known and hidden places** using an
   <img src="./docs//traampoverview.png" alt="TRAAMP Banner" width="100%" />
 </p>
 
+Marketing video - https://youtu.be/W3dUOSqmktw
+Check project on SDGP.LK website - https://www.sdgp.lk/project/cbcae5bc-4bd4-4b84-a550-b2f30b374c87
+
 This repository contains:
 
 * **Flutter frontend** (Android, iOS, Web)
