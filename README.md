@@ -8,6 +8,7 @@ The platform helps tourists discover **lesser-known and hidden places** using an
 </p>
 
 Marketing video - https://youtu.be/W3dUOSqmktw
+
 Check project on SDGP.LK website - https://www.sdgp.lk/project/cbcae5bc-4bd4-4b84-a550-b2f30b374c87
 
 This repository contains:
